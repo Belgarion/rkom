@@ -19,5 +19,6 @@ void	write_set_motd(char *str);
 void	write_remove_motd(char *str);
 void	write_fastcmnt(void);
 void	write_fastcmnt_no(int);
+void	convert_from_swascii(void);
 
 int	is_writing; /* Is writing text right now */
