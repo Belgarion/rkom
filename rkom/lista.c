@@ -68,6 +68,7 @@ list_news(char *args)
 	struct rk_unreadconfval *conf;
 	int i, nconf, *confs;
 	int longfmt;
+	int unr_texts, unr_confs;
 
 	if (myuid == 0) {
 		rprintf("Du måste logga in först.\n");
@@ -80,6 +81,8 @@ list_news(char *args)
 
 	longfmt = iseql("unread-long-format","1");
 	
+	unr_texts = unr_confs = 0;
+
 	/* Show where we have unread texts. */
 	nconf = conf->ru_confs.ru_confs_len;
 	if (nconf) {
@@ -115,10 +118,14 @@ list_news(char *args)
 			else
 				rprintf("Du har %d oläst%s inlägg i %s\n",
 				    nr, nr == 1 ? "" : "a", rkc->rc_name);
+			unr_texts += nr;
+			unr_confs++;
 			free(rkc);
 			free(m);
 		}
-		rprintf("\n");
+		rprintf("\nDu har %d oläst%s inlägg i %d möte%s.\n",
+		        unr_texts, unr_texts>1?"a":"",
+		        unr_confs, unr_confs>1?"n":"");
 	} else
 		rprintf("Du har inga olästa inlägg.\n");
 	free(conf);
