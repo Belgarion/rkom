@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.52 2003/10/13 20:25:05 ragge Exp $ */
+/* $Id: parse.c,v 1.53 2003/10/13 20:53:53 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -143,6 +143,8 @@ DCMD(other_name);
 DCMD(other_sync);
 DCMD(other_exec);
 DCMD(other_create_person);
+DCMD(other_enable);
+DCMD(other_disable);
 
 /* debug commands */
 DCMD(debug_dump_membership);
@@ -270,6 +272,8 @@ DROW("sluta",					0,PE_NO_ARG,other_quit)
 DROW("synkronisera",				0,PE_NO_ARG,other_sync)
 DROW("ändra lösenord",				0,PE_NO_ARG,other_password)
 DROW("ändra namn",				0,PE_NO_ARG,other_name)
+DROW("övergå (till administratörsmod)",		0,PE_NO_ARG,other_enable)
+DROW("lämna (administratörsmod)",		0,PE_NO_ARG,other_disable)
 DROW("!", 					0,PE_STR_ARG,other_exec)
 
 DROW("debug membership",		0,PE_STR_ARG,debug_dump_membership)
@@ -983,6 +987,22 @@ exec_info_extra(int argc, char *argv[])
 		text = atoi(argv[0]);
 	TT(argc == 0 && text == 0, "Du måste ange en text.\n");
 	cmd_info_extra(text);
+	return 0;
+}
+
+static int
+exec_other_enable(int argc, char *argv[])
+{
+	LF;
+	cmd_enable();
+	return 0;
+}
+
+static int
+exec_other_disable(int argc, char *argv[])
+{
+	LF;
+	cmd_disable();
 	return 0;
 }
 

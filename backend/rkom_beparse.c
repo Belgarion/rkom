@@ -717,3 +717,17 @@ rk_add_text_info(u_int32_t textno, struct rk_aux_item_input *raii)
 
 	return ret;
 }
+
+int
+rk_enable(int num)
+{
+	int ret;
+
+	if (send_reply("42 %d\n", num)) {
+		ret = get_int();
+		get_eat('\n');
+		return ret;
+	}
+	get_accept('\n');  
+	return 0;
+}

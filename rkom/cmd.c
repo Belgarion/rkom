@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.75 2003/10/13 20:25:05 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.76 2003/10/13 20:53:53 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -1053,4 +1053,28 @@ cmd_change_priority(char *str)
 		rprintf("Det sket sej: %s\n", error(i));
 	else
 		rprintf("Prioriteten nu ändrad till %d.\n", pri);
+}
+
+void
+cmd_enable()
+{
+	int err;
+
+	rprintf("Övergå (till administratörsmod)\n");
+	if ((err = rk_enable(255)))
+		rprintf("Det gick inte: %s\n", error(err));
+	else
+		rprintf("Du är nu administratör.\n");
+}
+
+void
+cmd_disable()
+{
+	int err;
+
+	rprintf("Lämna (administratörsmod)\n");
+	if ((err = rk_enable(0)))
+		rprintf("Det gick inte: %s\n", error(err));
+	else
+		rprintf("Du är nu inte administratör.\n");
 }

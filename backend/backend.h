@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.33 2003/10/13 20:24:52 ragge Exp $	*/
+/*	$Id: backend.h,v 1.34 2003/10/13 20:53:48 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -53,6 +53,11 @@ void	reread_text_stat_bg(int text);
 void	readin_textstat(struct rk_text_stat *ts);
 struct	rk_time *rk_time(void);
 void	rk_alive(void);
+
+/*
+ * Change mode to/from administrator.
+ */
+int rk_enable(int);
 
 /*
  * Get information about who is logged on.
