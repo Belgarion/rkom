@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.44 2002/10/21 10:17:29 jens Exp $ */
+/* $Id: parse.c,v 1.45 2002/11/06 16:04:28 offe Exp $ */
 
 #include <sys/param.h>
 
@@ -190,7 +190,7 @@ DROW("addera medlem",				0,PE_NO_ARG,conf_add_member)
 DROW("subtrahera medlem",			0,PE_NO_ARG,conf_sub_member)
 DROW("var",					0,PE_NO_ARG,conf_where)
 DROW("gå",					0,PE_STR_ARG,conf_goto)
-DROW("nästa möte",				0,PE_NO_ARG,conf_goto_next)
+DROW("nästa möte",			1,PE_NO_ARG,conf_goto_next)
 DROW("lista möten",				0,PE_NO_ARG,conf_list)
 DROW("snabblista möten",			0,PE_NO_ARG,conf_list_q)
 DROW("utträda",					0,PE_STR_ARG,conf_leave)
