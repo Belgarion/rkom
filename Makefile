@@ -1,7 +1,7 @@
-#	$Id: Makefile,v 1.11 2001/11/25 20:06:21 jens Exp $
+#	$Id: Makefile,v 1.12 2002/11/26 09:01:31 ragge Exp $
 #
 all:
-	@if [ `uname` = NetBSD -o `uname` = FreeBSD -o `uname` = Darwin ]; then \
+	@if [ `uname` = NetBSD -o `uname` = FreeBSD -o `uname` = Darwin -o `uname` = OpenBSD ]; then \
 		echo "Using *BSD" ; \
 		${MAKE} -f Makefile.bsd ; \
 	elif [ `uname` = SunOS ]; then \
