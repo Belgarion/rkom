@@ -1,4 +1,4 @@
-#	$Id: Makefile,v 1.6 2000/10/21 12:15:33 ragge Exp $
+#	$Id: Makefile,v 1.7 2000/12/29 11:55:38 jens Exp $
 #
 # Rkom backend library Makefile
 #
@@ -13,6 +13,10 @@ MKPIC=	no	# No shared library
 WARNS?=	1	# All possible warnings
 
 SPCGEN?= spcgen
+
+.if defined(DEBUG)
+CFLAGS= -g
+.endif
 
 CLEANFILES+= rkom_proto.c rkom_proto.h rkom_proto_stubs.c
 
