@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.42 2002/02/17 21:21:49 ragge Exp $ */
+/* $Id: rkom.c,v 1.43 2002/02/26 14:18:18 offe Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -369,7 +369,7 @@ setup_tty(int save_old)
 	t.c_cc[VMIN] = 1;	/* 1 byte at a time, no timer */
 	t.c_cc[VTIME] = 0;
 
-	if (tcsetattr(0, TCSAFLUSH, &t) < 0)
+	if (tcsetattr(0, TCSANOW, &t) < 0)
 		err(1, "tcsetattr");
 }
 
