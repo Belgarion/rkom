@@ -88,13 +88,21 @@ async(int level)
 		async_handle();
 }
 
+static int prefetch;
+
 void
 async_handle()
 {
+	struct rk_text_stat *ts;
 	extern int fepid;
 
 	if (pole)
 		kill(fepid, SIGIO);
+	if (prefetch) {
+		ts = rk_textstat_server(prefetch);
+		free(ts);
+		prefetch = 0;
+	}
 }
 
 struct rk_async *
@@ -132,7 +140,7 @@ async_new_text()
 	int i, type, cnt, conf, local;
 	struct rk_time time;
 
-	get_int();
+	prefetch = get_int();
 	read_in_time(&time);
 	get_int();get_int();get_int();get_int();
 	cnt = get_int();

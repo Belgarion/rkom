@@ -14,7 +14,6 @@
 #include "backend.h"
 
 static int reqnr;
-static int handling;	/* Handling front-end request right now */
 static int wait_for_reply_no;
 int sockfd;
 static int unget;
@@ -33,11 +32,11 @@ rkom_loop()
 	/*
 	 * Set up the poll descriptors.
 	 */
+	level++;
 	pfd[0].fd = readfd;
-	pfd[0].events = POLLIN|POLLPRI;
+	pfd[0].events = (level < 2 ? POLLIN|POLLPRI : 0);
 	pfd[1].fd = sockfd;
 	pfd[1].events = POLLIN|POLLPRI;
-	level++;
 
 	/*
 	 * Ok, everything seems OK. Get into the poll loop and wait
@@ -57,12 +56,8 @@ rkom_loop()
 				warn("poll");
 			continue;
 		}
-		if (pfd[0].revents) {
-			if (handling++)
-				warn("front-end unwanted talk");
+		if (pfd[0].revents)
 			spc_process_request();
-			handling = 0;
-		}
 		if (pfd[1].revents & (POLLIN|POLLPRI)) {
 			int i;
 			char c = get_char();
