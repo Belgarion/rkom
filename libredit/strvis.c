@@ -1,4 +1,4 @@
-/*	$Id: strvis.c,v 1.4 2001/11/20 22:24:50 ragge Exp $	*/
+/*	$Id: strvis.c,v 1.5 2001/11/23 22:24:32 ragge Exp $	*/
 /*	$NetBSD: vis.c,v 1.13 1999/09/20 04:39:07 lukem Exp $	*/
 
 /*-
@@ -39,7 +39,6 @@
 #include "sys.h"
 
 #include <limits.h>
-#include <ctype.h>
 
 #define	isoctal(c)	(((u_char)(c)) >= '0' && ((u_char)(c)) <= '7')
 

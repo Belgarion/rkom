@@ -7,11 +7,11 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-#include <ctype.h>
 
 #include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "backend.h"
+#include "rtype.h"
 
 
 struct uarea {

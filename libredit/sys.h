@@ -47,13 +47,13 @@
 #include <sys/param.h>
 
 #include <termios.h>
-#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
 
+#include "rtype.h"
 
 #ifndef public
 # define public		/* Externally visible functions/variables */

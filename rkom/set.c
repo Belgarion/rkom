@@ -3,7 +3,6 @@
 #undef _XPG4_2
 #endif
 #include <stdio.h>
-#include <ctype.h>
 #include <string.h>
 #include <strings.h>
 #include <stdlib.h>
@@ -13,6 +12,7 @@
 #include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "rkom.h"
+#include "rtype.h"
 
 #include "set.h"
 

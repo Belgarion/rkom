@@ -1,9 +1,9 @@
-#	$Id: Makefile,v 1.12 2001/11/18 18:09:18 ragge Exp $
+#	$Id: Makefile,v 1.13 2001/11/23 22:24:29 ragge Exp $
 #
 # Rkom backend library Makefile
 #
 CFLAGS=	-O2 -g -Wall -Werror -Wstrict-prototypes -Wmissing-prototypes \
-	$(XFLAGS) -I../support
+	$(XFLAGS) -I../support -I../libredit
 
 OBJS=	rkom_subr.o rkom_lyskom.o rkom_beparse.o rkom_conf.o \
 	rkom_helpers.o rkom_proto.o rkom_async.o rkom_uarea.o

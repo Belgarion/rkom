@@ -1,8 +1,7 @@
-/* $Id: parse_eng.c,v 1.11 2001/11/20 22:24:53 ragge Exp $ */
+/* $Id: parse_eng.c,v 1.12 2001/11/23 22:24:35 ragge Exp $ */
 
 #include <sys/param.h>
 
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,6 +14,7 @@
 
 #include "parse_eng.h"
 #include "rkom.h"
+#include "rtype.h"
 
 #if !defined(MIN)
 #define	MIN(a,b)	(((a)<(b))?(a):(b))

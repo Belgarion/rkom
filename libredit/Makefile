@@ -9,7 +9,7 @@ RANLIB=	ranlib
 OBJS=	chared.o common.o el.o emacs.o fcns.o help.o hist.o key.o map.o \
 	parse.o prompt.o read.o refresh.o search.o sig.o term.o tty.o vi.o \
 	tokenizer.o history.o fgetln.o strvis.o strunvis.o strsep.o strlcpy.o \
-	strlcat.o strerror.o snprintf.o
+	strlcat.o strerror.o snprintf.o ctype_.o tolower_.o toupper_.o
 
 all:	libredit.a
 

@@ -1,4 +1,4 @@
-/*	$Id: snprintf.c,v 1.3 2001/11/20 22:55:52 ragge Exp $	*/
+/*	$Id: snprintf.c,v 1.4 2001/11/23 22:24:32 ragge Exp $	*/
 
 /*
  * Copyright Patrick Powell 1995
@@ -61,7 +61,6 @@
 
 #include <sys/types.h>
 #include <stdarg.h>
-#include <ctype.h>
 
 #include "rkomsupport.h"
 

@@ -4,7 +4,6 @@
 
 #include <unistd.h>
 #include <string.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
@@ -13,6 +12,7 @@
 #include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "backend.h"
+#include "rtype.h"
 
 #ifndef INFTIM
 #define	INFTIM -1
