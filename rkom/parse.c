@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.5 2000/11/19 18:21:34 ragge Exp $ */
+/* $Id: parse.c,v 1.6 2000/11/19 18:28:51 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -343,6 +343,8 @@ exec_read_jump(int argc, char *argv[])
 static int
 exec_write_new(int argc, char *argv[])
 {
+	LF;
+	MHC;
 	write_new(NULL);
 	return 0;
 }
