@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.18 2001/01/12 17:01:17 ragge Exp $ */
+/* $Id: parse.c,v 1.19 2001/01/12 18:04:01 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -197,6 +197,7 @@ DROW("lista kommandon",			0,PE_NO_ARG,info_list_commands)
 DROW("flaggor",					0,PE_NO_ARG,info_flags)
 DROW("tiden",					0,PE_NO_ARG,info_time)
 DROW("hjälp",					0,PE_NO_ARG,info_list_commands)
+DROW("?",					0,PE_NO_ARG,info_list_commands)
 DROW("status",					0,PE_STR_ARG,info_status)
 DROW("tillägsinformation",			0,PE_NUM_ARG,info_extra)
 
