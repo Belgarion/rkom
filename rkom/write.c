@@ -24,6 +24,7 @@ static char *input_string(void);
 static void parse_text(char *);
 static int extedit(char *);
 static char *show_format(void);
+static void wfotnot(char *str);
 
 static struct rk_misc_info *mi;
 static int nmi = 0;
@@ -124,11 +125,9 @@ parse_text(char *txt)
 		} else if (strncasecmp(cmd, "Kommentar", strlen(cmd)) == 0) {
 			if (strncasecmp(arg, "till:", 5) == 0)
 				cmd = strsep(&arg, " ");
-			write_comment(arg, comm_to);
+			write_comment(arg);
 		} else if (strncasecmp(cmd, "Fotnot", strlen(cmd)) == 0) {
-			if (strncasecmp(arg, "till:", 5) == 0)
-				cmd = strsep(&arg, " ");
-			write_comment(arg, footn_to);
+			wfotnot(arg);
 		} else
 			printf("%s förstods inte.\n", cmd);
 	}
@@ -262,8 +261,32 @@ write_rcpt(char *str)
 	mi[nmi-1].rmi_numeric = conf;
 }
 
+static void
+wfotnot(char *str)
+{
+	int nr, i;
+	char *p;
+
+	TW;
+	p = index(str, ' ');
+	if (p)
+		nr = atoi(p);
+	if (p == 0 || nr == 0) {
+		printf("Det var ett hemskt dåligt inläggsnummer.\n");
+		return;
+	}
+	for (i = 0; i < nmi; i++)
+		if (mi[i].rmi_numeric == nr && mi[i].rmi_type == footn_to)
+			return;
+
+	nmi++;
+	mi = realloc(mi, sizeof(struct rk_misc_info) * nmi);
+	mi[nmi-1].rmi_type = footn_to;
+	mi[nmi-1].rmi_numeric = nr;
+}
+
 void
-write_comment(char *str, int typ)
+write_comment(char *str)
 {
 	int nr, i;
 
@@ -274,13 +297,12 @@ write_comment(char *str, int typ)
 		return;
 	}
 	for (i = 0; i < nmi; i++)
-		if (mi[i].rmi_numeric == nr && 
-		    (mi[i].rmi_type == comm_to || mi[i].rmi_type == footn_to))
+		if (mi[i].rmi_numeric == nr && mi[i].rmi_type == comm_to)
 			return;
 
 	nmi++;
 	mi = realloc(mi, sizeof(struct rk_misc_info) * nmi);
-	mi[nmi-1].rmi_type = typ;
+	mi[nmi-1].rmi_type = comm_to;
 	mi[nmi-1].rmi_numeric = nr;
 }
 
@@ -478,5 +500,8 @@ write_cmnt(char *str)
 void
 write_footnote(char *str)
 {
-	write_internal(str, "Fotnot (till ", footn_to);
+	if (str && atoi(str) == 0) {
+		wfotnot(str);
+	} else
+		write_internal(str, "Fotnot (till ", footn_to);
 }
