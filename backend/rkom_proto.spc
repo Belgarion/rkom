@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.8 2000/10/15 17:20:25 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.9 2000/10/17 18:51:42 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -169,6 +169,16 @@ struct rk_mark_retval {
 	struct rk_marks	rmr_marks<>;
 };
 
+struct rk_val {
+	string		rv_var;
+	string		rv_val;
+};
+
+struct rk_uarea {
+	int32_t		ru_retval;
+	struct rk_val	ru_val<>;
+};
+
 /*
  * Login a user to the system.
  * Arguments are (userid, password).
@@ -299,3 +309,15 @@ int32_t rk_setmark(u_int32_t, u_int8_t);
  * Arg is (text). Returns a normal Lyskom error code.
  */
 int32_t rk_unmark(u_int32_t);
+
+/*
+ * Get the user area specified by the string.
+ * Arg is (identifier). Returns the uarea struct or a normal Lyskom error code.
+ */
+struct rk_uarea rk_get_uarea(string);
+
+/*
+ * Set the user area specified by the string.
+ * Returns a normal Lyskom error code.
+ */
+int32_t rk_set_uarea(string, struct rk_uarea);

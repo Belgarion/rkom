@@ -427,6 +427,103 @@ rk_unmark_server(u_int32_t text)
 	return retval;
 }
 
+static char **spole;
+
+static char **
+splitup(char *str, char **nyc, int *cnt)
+{
+	int maxlen, i, num;
+	char *c;
+
+	if (spole)
+		free(spole);
+	spole = malloc(1000);
+	c = str;
+	maxlen = atoi(str);
+	if (maxlen == 0) {
+		*cnt = 0;
+		return 0;
+	}
+	while (*c++ != 'H')
+		;
+	for (i = 0; c < str + maxlen; i++) {
+		num = atoi(c);
+		while (*c++ != 'H')
+			;
+		spole = realloc(spole, (i + 1) * sizeof(char *));
+		spole[i] = c;
+		c += num;
+		*c++ = 0;
+	}
+	*cnt = i;
+	*nyc = c;
+	return spole;
+}
+
+static char *upole;
+
+struct rk_uarea *
+rk_get_uarea_server(char *str)
+{
+	struct rk_person *p;
+	struct rk_uarea *ru;
+	struct rk_val *rv;
+	char buf[30], *c, **vec;
+	int i, j;
+
+	if (upole)
+		free(upole);
+	ru = calloc(sizeof(*ru), 1);
+	if (myuid == 0) {
+		ru->ru_retval = 6;
+		return ru;
+	}
+	get_pers_stat(myuid, &p);
+	if (p->rp_user_area == 0) {
+		ru->ru_retval = 8;
+		return ru;
+	}
+	sprintf(buf, "25 %d 0 2000000\n", p->rp_user_area);
+	if (send_reply(buf)) {
+		if ((i = get_int()))
+			ru->ru_retval = i;
+		get_eat('\n');  
+		return ru;
+	}       
+	upole = get_string();
+	get_accept('\n'); 
+
+	/* Check if there is any entry in the uarea matching our string */
+	vec = splitup(upole, &c, &j);
+	for (i = 0; i < j; i++)
+		if (strcmp(vec[i], str) == 0)
+			break;
+	if (vec[i] == 0)
+		return ru;
+
+	for (j = 0; j < i; j++)
+		c = c + atoi(c) + 1;
+
+	vec = splitup(c, &c, &i);
+	free(ru);
+	ru = calloc(sizeof(*ru) + sizeof(struct rk_val) * i / 2, 1);
+	ru->ru_val.ru_val_len = i / 2;
+	rv = (void *)&ru[1];
+	ru->ru_val.ru_val_val = rv;
+	for (j = 0; j < i; j+=2) {
+		rv[j/2].rv_var = vec[j];
+		rv[j/2].rv_val = vec[j+1];
+	}
+	return ru;
+}
+
+
+int32_t
+rk_set_uarea_server(char *hej, struct rk_uarea *u)
+{
+	return 0;
+}
+
 
 
 
