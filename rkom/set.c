@@ -135,11 +135,13 @@ readvars()
 	struct rk_uarea *ru;
 
 	ru = rk_get_uarea("common");
+printf("readvars: common %d\n", ru->ru_retval);
 	if (ru->ru_retval == 0)
 		put_in_vars(ru, commonvars, ncommonvars);
 	free(ru);
 
 	ru = rk_get_uarea("rkom");
+printf("readvars: rkom %d\n", ru->ru_retval);
 	if (ru->ru_retval == 0)
 		put_in_vars(ru, rkomvars, nrkomvars);
 	free(ru);

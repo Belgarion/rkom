@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.27 2001/01/27 11:08:42 ragge Exp $ */
+/* $Id: parse.c,v 1.28 2001/01/27 12:00:15 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -119,6 +119,7 @@ DCMD(other_quit);
 DCMD(other_password);
 DCMD(other_name);
 DCMD(other_sync);
+DCMD(other_exec);
 
 #if 1
 /* Debug help */
@@ -220,6 +221,7 @@ DROW("sluta",					0,PE_NO_ARG,other_quit)
 DROW("ändra lösenord",				0,PE_NO_ARG,other_password)
 DROW("ändra namn",				0,PE_NO_ARG,other_name)
 DROW("synkronisera",				0,PE_NO_ARG,other_sync)
+DROW("!", 					0,PE_STR_ARG,other_exec)
 
 #if 1
 /* Debug help */
@@ -918,5 +920,15 @@ exec_text_copy(int argc, char *argv[])
 	LF;
 	TT(argc > 0, "Kopia tar inga argument.\n");
 	cmd_copy();
+	return 0;
+}
+
+static int
+exec_other_exec(int argc, char *argv[])
+{
+	if (argc == 0)
+		system("/bin/sh");
+	else
+		system(re_concat(argc, argv));
 	return 0;
 }
