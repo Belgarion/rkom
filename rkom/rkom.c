@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.17 2000/12/03 20:30:40 jens Exp $ */
+/* $Id: rkom.c,v 1.18 2000/12/10 15:09:27 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -152,6 +152,7 @@ main(int argc, char *argv[])
 			 * Go to the beginning of the line to allow libedit to start
 			 * from column 0 and overwrite the current prompt.
 			 */
+			outlines = 0;
 			rprintf("%c", '\r');	
 			if (el_gets(el, &num) == NULL) {
 				if (nullar > 20)
@@ -178,7 +179,6 @@ main(int argc, char *argv[])
 				rk_alive();
 				lasttime = tp.tv_sec;
 			}
-			outlines = 0;
 		}
 		async_collect();
 	}
