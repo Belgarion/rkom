@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.45 2002/08/16 14:27:47 ragge Exp $ */
+/* $Id: rkom.c,v 1.46 2002/09/04 15:10:15 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -92,7 +92,6 @@ main(int argc, char *argv[])
 	char	buf[MAX_LINE];
 	size_t	len;
 	int	num;
-	int	nullar = 0;
 	struct pollfd	pfd[1];
 	struct timeval	tp;
 	int ch, noprompt;
@@ -202,12 +201,9 @@ main(int argc, char *argv[])
 			outlines = 0;
 			rprintf("%c", '\r');	
 			if (el_gets(main_el, &num) == NULL) {
-				if (nullar > 20)
-					exit(0);
-				nullar++;
+				noprompt++;
 				continue;
 			}
-			nullar = 0;
 			lf = el_line(main_el);
 			strncpy(buf, lf->buffer, MAX_LINE);
 			buf[MAX_LINE-1] = 0;

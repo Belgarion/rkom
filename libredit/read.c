@@ -487,6 +487,10 @@ el_gets(EditLine *el, int *nread)
 			term__flush();
 			break;
 		}
+		if (el->el_line.lastchar - el->el_line.buffer == 0) {
+			num = 0;
+			break;
+		}
 	}
 
 				/* make sure the tty is set up correctly */
