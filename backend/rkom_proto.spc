@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.11 2000/10/20 10:45:28 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.12 2000/10/21 11:28:59 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -231,6 +231,17 @@ struct rk_membership rk_membership(u_int32_t, u_int32_t);
  * Args are (idlesecs, flags).
  */
 struct rk_dynamic_session_info_retval rk_vilka(u_int32_t, u_int32_t);
+
+/*
+ * Get the client version. This call directly corresponds to Lyskom call #71.
+ */
+string rk_client_version(u_int32_t);
+
+/*
+ * Get the client name. This call directly corresponds to Lyskom call #70.
+ */
+string rk_client_name(u_int32_t);
+
 /*
  * Ask for the server time.
  * XXX - should have void argument.

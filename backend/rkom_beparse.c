@@ -212,6 +212,42 @@ rk_vilka_server(u_int32_t secs, u_int32_t flags)
 	return pp;
 }
 
+char *
+rk_client_name_server(u_int32_t vers)
+{
+	char *ret;
+	char buf[50];
+
+	sprintf(buf, "70 %d\n", vers);
+	if (send_reply(buf)) {
+		get_eat('\n');
+		return "";
+	}
+	ret = get_string();
+	get_eat('\n');
+	if (*ret == 0)
+		ret = calloc(10,1);
+	return ret;
+}
+
+char *
+rk_client_version_server(u_int32_t vers)
+{
+	char *ret;
+	char buf[50];
+
+	sprintf(buf, "71 %d\n", vers);
+	if (send_reply(buf)) {
+		get_eat('\n');
+		return "";
+	}
+	ret = get_string();
+	get_eat('\n');
+	if (*ret == 0)
+		ret = calloc(10,1);
+	return ret;
+}
+
 struct text_stat_store {
 	struct text_stat_store *next;
 	int nummer;
