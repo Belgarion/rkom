@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.40 2001/11/25 16:46:32 ragge Exp $	*/
+/*	$Id: write.c,v 1.41 2001/11/25 20:30:27 jens Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -259,21 +259,23 @@ prompt_fun(EditLine *el)
 char *
 input_string(char *m)
 {
-	EditLine *el;
+	static EditLine *el =  NULL;
 	const char *get;
 	char *ret;
 	int len;
 
+	if (el == NULL) {
+		el = el_init("rkom", stdin, stdout, stderr);
+		el_set(el, EL_EDITOR, "emacs");
+		el_set(el, EL_PROMPT, prompt_fun);
+	}
+
 	msg = m;
-	el = el_init("rkom", stdin, stdout, stderr);
-	el_set(el, EL_EDITOR, "emacs");
-	el_set(el, EL_PROMPT, prompt_fun);
 	get = el_gets(el, &len);
 	if (get)
 		ret = strdup(get);
 	else
 		ret = NULL;
-	el_end(el);
 	return ret;
 }
 

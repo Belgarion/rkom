@@ -29,21 +29,23 @@ prompt_fun(EditLine *el)
 char *
 getstr(char *m)
 {
-	EditLine *el;
+	static EditLine *el = NULL;
 	char *ret;
 	const char *tc;
 	int len;  
+
+	if (el == NULL) {
+		el = el_init("rkom", stdin, stdout, stderr);
+		el_set(el, EL_EDITOR, "emacs");
+		el_set(el, EL_PROMPT, prompt_fun);
+	}
 	
 	msg = m;
-	el = el_init("rkom", stdin, stdout, stderr);
-	el_set(el, EL_EDITOR, "emacs");
-	el_set(el, EL_PROMPT, prompt_fun);
 	tc = el_gets(el, &len);
 	if (tc)
 		ret = strdup(tc);
 	else
 		ret = strdup("");
 	ret[len - 1] = 0; /* Forget \n */
-	el_end(el);
 	return ret;
 }
