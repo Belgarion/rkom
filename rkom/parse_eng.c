@@ -1,4 +1,4 @@
-/* $Id: parse_eng.c,v 1.7 2001/01/20 15:38:23 jens Exp $ */
+/* $Id: parse_eng.c,v 1.8 2001/01/20 15:52:38 jens Exp $ */
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
@@ -449,7 +449,7 @@ parse_exec(cmds_t *c, const char *str)
 		} else if (ce->ce_prio == max_prio) {
 			ce_max_prio = NULL;
 			warnx("Argh! Two commands has the same prio.");
-			wanrx("Read comments in parse.c and parse_eng.c:parse_exec()");
+			warnx("Read comments in parse.c and parse_eng.c:parse_exec()");
 			warnx("and ask Jens if you don't understand.");
 		}
 
