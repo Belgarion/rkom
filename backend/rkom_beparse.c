@@ -107,18 +107,19 @@ rk_unreadconf(u_int32_t uid)
 
 	if (arr != NULL)
 		free(arr);
+	arr = NULL;
 	if ((i = send_reply("52 %d\n", uid))) {
 		rku.ru_retval = get_int();
 		get_eat('\n');
 		return &rku;
 	}
 	nconfs = get_int();
-	arr = calloc(sizeof(u_int32_t), nconfs);
-	rku.ru_confs.ru_confs_val = arr;
 	rku.ru_confs.ru_confs_len = nconfs;
 	if (nconfs == 0) {
 		get_eat('\n');
 	} else {
+		arr = calloc(sizeof(u_int32_t), nconfs);
+		rku.ru_confs.ru_confs_val = arr;
 		get_accept('{');
 		for (i = 0; i < nconfs; i++)
 			arr[i] = get_int();

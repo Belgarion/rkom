@@ -522,7 +522,6 @@ rk_is_read(u_int32_t nr)
 		if (mi[i].rmi_type == loc_no)
 			break;
 	}
-	free(ts);
 	if (conf)
 		return is_read(conf, mi[i].rmi_numeric, myuid);
 	else
