@@ -499,7 +499,7 @@ is_read(int conf, int text, int uid)
 	int i, num, *txts;
 
 	if (get_membership(uid, conf, &m))
-		return 0; /* ??? */
+		return 1; /* ??? */
 	num = m->rm_read_texts.rm_read_texts_len;
 	txts = m->rm_read_texts.rm_read_texts_val;
 	for (i = 0; i < num; i++)
