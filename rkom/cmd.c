@@ -240,28 +240,6 @@ cmd_sluta(char *str)
 	exit(0);
 }
 
-static char *
-prompt_fun(EditLine *el)
-{
-	return "Meddelande: ";
-}
-
-static char *
-getstr(void)
-{
-	EditLine *el;
-	char *ret;
-	int len;
-
-	el = el_init("rkom", stdin, stdout, stderr);
-	el_set(el, EL_EDITOR, "emacs");
-	el_set(el, EL_PROMPT, prompt_fun);
-	ret = strdup(el_gets(el, &len));
-	ret[len - 1] = 0; /* Forget \n */
-	el_end(el);
-	return ret;
-}
-
 void 
 cmd_send(char *str)
 {
@@ -269,7 +247,7 @@ cmd_send(char *str)
 
 	rprintf("Sänd (alarmmeddelande till alla)\n");
 
-	buf = getstr();
+	buf = getstr("Meddelande: ");
 
 	if (strlen(buf) == 0)
 		rprintf("Nähej.");
@@ -295,7 +273,7 @@ cmd_say(char *str)
 	rprintf("Sänd meddelande till %s\n",
 	    retval->rcr_ci.rcr_ci_val[0].rc_name);
 
-	buf = getstr();
+	buf = getstr("Meddelande: ");
 	if (strlen(buf) == 0)
 		rprintf("Nähej.");
 	else {
@@ -358,9 +336,7 @@ cmd_goto(char *str)
 	if (ret == 13) { /* XXX should be define */
 		rprintf("Du är inte medlem i %s.\n", name);
 		do {
-			rprintf("Vill du bli medlem? (ja, nej) - ");
-			fflush(stdout);
-			ch = get_input_string(0, 0); /* XXX */
+			ch = getstr("Vill du bli medlem? (ja, nej) - ");
 		} while (strcasecmp("ja", ch) && strcasecmp("nej", ch));
 		if (strcasecmp("nej", ch) == 0) {
 			rprintf("Nehepp.\n");

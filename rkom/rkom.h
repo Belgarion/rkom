@@ -13,8 +13,7 @@ struct cmnd {
 };
 
 /* kbd.c */
-int	kbd_input(int);
-char *	get_input_string(int, int);
+char *	getstr(char *);
 
 /* cmd.c */
 void	cmd_parse(char *);
