@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.30 2001/02/13 09:58:57 jens Exp $ */
+/* $Id: parse.c,v 1.31 2001/07/03 14:53:05 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -835,6 +835,7 @@ exec_info_extra(int argc, char *argv[])
 	TT(argc > 1, "Du kan max ange ett argument.\n");
 	if (argc)
 		text = atoi(argv[0]);
+	TT(argc == 0 && text == 0, "Du måste ange en text.\n");
 	cmd_info_extra(text);
 	return 0;
 }
