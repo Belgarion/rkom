@@ -78,41 +78,65 @@ show_text(int nr)
 		sprintf(namn, "Person %d (hemlig)", ts->rt_author);
 	} else
 		namn = strdup(conf->rc_name);
-	rprintf("\n(%d) %s /%d rad%s/ %s\n", nr,
+	rprintf("\n(%d) %s /%d rad%s/ %s", nr,
 	    get_date_string(&ts->rt_time), ts->rt_no_of_lines,
 	    ts->rt_no_of_lines > 1 ? "er" : "", namn);
 	free(conf);
 
 	mi = ts->rt_misc_info.rt_misc_info_val;
 	len = ts->rt_misc_info.rt_misc_info_len;
+
 	for (i = 0; i < len; i++) {
-		if (mi[i].rmi_type == recpt)
-			rprintf("Mottagare: %s\n", vem(mi[i].rmi_numeric));
+		struct rk_text_stat *tt;
 
-		if (mi[i].rmi_type == cc_recpt)
-			rprintf("Extra kopia: %s\n", vem(mi[i].rmi_numeric));
-		if (mi[i].rmi_type == comm_to) {
-			struct rk_text_stat *tt;
+		switch(mi[i].rmi_type) {
+		case recpt:
+			rprintf("\n");
+			rprintf("Mottagare: %s", vem(mi[i].rmi_numeric));
+			break;
 
+		case cc_recpt:
+			rprintf("\n");
+			rprintf("Extra kopia: %s", vem(mi[i].rmi_numeric));
+			break;
+
+		case sent_by:
+			rprintf("\n");
+			rprintf("  Sändare: %s", vem(mi[i].rmi_numeric));
+			break;
+		
+		case sentat:
+			rprintf(" -- Sänt: %s",
+				get_date_string(&mi[i].rmi_time));
+			break;
+
+		case rec_time:
+			rprintf(" -- Mottaget: %s", 
+				get_date_string(&mi[i].rmi_time));
+			break;
+
+		case comm_to:
+			rprintf("\n");
 			rprintf("Kommentar till text %d", mi[i].rmi_numeric);
 			tt = rk_textstat(mi[i].rmi_numeric);
 			if (tt->rt_retval == 0)
 				rprintf(" av %s", vem(tt->rt_author));
 			free(tt);
+			break;
+
+		case footn_to:
 			rprintf("\n");
-		}
-
-		if (mi[i].rmi_type == footn_to) {
-			struct rk_text_stat *tt;
-
 			rprintf("Fotnot till text %d", mi[i].rmi_numeric);
 			tt = rk_textstat(mi[i].rmi_numeric);
 			if (tt->rt_retval == 0)
-					rprintf(" av %s", vem(tt->rt_author));
+				rprintf(" av %s", vem(tt->rt_author));
 			free(tt);
-			rprintf("\n");
+			break;
+		default:
+			break;
 		}
 	}
+	rprintf("\n");
 	p = iseql("reading-puts-comments-in-pointers-last", "1");
 	if (p == 0)
 		printcmnt(mi, len, p);
