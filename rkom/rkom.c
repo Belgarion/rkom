@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.25 2001/01/15 17:34:07 ragge Exp $ */
+/* $Id: rkom.c,v 1.26 2001/01/20 13:15:16 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -255,17 +255,18 @@ async_collect()
 			sender = rk_confinfo(ra->ra_pers);
 rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 			if (ra->ra_conf == 0)
-				rprintf("Allmänt meddelande från %s\n\n",
+				rprintf("Allmänt meddelande från %s",
 				    sender->rc_name);
 			else if (ra->ra_conf == myuid)
-				rprintf("Personligt meddelande från %s\n\n",
+				rprintf("Personligt meddelande från %s",
 				    sender->rc_name);
 			else {
 				rcpt = rk_confinfo(ra->ra_conf);
-				rprintf("Meddelande till %s från %s\n\n",
+				rprintf("Meddelande till %s från %s",
 				    rcpt->rc_name, sender->rc_name);
 				free(rcpt);
 			}
+			rprintf(" (%s):\n\n", get_date_string(rk_time()));
 			rprintf("%s\n", ra->ra_message);
 rprintf("----------------------------------------------------------------\n");
 			retval = 0;
