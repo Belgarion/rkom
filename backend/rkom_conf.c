@@ -242,16 +242,34 @@ get_membership(int uid, int conf, struct rk_membership **member)
 }
 
 static void
-delete_membership_internal(int uid)
+delete_membership_internal(int conf, int uid)
 {
+	struct membership_store *mb;
 	struct person_store *pp;
 
 	if ((pp = findperson(uid)) == 0)
 		return; /* Nothing in cache */
 
-	if (pp->next)
+	if (pp->next == 0)
+		return;
+
+	if (pp->next->mid == conf) {
+		mb = pp->next->next;
 		free(pp->next);
-	pp->next = 0;
+		pp->next = mb;
+		return;
+	}
+	omb = pp->next;
+	mb = pp->next->next;
+	while (mb) {
+		if (mb->mid == conf) {
+			omb->next = mb->next;
+			free(mb);
+			return;
+		}
+		omb = mb;
+		mb = mb->next;
+	}
 }
 
 static void
@@ -517,7 +535,7 @@ rk_add_member_server(u_int32_t conf, u_int32_t uid, u_int8_t prio,
 		return ret;
 	}
 	get_accept('\n');
-	delete_membership_internal(uid);
+	delete_membership_internal(conf, uid);
 	return ret;
 }
 
@@ -534,6 +552,6 @@ rk_sub_member_server(u_int32_t conf, u_int32_t uid)
 		return ret;
 	}
 	get_accept('\n');
-	delete_membership_internal(uid);
+	delete_membership_internal(conf, uid);
 	return ret;
 }

@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.6 2000/10/15 10:50:24 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.7 2000/10/25 09:40:24 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -35,6 +35,7 @@ rkom_connect(char *server, char *frontend, char *os_username)
 	struct hostent *hp;
 	int toback[2], fromback[2], asyncio[2];
 	char *buf, *buf2;
+	int ver;
 
 	/* Locate our KOM server */
 	if ((hp = gethostbyname(server)) == NULL)
@@ -71,8 +72,24 @@ rkom_connect(char *server, char *frontend, char *os_username)
 	free(buf);
 	free(buf2);
 
+	/* Check what the server is running */
+	send_reply("75\n");
+	ver = get_int();
+	buf = get_string();
+	buf2 = get_string();
+	get_accept('\n');
+
+	printf("Välkommen till raggkom kopplad till server %s.\n", server);
+	printf("Servern kör %s, version %s. Protokollversion %d.\n", 
+	    buf, buf2, ver);
+	free(buf);free(buf2);
+	if (ver < 10) {
+		printf("\nVARNING: Protokollversionen bör vara minst 10.\n");
+		printf("VARNING: Vissa saker kan ofungera.\n");
+	}
+
 	/* Set what async messages we want */
-	send_reply("80 6 { 5 9 12 13 15 16 }\n");
+	send_reply("80 10 { 5 8 9 12 13 14 15 16 17 18 }\n");
 	get_accept('\n');
 
 	pipe(toback);
