@@ -57,8 +57,63 @@ printcmnt(struct rk_misc_info *mi, int len, int p)
 	}
 }
 
+static char *
+rxindex(char *s, int n, int c)
+{
+	while (n && s[n] != c)
+		n--;
+	return (n ? s+n : NULL);
+}
+
+static void
+show_formatted(char *cc)
+{
+	char *ncc, *nncc;
+
+	/* Remove trailing \n */
+	while (strlen(cc) && cc[strlen(cc)-1] == '\n')
+		cc[strlen(cc)-1] = 0;
+	if (strlen(cc) == 0)
+		return;
+
+	/* Print lines, break them if they are longer than the screen width */
+	while ((ncc = index(cc, '\n'))) {
+		if ((ncc - cc) > wcols) {
+			nncc = rxindex(cc, wcols-8, ' ');
+			if (nncc == NULL) {
+				*ncc++ = 0;
+				rprintf("%s\n", cc);
+				cc = ncc;
+			} else {
+				*nncc++ = 0;
+				rprintf("%s\n", cc);
+				cc = nncc;
+			}
+		} else {
+			*ncc++ = 0;
+			rprintf("%s\n", cc);
+			cc = ncc;
+		}
+	}
+	if (*cc) {
+		while (strlen(cc) > wcols) {
+			nncc = rxindex(cc, wcols-8, ' ');
+			if (nncc == NULL) {	
+				rprintf("%s\n", cc);
+				break;
+			}
+			*nncc++ = 0;
+			rprintf("%s\n", cc);
+			cc = nncc;
+		}
+		if (*cc)
+			rprintf("%s", cc);
+	}
+	rprintf("\n");
+}
+
 void
-show_text(int nr)
+show_text(int nr, int format)
 {
 	struct rk_conference *conf;
 	struct rk_text_stat *ts;
@@ -156,9 +211,13 @@ show_text(int nr)
 	if (isneq("dashed-lines", "0"))
 		rprintf("\n------------------------------------------------------------");
 	if (*cc) {
-		rprintf("%s", cc);
-		if (cc[strlen(cc) - 1] != '\n')
-			rprintf("\n");
+		if (format) {
+			show_formatted(cc);
+		} else {
+			rprintf("%s", cc);
+			if (cc[strlen(cc) - 1] != '\n')
+				rprintf("\n");
+		}
 	} else
 		rprintf("\n");
 	if (iseql("show-writer-after-text", "1"))
@@ -219,7 +278,7 @@ show_savetext(char *str)
 	orows = wrows;
 	olines = outlines;
 	wrows = 2000000;
-	show_text(lasttext);
+	show_text(lasttext, 0);
 	wrows = orows;
 	outlines = olines;
 	close(1);

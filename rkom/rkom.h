@@ -35,7 +35,7 @@ void	cmd_copy(void);
 char *	error(int);
 
 /* show.c */
-void	show_text(int);
+void	show_text(int, int);
 void show_savetext(char *);
 char * get_date_string(struct rk_time *t);
 char *vem(int);

@@ -220,7 +220,7 @@ next_text(char *str)
 		return;
 	}
 	global = rk_local_to_global(curconf, local);
-	show_text(global);
+	show_text(global, 1);
 	mark_read(global);
 	next_action(global);
 	lastlasttext = lasttext;
@@ -254,7 +254,7 @@ try:	for (i = pole->listidx; i < len; i++)
 		goto try;
 	global = mi[i].rmi_numeric;
 	free(ts);
-	show_text(global);
+	show_text(global, 1);
 	mark_read(global);
 	next_action(global);
 	lastlasttext = lasttext;
@@ -280,7 +280,7 @@ next_resee_comment()
 		free(ts);
 		return;
 	}
-	show_text(mi[i].rmi_numeric);
+	show_text(mi[i].rmi_numeric, 1);
 	lastlasttext = lasttext;
 	lasttext = mi[i].rmi_numeric;
 	free(ts);
@@ -316,7 +316,7 @@ restart:
 		}
 
 	if(!count) {
-		show_text(text);
+		show_text(text, 1);
 		lastlasttext = lasttext;
 		lasttext = text;
 	}
@@ -325,9 +325,17 @@ restart:
 }
 
 void
+next_resee_text_unmodified(int num)
+{
+	show_text(num, 0);
+	lastlasttext = lasttext;
+	lasttext = num;
+}
+
+void
 next_resee_text(int num)
 {
-	show_text(num);
+	show_text(num, 1);
 	lastlasttext = lasttext;
 	lasttext = num;
 }
@@ -335,7 +343,7 @@ next_resee_text(int num)
 void
 next_again(char *str)
 {
-	show_text(lasttext);
+	show_text(lasttext, 1);
 }
 
 void
@@ -395,7 +403,7 @@ next_resee_presentation(char *name)
 	if (rc->rc_presentation == 0)
 		printf("Det finns ingen presentation.\n");
 	else
-		show_text(rc->rc_presentation);
+		show_text(rc->rc_presentation, 1);
 	free(rv);
 	free(rc);
 }

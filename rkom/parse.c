@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.33 2001/11/23 22:24:35 ragge Exp $ */
+/* $Id: parse.c,v 1.34 2001/11/24 14:31:11 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -46,6 +46,7 @@ DCMD(read_next_cmt);
 DCMD(read_see_again_cmt);
 DCMD(read_see_again_cmt_no);
 DCMD(read_see_presentation);
+DCMD(read_see_unmodified);
 DCMD(read_see_again_root);
 DCMD(read_list_news);
 DCMD(read_only);
@@ -148,10 +149,11 @@ DROW("nästa inlägg",			0,PE_NO_ARG,read_next_text)
 DROW("nästa kommentar",			0,PE_NO_ARG,read_next_cmt)
 DROW("återse",				0,PE_NUM_ARG,read_see_again_cmt_no)
 DROW("återse kommenterade",		1,PE_NO_ARG,read_see_again_cmt)
+DROW("återse oredigerat",		0,PE_NUM_ARG,read_see_unmodified)
 DROW("återse presentation",		0,PE_STR_ARG,read_see_presentation)
 DROW("återse urinlägg",			0,PE_NO_ARG,read_see_again_root)
 DROW("lista nyheter",			0,PE_NO_ARG,read_list_news)
-DROW("endast",					0,PE_NUM_ARG,read_only)
+DROW("endast",					1,PE_NUM_ARG,read_only)
 DROW("igen",					0,PE_NO_ARG,read_again)
 DROW("hoppa",					0,PE_NO_ARG,read_jump)
 
@@ -388,6 +390,23 @@ exec_read_see_again_cmt_no(int argc, char *argv[])
 		return 0;
 	}
 	next_resee_text(atoi(argv[0]));
+	return 0;
+}
+
+static int
+exec_read_see_unmodified(int argc, char *argv[])
+{
+	int textno;
+
+	LF;
+	if (argc > 1) {
+		rprintf("Handhavande: återse oredigerat <inläggsnummer>\n");
+		return 0;
+	} else if (argc == 1)
+		textno = atoi(argv[0]);
+	else
+		textno = lasttext;
+	next_resee_text_unmodified(textno);
 	return 0;
 }
 
