@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.26 2001/01/13 21:52:09 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.27 2001/02/12 20:23:47 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -449,3 +449,10 @@ void rk_sync(void);
  * negative lyskom error number.
  */
 int32_t rk_create_conf(string, u_int32_t);
+
+/*      
+ * Set text to motd for conf.
+ * Args are (conf, rk_text_info).
+ * Returns a normal Lyskom error code.
+ */
+int32_t rk_set_motd(u_int32_t, struct rk_text_info);
