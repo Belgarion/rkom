@@ -13,6 +13,10 @@
 #include "rkom_proto.h"
 #include "backend.h"
 
+#ifndef INFTIM
+#define	INFTIM -1
+#endif
+
 static int reqnr;
 static int wait_for_reply_no;
 int sockfd;
