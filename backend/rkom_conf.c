@@ -545,7 +545,8 @@ rk_next_unread_server(u_int32_t conf, u_int32_t uid)
 
 	get_conf_stat(conf, &c);
 	highest = c->rc_first_local_no + c->rc_no_of_texts - 1;
-	get_membership(uid, conf, &m);
+	if (get_membership(uid, conf, &m))
+		return 0;
 
 back:	last = m->rm_last_text_read;
 	if (highest <= last)
