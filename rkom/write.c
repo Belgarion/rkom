@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.25 2001/01/15 17:33:38 ragge Exp $	*/
+/*	$Id: write.c,v 1.26 2001/01/15 20:23:04 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -562,6 +562,7 @@ void
 write_change_presentation(char *str)
 {
         struct rk_confinfo_retval *retval;
+	char *c;
 
         if ((retval = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF)) == 0)
                 return;
@@ -572,7 +573,17 @@ write_change_presentation(char *str)
 	is_writing = 1;
 	mi = calloc(sizeof(struct rk_misc_info), 2);
 	nmi = 0;
-	doedit(retval->rcr_ci.rcr_ci_val[0].rc_name);
+	if (isneq("use-editor", "0")) { /* Extern editor, edit old text */
+		struct rk_conference *rc;
+
+		rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
+		if (rc->rc_retval == 0 && rc->rc_presentation)
+			c = rk_gettext(rc->rc_presentation);
+		free(rc);
+	} else
+		c = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);
+	doedit(c);
+	free(c);
 	free(retval);
 }
 
