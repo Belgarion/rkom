@@ -43,9 +43,6 @@
 #include "sys.h"
 #include "el.h"
 
-#include <unistd.h>
-#include <errno.h>
-
 #define	OKCMD	-1
 
 private int	read__fixio(int, int);
