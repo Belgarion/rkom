@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.50 2001/07/30 19:04:48 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.51 2001/11/18 14:27:27 ragge Exp $	*/
 
 #include <string.h>
 #include <stdio.h>
@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <pwd.h>
-#include <histedit.h>
 #include <signal.h>
 
 #include "rkom_proto.h"
@@ -15,6 +14,7 @@
 #include "list.h"
 #include "write.h"
 #include "set.h"
+#include "rhistedit.h"
 
 void cmd_logout(char *);
 void cmd_login(char *);

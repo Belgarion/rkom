@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.33 2001/07/30 19:04:48 ragge Exp $	*/
+/*	$Id: write.c,v 1.34 2001/11/18 14:27:27 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -11,7 +11,6 @@
 #include <paths.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <histedit.h>
 
 #include "rkom_proto.h"
 
@@ -19,6 +18,7 @@
 #include "write.h"
 #include "set.h"
 #include "next.h"
+#include "rhistedit.h"
 
 static char *get_text(char *);
 static void parse_text(char *);
@@ -34,6 +34,8 @@ static char *ctext = 0;
 #define IW if (is_writing) {rprintf("Du håller redan på att skriva en text.\n");return;}
 #define	LF if (myuid == 0) {rprintf("Du måste logga in först.\n");return;}
 #define	NC if (curconf == 0) {rprintf("Du måste gå till ett möte först.\n");return;}
+
+static char *input_string(char *);
 
 static void
 doedit(char *s)
@@ -217,16 +219,6 @@ write_put(char *str)
 	ctext = 0;
 }
 
-static char *
-getstr2(char *hej)
-{
-	char *rv = getstr(hej);
-	if (*rv)
-		return rv;
-	free(rv);
-	return NULL;
-}
-
 char *
 get_text(char *sub)
 {
@@ -237,10 +229,10 @@ get_text(char *sub)
 		base = strdup(sub);
 		rprintf("Ärende: %s", base);
 	} else
-		base = getstr("Ärende: ");
+		base = input_string("Ärende: ");
 
 	for (;;) {
-		str = getstr2("");
+		str = input_string("");
 		if (str == NULL)
 			return base;
 		base = realloc(base, strlen(base) + strlen(str) + 1);
@@ -249,7 +241,6 @@ get_text(char *sub)
 	}
 }
 
-#if 0
 static char *msg;
 
 static char *
@@ -261,7 +252,6 @@ prompt_fun(EditLine *el)
 char *
 input_string(char *m)
 {
-	return getstr(m);
 	EditLine *el;
 	const char *get;
 	char *ret;
@@ -283,7 +273,6 @@ input_string(char *m)
 	el_end(el);
 	return ret;
 }
-#endif
 
 void
 write_forget(char *str)

@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.30 2001/07/30 19:04:48 ragge Exp $ */
+/* $Id: rkom.c,v 1.31 2001/11/18 14:27:27 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -24,6 +24,7 @@
 #include "next.h"
 #include "set.h"
 #include "parse.h"
+#include "rhistedit.h"
 
 #define MAX_LINE	1024
 
@@ -34,6 +35,11 @@ static int lasttime;
 static void sigio(int);
 static void sigwinch(int);
 static int async_collect(void);
+
+static void setup_tty(int);
+static void restore_tty(void);
+
+static struct termios old_termios;
 
 char *p_next_conf = "(Gå till) nästa möte";
 char *p_next_text = "(Läsa) nästa inlägg";
@@ -46,7 +52,6 @@ int wrows, wcols, swascii;
 #define	INFTIM -1
 #endif
 
-#if 0
 static char *
 prompt_fun(EditLine *el)
 {
@@ -55,11 +60,19 @@ prompt_fun(EditLine *el)
 	snprintf(buf, sizeof(buf), "%s - ", prompt);
 	return buf;
 }
-#endif
 
 int
 main(int argc, char *argv[])
 {
+	HistEvent ev;
+	History *hist;
+	EditLine *el = NULL;
+	const LineInfo  *lf;
+	const char *str;
+	char	buf[MAX_LINE];
+	size_t	len;
+	int	num;
+	int	nullar = 0;
 	struct pollfd	pfd[1];
 	struct timeval	tp;
 	int ch, noprompt;
@@ -108,8 +121,6 @@ main(int argc, char *argv[])
 	pfd[0].events = POLLIN|POLLPRI;
 	noprompt = 0;
 
-	tcapinit();
-#if 0
 	setup_tty(1);
 	hist = history_init();
 #if !defined(__FreeBSD__)
@@ -122,11 +133,9 @@ main(int argc, char *argv[])
 	el_set(el, EL_PROMPT, prompt_fun);
 	el_set(el, EL_HIST, history, hist);
 	el_set(el, EL_TERMINAL, "vt100");
-#endif
 
 	for (;;) {
 		int rv;
-		char *str;
 
 		if (noprompt)
 			noprompt = 0;
@@ -134,6 +143,7 @@ main(int argc, char *argv[])
 			rprintf("\n%s - ", prompt);
 		fflush(stdout);
 
+		setup_tty(0);
 		rv = poll(pfd, 1, INFTIM);
 		if (rv == 0)
 			continue;
@@ -150,9 +160,6 @@ main(int argc, char *argv[])
 			 * from column 0 and overwrite the current prompt.
 			 */
 			outlines = 0;
-			str = getstr("");
-			exec_cmd(str);
-#if 0
 			rprintf("%c", '\r');	
 			if (el_gets(el, &num) == NULL) {
 				if (nullar > 20)
@@ -177,10 +184,10 @@ main(int argc, char *argv[])
 			}
 			str = buf;
 			exec_cmd(str);
+			discard = 0;
 #if !defined(__FreeBSD__)
 			if (len > 1)
 				history(hist, &ev, H_ENTER, buf);
-#endif
 #endif
 
 			gettimeofday(&tp, 0);
@@ -297,4 +304,31 @@ rprintf("----------------------------------------------------------------\n");
 		}
 		free(ra);
 	}
+}
+
+static void
+setup_tty(int save_old)
+{
+	struct termios t;
+
+	if (tcgetattr(0, &t) < 0)
+		err(1, "tcgetattr");
+
+	if (save_old) {
+		old_termios = t;
+		atexit(restore_tty);
+	}
+
+	t.c_lflag &= ~(ECHO | ICANON);
+	t.c_cc[VMIN] = 1;	/* 1 byte at a time, no timer */
+	t.c_cc[VTIME] = 0;
+
+	if (tcsetattr(0, TCSAFLUSH, &t) < 0)
+		err(1, "tcsetattr");
+}
+
+static void
+restore_tty(void)
+{
+	tcsetattr(0, TCSAFLUSH, &old_termios);
 }
