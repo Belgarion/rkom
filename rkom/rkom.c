@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.36 2001/11/24 12:33:28 ragge Exp $ */
+/* $Id: rkom.c,v 1.37 2001/11/24 16:50:08 offe Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -23,6 +23,7 @@
 #include <err.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "rkomsupport.h"
 #include "rkom_proto.h"
