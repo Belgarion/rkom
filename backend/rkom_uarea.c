@@ -176,7 +176,7 @@ rk_get_uarea_server(char *str)
 
 	vec = splitup(uarea[i].elem, &i, 1);
 	if (vec == NULL) {
-		ru->ru_retval = 11;
+		ru->ru_retval = 12;
 		return ru;
 	}
 	free(ru);
@@ -206,8 +206,8 @@ rk_set_uarea_server(char *str, struct rk_uarea *u)
 	v = u->ru_val.ru_val_val;
 	len = u->ru_val.ru_val_len;
 	for (i = tot = 0; i < len; i++)
-		tot += strlen(v->rv_var) + strlen(v->rv_val);
-	tot += len * 15;
+		tot += (strlen(v->rv_var) + strlen(v->rv_val));
+	tot += (len * 20);
 	udata = alloca(tot);
 	*udata = 0;
 	narea = alloca(tot + 20);
