@@ -139,6 +139,9 @@ parse_text(char *txt)
 	for (;;) {
 		if (*txt != '!') {
 			ctext = strdup(txt);
+			while (ctext[strlen(ctext)-1] == '\n' &&
+			    ctext[strlen(ctext)-2] == '\n')
+				ctext[strlen(ctext)-1] = 0;
 			return;
 		}
 		txt++;
