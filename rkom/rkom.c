@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.48 2002/09/04 20:56:49 ragge Exp $ */
+/* $Id: rkom.c,v 1.49 2003/08/21 15:12:31 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -327,8 +327,10 @@ rprintf("----------------------------------------------------------------\n");
 			hej = prompt;
 			if (prompt != PROMPT_NEXT_COMMENT)
 				next_prompt();
-			if (prompt != hej)
+			if (prompt != hej) {
+				putchar(007); /* Signal new text */
 				retval = 0;
+			}
 			break;
 
 		case 8:
