@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.59 2002/05/16 14:01:43 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.60 2002/05/19 14:23:22 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -329,15 +329,15 @@ cmd_where(char *str)
 	struct rk_conference *conf;
 
 	if (myuid == 0)
-		rprintf("Du är inte ens inloggad.\n");
+		rprintf("Du är inte inloggad");
 	else if (curconf == 0)
-		rprintf("Du är inte närvarande någonstans.\n");
+		rprintf("Du är inte närvarande någonstans");
 	else {
 		conf = rk_confinfo(curconf);
-		rprintf("Du är i möte %s på server %s\n",
-		    conf->rc_name, server);
+		rprintf("Du är i möte %s", conf->rc_name);
 		free(conf);
 	}
+	rprintf(" på server %s.\n", server);
 }
 
 void

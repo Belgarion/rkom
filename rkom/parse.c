@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.37 2002/05/18 21:30:36 offe Exp $ */
+/* $Id: parse.c,v 1.38 2002/05/19 14:23:22 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -571,7 +571,6 @@ exec_write_private(int argc, char *argv[])
 static int
 exec_conf_where(int argc, char *argv[])
 {
-	LF;
 	cmd_where(NULL);
 	return 0;
 }
