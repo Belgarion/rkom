@@ -75,7 +75,7 @@ extern const short	*_toupper_tab_;
 #define _tolower(c)	((c) - 'A' + 'a')
 #define _toupper(c)	((c) - 'a' + 'A')
 
-extern const u_int8_t _C_ctype_[];
+extern const unsigned char _C_ctype_[];
 extern const int16_t _C_toupper_[];
 extern const int16_t _C_tolower_[];
 
