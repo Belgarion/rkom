@@ -1,0 +1,35 @@
+	$Id: README,v 1.1 2001/04/17 13:12:10 ragge Exp $
+
+How to compile:
+
+Rkom needs the following programs to compile. Some of them may be included
+in your system, some may not. I have putten some of them together in 
+small tar files to make it simpler to compile. Needed are:
+	gcc and friends
+	flex (needed by spcgen, AT&T lex won't work)
+	spcgen (ftp://subzero.campus.luth.se/pub/spcgen/spcgen-1.1.tar.gz)
+	pmake (ftp://bakfull.campus.luth.se/rkom/pmake.tgz)
+	libedit (ftp://bakfull.campus.luth.se/rkom/libedit.tgz)
+
+
+NetBSD:
+FreeBSD:
+	Just unpack the distribution and compile.
+
+OpenBSD:
+BSDI:
+	Haven't tried, but should "just work".
+
+Linux:
+	Tested under Debian /w libc6.
+	- Install pmake, available in a package.
+	- Fetch, compile and install spcgen from the address above.
+	- Fetch libedit from the address above and compile it.
+	- Uncomment the following flags in the top-level Makefile.inc:
+		NOGCCERROR=1
+		LDADD+=-L../../libedit (or the place where libedit is)
+		CPPFLAGS+=-I../../libedit
+	- Just compile.
+SunOS4:
+	Gcc and flex must be installed first.
+	
