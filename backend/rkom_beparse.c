@@ -38,10 +38,10 @@ rk_whatido_server(char *args)
 	int i;
 	char *buf;
 
-	buf = alloca(strlen(args));
+	buf = alloca(strlen(args) + 17);
 	sprintf(buf, "4 %ldH%s\n", (long)strlen(args), args);
 	i = send_reply(buf);
-	get_eat('\n');
+	get_accept('\n');
 	return i;
 }
 
