@@ -32,7 +32,7 @@ void	cmd_nasta(char *);
 void	cmd_login(char *);
 void	show_text(int);
 void	cmd_exec(char *, struct cmnd *);
-char *	get_input_string(int);
+char *	get_input_string(int, int);
 char * get_date_string(struct rk_time *t);
 
 extern	int myuid;

@@ -38,7 +38,7 @@ show_text(int nr)
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mi;
 	int i, len;
-	char *c, *cc, *namn;
+	char *c, *cc, *namn, buf[20];
 
 	ts = rk_textstat(nr);
 
@@ -91,7 +91,11 @@ show_text(int nr)
 		printf("%c", *cc++);
 printf("\n------------------------------------------------------------");
 	printf("%s", cc);
-printf("\n------------------------------------------------------------\n");
+	if (cc[strlen(cc) - 1] != '\n')
+		printf("\n");
+	sprintf(buf, "(%d)", nr);
+	printf("%s%s", buf,
+&"------------------------------------------------------------\n"[strlen(buf)]);
 	free(c);
 
 	for (i = 0; i < len; i++) {

@@ -306,7 +306,7 @@ cmd_send(char *str)
 	printf("Sänd (alarmmeddelande till alla)\nMeddelande: ");
 	fflush(stdout);
 
-	buf = get_input_string(0); /* XXX */
+	buf = get_input_string(0, 0); /* XXX */
 
 	if (strlen(buf) == 0) {
 		printf("Nähej.");
@@ -341,7 +341,7 @@ cmd_say(char *str)
 	printf("Sänd meddelande till %s\nMeddelande: ", conf_num2name(id));
 	fflush(stdout);
 
-	buf = get_input_string(0); /* XXX */
+	buf = get_input_string(0, 0); /* XXX */
 
 	if (strlen(buf) == 0) {
 		printf("Nähej.");
@@ -427,7 +427,7 @@ cmd_goto(char *str)
 		do {
 			printf("Vill du bli medlem? (ja, nej) - ");
 			fflush(stdout);
-			ch = get_input_string(0); /* XXX */
+			ch = get_input_string(0, 0); /* XXX */
 		} while (strcasecmp("ja", ch) && strcasecmp("nej", ch));
 		if (strcasecmp("nej", ch) == 0) {
 			printf("Nehepp.\n");

@@ -58,7 +58,27 @@ next_action(int nr)
 	if (i == len) { /* No, nothing followed */
 again:		free(ts); /* Forget last text */
 		if (pole == 0) { /* Nothing to do at all */
-			prompt = PROMPT_NEXT_TEXT;
+			struct rk_unreadconfval *conf;
+			struct rk_conference *rkc;
+			struct rk_membership *m;
+			int hln, mr;
+
+			rkc = rk_confinfo(curconf);
+			hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
+			m = rk_membership(myuid, curconf);
+			mr = m->rm_last_text_read;
+			free(rkc);
+			free(m);
+			if (hln - mr > 0) {
+				prompt = PROMPT_NEXT_TEXT;
+				return;
+			}
+			conf = rk_unreadconf(myuid);
+			if (conf->ru_confs.ru_confs_len)
+				prompt = PROMPT_NEXT_CONF;
+			else
+				prompt = PROMPT_SEE_TIME;
+			free(conf);
 			return;
 		}
 		ts = rk_textstat(pole->textnr);
@@ -237,6 +257,7 @@ next_resee(char *str)
 		return;
 	}
 	show_text(num);
+	lasttext = num;
 }
 
 
