@@ -59,6 +59,7 @@ rprintf(char const *fmt, ...)
 				printf("\r");
 				return;
 			}
+			printf("\r             \r");
 		}
 		c = d;
 	}
