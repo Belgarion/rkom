@@ -1,10 +1,11 @@
-#	$Id: Makefile,v 1.6 2001/11/18 18:05:30 ragge Exp $
+#	$Id: Makefile,v 1.7 2001/11/18 18:23:32 ragge Exp $
 #
 all:
-	@if [ `uname` = NetBSD ]; then \
-		echo "Using NetBSD" ; \
+	@if [ `uname` = NetBSD -o `uname` = FreeBSD ]; then \
+		echo "Using *BSD" ; \
 		make -f Makefile.bsd ; \
 	elif [ `uname` = SunOS -a `uname -r` = 5.8 ]; then \
+		echo "Using Solaris" ; \
 		make -f Makefile.solaris ; \
 	fi
 

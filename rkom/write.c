@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.35 2001/11/18 18:05:31 ragge Exp $	*/
+/*	$Id: write.c,v 1.36 2001/11/18 18:23:33 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -264,11 +264,7 @@ input_string(char *m)
 	int len;
 
 	msg = m;
-#if defined(__FreeBSD__)
-	el = el_init("rkom", stdin, stdout);
-#else
 	el = el_init("rkom", stdin, stdout, stderr);
-#endif
 	el_set(el, EL_EDITOR, "emacs");
 	el_set(el, EL_PROMPT, prompt_fun);
 	get = el_gets(el, &len);

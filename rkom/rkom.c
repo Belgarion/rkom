@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.32 2001/11/18 18:05:30 ragge Exp $ */
+/* $Id: rkom.c,v 1.33 2001/11/18 18:23:33 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -139,12 +139,8 @@ main(int argc, char *argv[])
 
 	setup_tty(1);
 	hist = history_init();
-#if !defined(__FreeBSD__)
 	history(hist, &ev, H_SETSIZE, 200);
 	el = el_init("rkom", stdin, stdout, stderr);
-#else
-	el = el_init("rkom", stdin, stdout);
-#endif
 	el_set(el, EL_EDITOR, "emacs");	/* emacs binding */
 	el_set(el, EL_PROMPT, prompt_fun);
 	el_set(el, EL_HIST, history, hist);

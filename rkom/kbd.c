@@ -31,11 +31,7 @@ getstr(char *m)
 	int len;  
 	
 	msg = m;
-#if !defined(__FreeBSD__)
 	el = el_init("rkom", stdin, stdout, stderr);
-#else
-	el = el_init("rkom", stdin, stdout);
-#endif
 	el_set(el, EL_EDITOR, "emacs");
 	el_set(el, EL_PROMPT, prompt_fun);
 	tc = el_gets(el, &len);
