@@ -266,7 +266,7 @@ show_savetext(char *str)
 		rprintf("Du måste ange filnamn att spara till.\n");
 		return;
 	}
-	fd = open(str, O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR);
+	fd = open(str, O_WRONLY|O_CREAT|O_APPEND, S_IRUSR|S_IWUSR);
 	if (fd < 0) {
 		rprintf("Det sket sej att skapa filen: %s\n", strerror(errno));
 		return;
