@@ -46,8 +46,6 @@ int fflush(void *);
 int fprintf(void *, ...);
 long strtol(char *, char **, int);
 int fputc(char, void *);
-int tolower(int);
-int toupper(int);
 int fputs(const char *, void *);
 int getopt(int, char **, char *);
 extern char *optarg;

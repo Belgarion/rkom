@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.16 2001/11/24 12:33:24 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.17 2001/11/25 16:17:11 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -41,6 +41,7 @@ rk_connect_server(char *server, char *frontend, char *os_username, char *fevers)
 
 	rs = malloc(sizeof(struct rk_server));
 	rs->rs_retval = -1;
+	rs->rs_servtype = rs->rs_version = "";
 
 	/* Locate our KOM server */
 	if ((hp = gethostbyname(server)) == NULL)

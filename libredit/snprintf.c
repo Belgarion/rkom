@@ -1,4 +1,4 @@
-/*	$Id: snprintf.c,v 1.4 2001/11/23 22:24:32 ragge Exp $	*/
+/*	$Id: snprintf.c,v 1.5 2001/11/25 16:17:11 ragge Exp $	*/
 
 /*
  * Copyright Patrick Powell 1995
@@ -63,6 +63,7 @@
 #include <stdarg.h>
 
 #include "rkomsupport.h"
+#include "rtype.h"
 
 #ifndef MAX
 #define	MAX(a,b)	(((a)>(b))?(a):(b))
