@@ -50,6 +50,9 @@ int ismember(int conf);
 /* rprintf.c */
 void	rprintf(char const *fmt, ...);
 
+/* parse.c */
+void	chrconvert(char *str);
+
 extern	int myuid;
 extern	int curconf;
 extern	char *prompt, *p_see_time, *p_next_conf, *p_next_text;

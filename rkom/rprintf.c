@@ -48,7 +48,7 @@ vasprintf(char **ret, const char *format, va_list ap)
 #endif
 
 static void
-chrconvert(char *str)
+to_swascii(char *str)
 {
         int len = strlen(str);
         int i, j;
@@ -78,7 +78,7 @@ rprintf(char const *fmt, ...)
 	while ((d = index(c, '\n'))) {
 		*d++ = 0;
 		if (swascii)
-			chrconvert(c);
+			to_swascii(c);
 		printf("%s\n", c);
 		outlines += (strlen(c)/wcols);
 		if (outlines++ >= (wrows - 1)) {
@@ -98,7 +98,7 @@ rprintf(char const *fmt, ...)
 	}
 	if (strlen(c)) {
 		if (swascii)
-			chrconvert(c);
+			to_swascii(c);
 		printf("%s", c);
 	}
 	free(utstr);
