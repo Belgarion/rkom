@@ -414,7 +414,7 @@ rk_is_read_server(u_int32_t nr)
 {
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mi;
-	int i, len, conf;
+	int i, len, conf = 0;
 
 	ts = rk_textstat_server(nr);
 	if (ts->rt_retval)
@@ -430,7 +430,10 @@ rk_is_read_server(u_int32_t nr)
 			break;
 	}
 	free(ts);
-	return is_read(conf, mi[i].rmi_numeric, myuid);
+	if (conf)
+		return is_read(conf, mi[i].rmi_numeric, myuid);
+	else
+		return 0;
 }
 
 u_int32_t
@@ -644,14 +647,14 @@ rk_memberconf_server(u_int32_t uid)
 {
 	struct rk_memberconflist *mcl;
 	struct person_store *ps;
-	struct rk_person **person;
+	struct rk_person *person;
 	int i;
 	char buf[50];
 
 	mcl = calloc(sizeof(*mcl), 1);
 	ps = findperson(uid);
 	if (ps == 0) {
-		if (get_pers_stat(uid, person)) {
+		if (get_pers_stat(uid, &person)) {
 			mcl->rm_retval = -1;
 			return mcl;
 		}

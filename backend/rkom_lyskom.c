@@ -100,7 +100,7 @@ rkom_loop()
 					level--;
 					return err;
 				} else {
-					struct callback *nc, *cc = cpole;
+					struct callback *nc = 0, *cc = cpole;
 					while (cc) {
 						if (cc->msgid == i) {
 							(*cc->func)
