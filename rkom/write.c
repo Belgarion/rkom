@@ -10,6 +10,7 @@
 #include <paths.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <histedit.h>
 
 #include "rkom_proto.h"
 
@@ -19,7 +20,7 @@
 #include "next.h"
 
 static char *get_text(char *);
-static char *input_string(void);
+static char *input_string(char *);
 static void parse_text(char *);
 static int extedit(char *);
 static char *show_format(void);
@@ -215,41 +216,50 @@ get_text(char *sub)
 {
 	char *str, *base;
 
-	if (sub == 0)
-		base = calloc(10, 1);
-	else
-		base = strdup(sub);
-	rprintf("\nÄrende: ");
-	if (sub)
-		rprintf("%s\n", base);
-	fflush(stdout);
+	rprintf("\n");
+	base = input_string("Ärende: ");
 
 	for (;;) {
-		str = input_string();
+		str = input_string("");
+		if (str == NULL)
+			return base;
 		base = realloc(base, strlen(base) + strlen(str) + 1);
 		strcat(base, str);
-		if (strlen(str) == 0 || str[strlen(str) - 1] != '\n') {
-			free(str);
-			return base;
-		}
 		free(str);
 	}
 }
 
-char *
-input_string()
+static char *msg;
+
+static char *
+prompt_fun(EditLine *el)
 {
-        int i = 0, len;
-        char *buf = 0;
+	return msg;
+}
 
-        do {
-                i++;
-                buf = realloc(buf, 80 * i);
-                len = read(0, &buf[80 * (i - 1)], 80);
-        } while (len == 80);
-        buf[80 * (i - 1) + len] = 0;
+char *
+input_string(char *m)
+{
+	EditLine *el;
+	const char *get;
+	char *ret;
+	int len;
 
-        return buf;
+	msg = m;
+#if defined(__FreeBSD__)
+	el = el_init("rkom", stdin, stdout);
+#else
+	el = el_init("rkom", stdin, stdout, stderr);
+#endif
+	el_set(el, EL_EDITOR, "emacs");
+	el_set(el, EL_PROMPT, prompt_fun);
+	get = el_gets(el, &len);
+	if (get)
+		ret = strdup(get);
+	else
+		ret = NULL;
+	el_end(el);
+	return ret;
 }
 
 void
