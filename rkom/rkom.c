@@ -1,4 +1,4 @@
-
+/* $Id: rkom.c,v 1.13 2000/11/05 16:26:19 jens Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -11,6 +11,9 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <termios.h>
+#include <histedit.h>
+#include <termcap.h>
 #include <errno.h>
 #include <err.h>
 #include <unistd.h>
@@ -22,13 +25,22 @@
 #include "rkom.h"
 #include "next.h"
 #include "set.h"
+#include "parse.h"
+
+#define MAX_LINE	1024
 
 int	main(int, char **);
+
 
 static int lasttime;
 static void sigio(int);
 static void sigwinch(int);
 static int async_collect(void);
+
+static void setup_tty(int);
+static void restore_tty(void);
+
+static struct termios old_termios;
 
 char *p_next_conf = "(Gå till) nästa möte";
 char *p_next_text = "(Läsa) nästa inlägg";
@@ -37,13 +49,31 @@ char *p_next_comment = "(Läsa) nästa kommentar";
 char *prompt;
 int wrows;
 
+static char *
+prompt_fun(EditLine *el)
+{
+	static char		buf[MAX_LINE];
+
+	snprintf(buf, sizeof(buf), "%s - ", prompt);
+	return buf;
+}
+
 int
 main(int argc, char *argv[])
 {
-	struct pollfd pfd[1];
-	struct timeval tp;
-	int ch, noprompt;
-	char *server, *uname, *confile;
+	HistEvent		ev;
+	History			*hist;
+	EditLine		*el = NULL;
+	const LineInfo	*lf;
+	const char		*str;
+	char			buf[MAX_LINE];
+	size_t			len;
+	int				num;
+	int				nullar = 0;
+	struct pollfd	pfd[1];
+	struct timeval	tp;
+	int				ch, noprompt;
+	char			*server, *uname, *confile;
 
 	confile = 0;
 	prompt = p_see_time;
@@ -84,6 +114,17 @@ main(int argc, char *argv[])
 	pfd[0].events = POLLIN|POLLPRI;
 	noprompt = 0;
 
+
+	setup_tty(1);
+	hist = history_init();
+	history(hist, &ev, H_SETSIZE, 200);
+	el = el_init("rkom", stdin, stdout, stderr);
+	el_set(el, EL_EDITOR, "emacs");	/* emacs binding */
+	el_set(el, EL_PROMPT, prompt_fun);
+	el_set(el, EL_HIST, history, hist);
+	el_set(el, EL_TERMINAL, "vt100");
+
+
 	for (;;) {
 		int rv;
 
@@ -93,6 +134,7 @@ main(int argc, char *argv[])
 			printf("\n%s - ", prompt);
 		fflush(stdout);
 
+		setup_tty(0);
 		rv = poll(pfd, 1, INFTIM);
 		if (rv == 0)
 			continue;
@@ -103,7 +145,30 @@ main(int argc, char *argv[])
 			continue;
 		}
 		if (pfd[0].revents & (POLLIN|POLLPRI)) {
-			kbd_input(pfd[0].fd);
+			/*
+			 * Go to the beginning of the line to allow libedit to start
+			 * from column 0 and overwrite the current prompt.
+			 */
+			printf("%c", '\r');	
+			if (el_gets(el, &num) == NULL) {
+				if (nullar > 20)
+					exit(0);
+				nullar++;
+				continue;
+			}
+			nullar = 0;
+			lf = el_line(el);
+			strlcpy(buf, lf->buffer, MAX_LINE);
+			len = strlen(buf);
+			if (len > 0 && buf[len - 1] == '\n') {
+				buf[len - 1] = '\0';
+				len--;
+			}
+			str = buf;
+			exec_cmd(str);
+			if (len > 1)
+				history(hist, &ev, H_ENTER, buf);
+
 			gettimeofday(&tp, 0);
 			if (tp.tv_sec - lasttime > 30) {
 				rk_alive(0);
@@ -204,3 +269,31 @@ printf("----------------------------------------------------------------\n");
 		free(ra);
 	}
 }
+
+static void
+setup_tty(int save_old)
+{
+	struct termios t;
+
+	if (tcgetattr(0, &t) < 0)
+		err(1, "tcgetattr");
+
+	if (save_old) {
+		old_termios = t;
+		atexit(restore_tty);
+	}
+
+	t.c_lflag &= ~(ECHO | ICANON);
+	t.c_cc[VMIN] = 1;	/* 1 byte at a time, no timer */
+	t.c_cc[VTIME] = 0;
+
+	if (tcsetattr(0, TCSAFLUSH, &t) < 0)
+		err(1, "tcsetattr");
+}
+
+static void
+restore_tty(void)
+{
+	tcsetattr(0, TCSAFLUSH, &old_termios);
+}
+

@@ -14,18 +14,19 @@
 #include "write.h"
 #include "set.h"
 
-static void cmd_logout(char *);
-static void cmd_login(char *);
-static void cmd_tiden(char *);
-static void cmd_vilka(char *);
-static void cmd_sluta(char *);
-static void cmd_send(char *);
-static void cmd_say(char *);
-static void cmd_where(char *);
-static void cmd_goto(char *);
-static void cmd_only(char *);
-static void cmd_leave(char *);
+void cmd_logout(char *);
+void cmd_login(char *);
+void cmd_tiden(char *);
+void cmd_vilka(char *);
+void cmd_sluta(char *);
+void cmd_send(char *);
+void cmd_say(char *);
+void cmd_where(char *);
+void cmd_goto(char *);
+void cmd_only(char *);
+void cmd_leave(char *);
 
+#if 0
 struct cmnd cmds[] = {
 	{"avmarkera", 0, list_unmark },
 	{"brev", 0, write_brev },
@@ -68,8 +69,11 @@ struct cmnd cmds[] = {
 };
 static int ncmds = sizeof(cmds)/sizeof(cmds[0]);
 
+#endif
+
 int myuid = 0, curconf = 0;
 
+#if 0
 /*
  * Parse the command.
  */
@@ -153,6 +157,8 @@ cmd_parse(str)
 			printf("%s %s\n", cmds[i].arg1, cmds[i].arg2);
 	printf("\n");
 };
+
+#endif
 
 static char *dindx[] = {"sön", "mån", "tis", "ons", "tors", "fre", "lör"};
 static char *mindx[] = {"januari", "februari", "mars", "april", "maj", "juni",
@@ -368,7 +374,7 @@ cmd_sluta(char *str)
 	exit(0);
 }
 
-static void 
+void 
 cmd_send(char *str)
 {
 	char *buf;

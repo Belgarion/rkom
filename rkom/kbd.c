@@ -8,6 +8,7 @@
 
 #include "rkom.h"
 
+#if 0
 /*
  * Reads input from keyboard, and tries to understand it.
  */
@@ -63,6 +64,7 @@ kbd_input(fd)
 	cmd_parse(dst);
 	return 0;
 }
+#endif
 
 char *
 get_input_string(int fd, int brk)
