@@ -62,7 +62,7 @@ show_text(int nr)
 	struct rk_conference *conf;
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mi;
-	int i, len, p;
+	int i, len, p, first;
 	char *c, *cc, *namn, buf[100];
 
 	ts = rk_textstat(nr);
@@ -170,6 +170,16 @@ show_text(int nr)
 		rprintf("%s\n", buf);
 	free(c);
 	free(namn);
+	/* Check for "Anmärkningar" */
+	for (first = i = 0; i < ts->rt_aux_item.rt_aux_item_len; i++) {
+		if (ts->rt_aux_item.rt_aux_item_val[i].rai_tag ==
+		    RAI_TAG_FAST_REPLY) {
+			if (first++ == 0)
+				rprintf("Anmärkningar av författaren:\n");
+			rprintf("  \"%s\"\n", 
+			    ts->rt_aux_item.rt_aux_item_val[i].rai_data);
+		}
+	}
 	if (p)
 		printcmnt(mi, len, p);
 

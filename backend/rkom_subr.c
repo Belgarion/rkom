@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.12 2001/03/31 10:21:02 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.13 2001/04/24 08:51:35 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -21,7 +21,7 @@
 #include "backend.h"
 
 int sockfd, readfd, writefd, asyncfd, fepid;
-static char *version = "ett.ett.release";
+static char *version = "ett.två.beta";
 static int childpid;
 /*
  * First connect to the server, then fork away the backend after informing
