@@ -79,8 +79,9 @@ next_action(int nr)
 			free(ts2);
 			if (r)
 				continue;
-			else
-				break;
+			if (rk_is_read(mi[i].rmi_numeric))
+				continue;
+			break;
 		}
 
 	if (i == len) { /* No, nothing followed */
@@ -104,8 +105,9 @@ again:		free(ts); /* Forget last text */
 				free(ts2);
 				if (r)
 					continue;
-				else
-					break;  
+				if (rk_is_read(mi[i].rmi_numeric))
+					continue;
+				break;  
 			}
 		if (i == len) { /* last text at this leaf, iterate */
 			struct keeptrack *old;
@@ -233,7 +235,7 @@ back:		printf("Det finns ingen nästa kommentar.\n");
 	ts = rk_textstat(pole->textnr);
 	len = ts->rt_misc_info.rt_misc_info_len;
 	mi = ts->rt_misc_info.rt_misc_info_val;
-	for (i = pole->listidx; i < len; i++)
+try:	for (i = pole->listidx; i < len; i++)
 		if (mi[i].rmi_type == footn_in ||
 		    mi[i].rmi_type == comm_in)
 			break;
@@ -241,6 +243,8 @@ back:		printf("Det finns ingen nästa kommentar.\n");
 		free(ts);
 		goto back;
 	}
+	if (rk_is_read(mi[i].rmi_numeric))
+		goto try;
 	global = mi[i].rmi_numeric;
 	free(ts);
 	show_text(global);

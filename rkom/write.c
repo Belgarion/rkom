@@ -100,12 +100,15 @@ parse_text(char *txt)
 void
 write_put(char *str)
 {
+	struct rk_text_stat *ts;
 	struct rk_text_info *rti;
 	struct rk_text_retval *rtr;
+	struct rk_misc_info *imi;
+	int cnt, i, conf;
 
 	TW;
 
-	rti = alloca(sizeof(struct rk_text_info));
+	rti = malloc(sizeof(struct rk_text_info));
 	rti->rti_misc.rti_misc_len = nmi;
 	rti->rti_misc.rti_misc_val = mi;
 	rti->rti_text = ctext;
@@ -114,9 +117,23 @@ write_put(char *str)
 		printf("write_new: %s\n", error(rtr->rtr_status));
 	else
 		printf("Text %d har skapats.\n", rtr->rtr_textnr);
+	if (isneq("created-texts-are-read", "0") && (rtr->rtr_status == 0)) {
+		ts = rk_textstat(rtr->rtr_textnr);
+		imi = ts->rt_misc_info.rt_misc_info_val;
+		cnt = ts->rt_misc_info.rt_misc_info_len;
+		for (i = 0; i < cnt; i++) {
+			if (imi[i].rmi_type == recpt ||
+			    imi[i].rmi_type == cc_recpt ||
+			    imi[i].rmi_type == bcc_recpt)
+				conf = imi[i].rmi_numeric;
+			if (imi[i].rmi_type == loc_no)
+				rk_mark_read(conf, imi[i].rmi_numeric);
+		}
+	}
 	free(ctext);
 	free(mi);
 	free(rtr);
+	free(rti);
 	nmi = 0;
 	is_writing = 0;
 	ctext = 0;
