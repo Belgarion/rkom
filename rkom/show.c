@@ -8,7 +8,7 @@
 #include "rkom_proto.h"
 #include "exported.h"
 #include "rkom.h"
-//#include "conf.h"
+#include "set.h"
 //#include "read.h"
 
 static char *
@@ -92,7 +92,8 @@ show_text(int nr)
 	cc = c;
 	while (*cc && (*cc != '\n'))
 		printf("%c", *cc++);
-printf("\n------------------------------------------------------------");
+	if (isneq("dashed-lines", "0"))
+		printf("\n------------------------------------------------------------");
 	if (*cc) {
 		printf("%s", cc);
 		if (cc[strlen(cc) - 1] != '\n')
@@ -100,8 +101,10 @@ printf("\n------------------------------------------------------------");
 	} else
 		printf("\n");
 	sprintf(buf, "(%d)", nr);
-	printf("%s%s", buf,
-&"------------------------------------------------------------\n"[strlen(buf)]);
+	if (isneq("dashed-lines", "0"))
+		printf("%s%s", buf, &"------------------------------------------------------------\n"[strlen(buf)]);
+	else
+		printf("\n");
 	free(c);
 
 	for (i = 0; i < len; i++) {

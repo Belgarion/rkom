@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <err.h>
 
+#include "rkom_proto.h"
+#include "exported.h"
+
 #include "set.h"
 
 
@@ -86,4 +89,50 @@ parsefile(char *fname)
 			printf("%s: bad line %d\n", fname, line);
 	}
 	fclose(fd);
+}
+
+static struct rk_val *rkv;
+static int rkn;
+
+void
+readvars()
+{
+	struct rk_uarea *ru;
+
+	ru = rk_get_uarea("common");
+	if (ru->ru_retval || (ru->ru_val.ru_val_len == 0))
+		return;
+
+	rkn = ru->ru_val.ru_val_len;
+	rkv = calloc(sizeof(*rkv), rkn);
+	bcopy(ru->ru_val.ru_val_val, rkv, sizeof(*rkv) * rkn);
+	free(ru);
+}
+
+int
+iseql(char *var, char *val)
+{
+	int i;
+
+	if (rkv == 0)
+		return 0;
+	for (i = 0; i < rkn; i++)
+		if ((strcmp(rkv->rv_var, var) == 0) &&
+		    (strcmp(rkv->rv_val, val) == 0))
+			return 1;
+	return 0;
+}
+
+int
+isneq(char *var, char *val)
+{
+	int i;
+
+	if (rkv == 0)
+		return 1;
+	for (i = 0; i < rkn; i++)
+		if ((strcmp(rkv->rv_var, var) == 0) &&
+		    (strcmp(rkv->rv_val, val) == 0))
+			return 0;
+	return 1;
 }

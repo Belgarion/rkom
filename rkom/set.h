@@ -13,3 +13,6 @@ extern int use_editor;	/* Always use the editor $EDITOR */
 extern int no_user_active; /* No "I'm alive"-messages to the server. */
 
 void parsefile(char *);	/* Reads and parses config file */
+void readvars(void);
+int iseql(char *var, char *val);
+int isneq(char *var, char *val);
