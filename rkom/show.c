@@ -94,6 +94,9 @@ show_text(int nr)
 			rprintf("\n");
 			rprintf("Mottagare: %s", vem(mi[i].rmi_numeric));
 			break;
+		case loc_no:
+			rprintf(" <%d>", mi[i].rmi_numeric);
+			break;
 
 		case cc_recpt:
 			rprintf("\n");
