@@ -106,6 +106,7 @@ static struct rk_val rkomvars[] = {
 	{ "use-editor", "0" },
 	{ "show-writer-after-text", "1" },
 	{ "idle-hide-in-who-list", "30" },
+	{ "kom-mercial", "Kör raggeklienten!" },
 };
 static int nrkomvars = sizeof(rkomvars)/sizeof(rkomvars[0]);
 
@@ -234,6 +235,11 @@ set_setflag(char *name, char *val)
 		rkomvars[nc].rv_val = strdup(val);
 		rmod++;
 	}
+/* HACK! some variables need interaction with the server when changed */
+	if (bcmp(name, "kom-mercial", strlen(name)) == 0)
+		if (rk_whatido(val))
+			rprintf("Byta kom-mercial sket sej.\n");
+/* END HACK */
 }
 
 void

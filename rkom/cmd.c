@@ -209,7 +209,7 @@ cmd_login(char *str)
 	/*
 	 * Set some informative text.
 	 */
-	if (rk_whatido("Kör raggeklienten (nu med login!)"))
+	if (rk_whatido(getval("kom-mercial")))
 		rprintf("Set what-i-am-doing sket sej\n");
 
 	/* Show where we have unread texts. */

@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.21 2001/01/14 13:32:26 ragge Exp $ */
+/* $Id: parse.c,v 1.22 2001/01/14 14:19:36 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -726,9 +726,9 @@ exec_alias_list(int argc, char *argv[])
 static int
 exec_other_set(int argc, char *argv[])
 {
-//	LF;
-	TT(argc != 2, "Handhavande:\nsätt <flaggnamn> <värde>\n");
-	set_setflag(argv[0], argv[1]);
+	LF;
+	TT(argc < 2, "Handhavande:\nsätt <flaggnamn> <värde>\n");
+	set_setflag(argv[0], re_concat(argc-1, &argv[1]));
 	return 0;
 }
 
