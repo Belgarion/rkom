@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.36 2001/12/01 14:43:08 ragge Exp $ */
+/* $Id: parse.c,v 1.37 2002/05/18 21:30:36 offe Exp $ */
 
 #include <sys/param.h>
 
@@ -62,6 +62,8 @@ DCMD(write_footnote);
 DCMD(write_footnote_no);
 DCMD(write_letter);
 DCMD(write_private);
+DCMD(write_fastcmt);
+DCMD(write_fastcmt_no);
 
 /* Commands for conferences */
 DCMD(conf_add_member);
@@ -169,6 +171,8 @@ DROW("fotnot",					0,PE_NUM_ARG,write_footnote_no)
 DROW("fotnot",					1,PE_NO_ARG,write_footnote)
 DROW("brev",					0,PE_STR_ARG,write_letter)
 DROW("personligt",				0,PE_STR_ARG,write_private)
+DROW("snabbkommentar",				0,PE_NUM_ARG,write_fastcmt_no)
+DROW("snabbkommentar",				1,PE_NO_ARG,write_fastcmt)
 
 /* Commands for conferences */
 DROW("addera medlem",				0,PE_NO_ARG,conf_add_member)
@@ -490,6 +494,24 @@ exec_write_cmt_no(int argc, char *argv[])
 	LF;
 	NWA;
 	write_cmnt_no(atoi(argv[0]));
+	return 0;
+}
+
+static int
+exec_write_fastcmt(int argc, char *argv[])
+{
+	LF;
+	NWA;
+	write_fastcmnt();
+	return 0;
+}
+
+static int
+exec_write_fastcmt_no(int argc, char *argv[])
+{
+	LF;
+	NWA;
+	write_fastcmnt_no(atoi(argv[0]));
 	return 0;
 }
 

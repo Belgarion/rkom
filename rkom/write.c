@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.43 2002/02/17 21:07:12 ragge Exp $	*/
+/*	$Id: write.c,v 1.44 2002/05/18 21:30:36 offe Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -524,6 +524,45 @@ write_cmnt()
 	}
 	rprintf("Kommentera (inlägg %d)\n", lasttext);
 	write_internal(lasttext, comm_to);
+}
+
+void
+write_fastcmnt_no(nr)
+{
+	char *buf;
+	struct rk_aux_item_input *rtii;
+	int retval;
+
+	rprintf("Snabbkommentera (inlägg %d)\n", nr);
+	buf = getstr("Kommentarstext: ");
+	if(strlen(buf)) {
+	} else {
+		rprintf("Nehepp.");
+	}
+
+	rtii = alloca(sizeof(*rtii));
+	rtii->raii_tag = RAI_TAG_FAST_REPLY;
+	rtii->inherit_limit = 1;
+	rtii->raii_data = buf;
+
+	retval = rk_add_text_info(nr, rtii);
+
+	if(retval) {
+		rprintf("Kunde inte addera kommentaren till texten: %s\n",
+		    error(retval));
+	}
+
+	free(buf); free(rtii);
+}
+
+void
+write_fastcmnt()
+{
+	if (lasttext == 0) {
+		rprintf("Du har inte läst något inlägg.\n");
+		return;
+	}
+	write_fastcmnt_no(lasttext);
 }
 
 void

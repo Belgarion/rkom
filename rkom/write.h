@@ -17,5 +17,7 @@ void	write_private(int);
 void	write_change_presentation(char *);
 void	write_set_motd(char *str);
 void	write_remove_motd(char *str);
+void	write_fastcmnt(void);
+void	write_fastcmnt_no(int);
 
 int	is_writing; /* Is writing text right now */
