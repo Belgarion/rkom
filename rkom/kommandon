@@ -1,6 +1,5 @@
 "Lista kommandon
 Ord inom parantes ska inte skrivas.
-Kommandon med en '*' framför är inte implementerade ännu.
 
   Kommandon för läsning:
     (Läsa) nästa inlägg
@@ -14,6 +13,7 @@ Kommandon med en '*' framför är inte implementerade ännu.
     (Skriva eget) inlägg
     Kommentera (inlägget)
     Kommentera föregående (inlägg)
+    Fotnot (till inlägg)
 
   Kommandon för möten:
     Var (är jag)
@@ -35,8 +35,8 @@ Kommandon med en '*' framför är inte implementerade ännu.
 
   Kommandon för onlinekommunikation:
     Vilka (är inloggade)
-*   Sänd (alarmmeddelande till alla)
-*   Säg (något till)
+    Sänd (alarmmeddelande till alla)
+    Säg (något till)
 
   Kommandon för information:
     Lista kommandon

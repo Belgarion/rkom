@@ -26,6 +26,7 @@ static void cmd_only(char *);
 struct cmnd cmds[] = {
 	{"avmarkera", 0, list_unmark },
 	{"endast", 0, cmd_only },
+	{"fotnot", 0, write_footnote },
 	{"gå", 0, cmd_goto },
 	{"glöm", 0, write_forget },
 	{"hela", 0, write_whole },

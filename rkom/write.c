@@ -346,8 +346,8 @@ extedit(char *sub)
 	free(txt);
 }
 
-void
-write_cmnt(char *str)
+static void
+write_internal(char *str, char *typ, int ktyp)
 {
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mf;
@@ -365,7 +365,7 @@ write_cmnt(char *str)
 
 	if (str == 0) {
 		text = lasttext;
-		printf("Kommentera (inlägget) (%d)\n", text);
+		printf("%s %d)\n", typ, text);
 	} else if (bcmp(str, "föregående", strlen(str)) == 0) {
 		struct rk_text_stat *ts;
 		struct rk_misc_info *mi;
@@ -389,9 +389,10 @@ write_cmnt(char *str)
 		printf("'%s' är ett jättedåligt textnummer.\n", str);
 		return;
 	} else
-		printf("Kommentera (inlägg %d)\n", text);
+		printf("%s inlägg %d)\n", typ, text);
 	ts = rk_textstat(text);
 	if (ts->rt_retval) {
+		printf("Text %d är inte läsbart, tyvärr...\n", text);
 		free(ts);
 		return;
 	}
@@ -406,7 +407,7 @@ write_cmnt(char *str)
 			mi[nmi].rmi_numeric = mf[i].rmi_numeric;
 			nmi++;
 		}
-	mi[nmi].rmi_type = comm_to;
+	mi[nmi].rmi_type = ktyp;
 	mi[nmi].rmi_numeric = text;
 	nmi++;
 
@@ -425,4 +426,17 @@ write_cmnt(char *str)
 		free(txt);
 	}
 	free(s);
+}
+
+
+void
+write_cmnt(char *str)
+{
+	write_internal(str, "Kommentera (", comm_to);
+}
+
+void
+write_footnote(char *str)
+{
+	write_internal(str, "Fotnot (till ", footn_to);
 }
