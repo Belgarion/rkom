@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.3 2000/11/19 11:10:49 ragge Exp $ */
+/* $Id: parse.c,v 1.4 2000/11/19 15:49:04 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -31,7 +31,7 @@ void cmd_leave(char *);
 #include "parse.h"
 
 #if defined(__STDC__) || defined(__cplusplus)
-#	define CC_2(a,b)        a ## b
+#	define CC_2(a,b)	a ## b
 #else
 #	define CC_2(a,b) a/**/b
 #endif
@@ -77,6 +77,8 @@ DCMD(text_mark);
 DCMD(text_unmark);
 DCMD(text_list_marked);
 DCMD(text_save);
+DCMD(text_list_subject);
+DCMD(text_list_unread);
 
 /* Commands for online communication */
 DCMD(com_who);
@@ -148,6 +150,8 @@ DROW("avmarkera",				0,PE_NUM_ARG,text_unmark)
 DROW("lista markerade",			0,PE_NO_ARG,text_list_marked)
 DROW("spara",					0,PE_STR_ARG,text_save)
 DROW("spara flaggor",				0,PE_NO_ARG,info_saveflags)
+DROW("lista ärenden",			0,PE_NO_ARG,text_list_subject)
+DROW("lista olästa",			0,PE_NO_ARG,text_list_unread)
 
 /* Commands for online communication */
 DROW("vilka",					0,PE_NO_ARG,com_who)
@@ -221,12 +225,12 @@ exec_cmd(const char *str)
 }
 
 /* Helpers */
-#define	XXTEST(name, test, text) \
+#define XXTEST(name, test, text) \
 static int name(void) {if(test)printf(text);else return 0;return 1;}
 #define TT(cmp, str) if (cmp) {printf(str);return 0;}
 
 XXTEST(nwa, is_writing, "Du håller redan på att skriva en text.\n")
-#define	NWA if (nwa()) return 0
+#define NWA if (nwa()) return 0
 XXTEST(owa, is_writing == 0, "Du skriver ingen text just nu.\n")
 #define OWA if (owa()) return 0
 XXTEST(lf, myuid == 0, "Du måste logga in först.\n")
@@ -523,6 +527,24 @@ exec_text_unmark(int argc, char *argv[])
 }
 
 static int
+exec_text_list_subject(int argc, char *argv[])
+{
+	LF;
+	MHC;
+	list_subject();
+	return 0;
+}
+
+static int
+exec_text_list_unread(int argc, char *argv[])
+{
+	LF;
+	MHC;
+	list_unread();
+	return 0;
+}
+
+static int
 exec_text_list_marked(int argc, char *argv[])
 {
 	LF;
@@ -597,7 +619,7 @@ exec_info_list_commands(int argc, char *argv[])
 static int
 exec_info_saveflags(int argc, char *argv[])
 {
-//	LF;
+	LF;
 	set_saveflags();
 	return 0;
 }
@@ -605,7 +627,7 @@ exec_info_saveflags(int argc, char *argv[])
 static int
 exec_info_flags(int argc, char *argv[])
 {
-//	LF;
+	LF;
 	set_flags();
 	return 0;
 }

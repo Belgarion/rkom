@@ -186,17 +186,13 @@ list_unmark(char *str)
 }
 
 void
-list_subject(char *str)  
+list_subject()
 {
 	struct rk_conference *conf;
 	struct rk_text_stat *ts;
 	int high, low, i, nr, rows;
 	char *gubbe, *text, *c;
 
-	if (curconf == 0) {
-		printf("Du befinner dej inte i något möte.\n");
-		return;
-	}
 	conf = rk_confinfo(curconf);
 	if (conf->rc_retval) {
 		printf("rk_confinfo sket sej: %s\n", error(conf->rc_retval));
@@ -239,4 +235,9 @@ list_subject(char *str)
 			rows = 0;
 		}
 	}
+}
+
+void
+list_unread()
+{
 }
