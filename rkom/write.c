@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.41 2001/11/25 20:30:27 jens Exp $	*/
+/*	$Id: write.c,v 1.42 2001/12/21 23:14:36 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -35,11 +35,6 @@ static void wfotnot(char *str);
 static struct rk_misc_info *mi;
 static int nmi = 0, ispres = 0, islapp = 0;
 static char *ctext = 0;
-
-#define	TW if (!is_writing) {rprintf("Du skriver ingen text just nu.\n");return;}
-#define IW if (is_writing) {rprintf("Du håller redan på att skriva en text.\n");return;}
-#define	LF if (myuid == 0) {rprintf("Du måste logga in först.\n");return;}
-#define	NC if (curconf == 0) {rprintf("Du måste gå till ett möte först.\n");return;}
 
 static char *input_string(char *);
 
@@ -118,10 +113,6 @@ write_private(int textno)
 void
 write_new(char *str)
 {
-	IW;
-	LF;
-	NC;
-
 	is_writing = 1;
 	mi = calloc(sizeof(struct rk_misc_info), 1);
 	mi[0].rmi_type = recpt;
@@ -177,8 +168,6 @@ write_put(char *str)
 	struct rk_text_info *rti;
 	struct rk_text_retval *rtr;
 	struct rk_aux_item_input *rtii;
-
-	TW;
 
 	/* Remove extra '\n' after txt */
 	while (strlen(ctext) && ctext[strlen(ctext) - 1] == '\n')
@@ -298,7 +287,6 @@ write_forget(char *str)
 void
 write_editor(char *str)
 {
-	TW;
 	extedit(0);
 }
 
@@ -308,7 +296,6 @@ write_rcpt(char *str, int type)
 	struct rk_confinfo_retval *cr;
 	int conf, i;
 
-	TW;
 	cr = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF);
 	if (cr == NULL)
 		return;
@@ -329,7 +316,6 @@ wfotnot(char *str)
 	int nr = 0, i;
 	char *p;
 
-	TW;
 	p = index(str, ' ');
 	if (p)
 		nr = atoi(p);
@@ -352,7 +338,6 @@ write_comment(char *str)
 {
 	int nr, i;
 
-	TW;
 	nr = atoi(str);
 	if (nr == 0) {
 		rprintf("Det var ett hemskt dåligt inläggsnummer.\n");
@@ -372,8 +357,6 @@ void
 write_whole(char *str)  
 {
 	char *txt;
-
-	TW;
 
 	txt = show_format();
 	puts(txt);
@@ -595,7 +578,6 @@ void
 write_set_motd(char *str)
 {
         struct rk_confinfo_retval *rv;
-	char *c = NULL;
 
         if ((rv = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF)) == 0)
                 return;
@@ -603,22 +585,11 @@ write_set_motd(char *str)
 	islapp = rv->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	rprintf("(Sätt) lapp (på dörren för) %s\n",
 	    rv->rcr_ci.rcr_ci_val[0].rc_name);
+	free(rv);
 	is_writing = 1;
 	mi = calloc(sizeof(struct rk_misc_info), 2);
 	nmi = 0;
-	if (isneq("use-editor", "0")) { /* Extern editor, edit old text */
-		struct rk_conference *rc;
-
-		rc = rk_confinfo(rv->rcr_ci.rcr_ci_val[0].rc_conf_no);
-		if (rc->rc_retval == 0 && rc->rc_presentation)
-			c = rk_gettext(rc->rc_presentation);
-		free(rc);
-	}
-	if (c == NULL)
-		c = strdup(rv->rcr_ci.rcr_ci_val[0].rc_name);
-	doedit(c);
-	free(c);
-	free(rv);
+	doedit(0);
 }
 
 void
