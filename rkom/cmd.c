@@ -22,6 +22,7 @@ static void cmd_say(char *);
 static void cmd_where(char *);
 static void cmd_goto(char *);
 static void cmd_only(char *);
+static void cmd_leave(char *);
 
 struct cmnd cmds[] = {
 	{"avmarkera", 0, list_unmark },
@@ -51,6 +52,7 @@ struct cmnd cmds[] = {
 	{"säg", 0, cmd_say },
 	{"sända", 0, cmd_send },
 	{"tiden", 0, cmd_tiden },
+	{"utträda", 0, cmd_leave },
 	{"var", 0, cmd_where },
  	{"vilka", 0, cmd_vilka },
 	{"återse", 0, next_resee },
@@ -532,4 +534,38 @@ cmd_only(char *str)
 	rk_set_last_read(curconf, high - only);
 	next_resetchain();
 	next_prompt();
+}
+
+void
+cmd_leave(char *str)
+{
+	struct rk_confinfo_retval *retval;
+	int num, ret, i;
+
+	if (myuid == 0) {
+		printf("Logga in först.\n");
+		return;
+	}
+	if (str == 0) {
+		printf("Du måste ge ett möte som argument.\n");
+		return;
+	}
+	retval = rk_matchconf(str, MATCHCONF_CONF);
+	num = retval->rcr_ci.rcr_ci_len;
+	if (num == 0) {
+		printf("Det finns inget möte som matchar \"%s\".\n", str);
+		free(retval);
+		return;
+	} else if (num > 1) {
+		printf("Namnet \"%s\" är flertydigt. Du kan mena:\n", str);
+		for (i = 0; i < num; i++)
+			printf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
+		printf("\n");
+		free(retval);
+		return;
+	}
+	ret = rk_sub_member(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, myuid);
+	if (ret)
+		printf("Det sket sej: %s\n", error(ret));
+	free(retval);
 }
