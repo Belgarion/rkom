@@ -1,0 +1,4 @@
+.depend
+rkom_proto.c
+rkom_proto.h
+rkom_proto_stubs.c
