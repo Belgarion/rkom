@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.14 2003/09/17 10:51:34 ragge Exp $	*/
+/*	$Id: backend.h,v 1.15 2003/09/17 14:28:11 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -15,7 +15,7 @@ struct rk_aux_item_input;
 struct rk_modifyconfinfo;
 
 /* Lyskom protocol helper functions, in rkom_lyskom.c */
-int	send_reply(char *msg);
+int	send_reply(char *msg, ...);
 char	get_char(void);
 int	get_int(void);
 void	get_eat(char c);

@@ -13,6 +13,11 @@
 #include <errno.h>
 #include <stdio.h>
 #include <err.h>
+#ifdef __STDC__
+#include <stdarg.h>
+#else
+#include <varargs.h>
+#endif
 
 #include "rkomsupport.h"
 #include "backend.h"
@@ -165,18 +170,30 @@ rkom_loop()
 	}
 }
 
+#ifdef __STDC__
 int
-send_reply(char *msg)
+send_reply(char *msg, ...)
+#else
+int
+send_reply(msg, va_alist)
+	char *msg;
+	va_dcl
+#endif
 {
 	static int in_state;
-	char buf[12];
+	va_list ap;
 
+#ifdef __STDC__
+	va_start(ap, msg);
+#else
+	va_start(ap);
+#endif
 	if (in_state == 0) {
 		wait_for_reply_no = reqnr;
-		sprintf(buf, "%d ", reqnr++);
-		fputs(buf, sfd);
+		fprintf(sfd, "%d ", reqnr++);
 	}
-	fputs(msg, sfd);
+	vfprintf(sfd, msg, ap);
+	va_end(ap);
 	in_state = (msg[strlen(msg) - 1] != '\n');
 	return (in_state ? 0 : rkom_loop());
 }
