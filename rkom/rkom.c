@@ -152,7 +152,8 @@ printf("----------------------------------------------------------------\n");
 
 		case 15: /* New text created */
 			hej = prompt;
-			next_prompt();
+			if (prompt != PROMPT_NEXT_COMMENT)
+				next_prompt();
 			if (prompt != hej)
 				retval = 0;
 			break;

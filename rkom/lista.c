@@ -79,7 +79,7 @@ list_news(char *args)
 		for (i = 0; i < nconf; i++) {
 			struct rk_conference *rkc;
 			struct rk_membership *m;
-			int hln;
+			int hln, nr;
 
 			rkc = rk_confinfo(confs[i]);
 
@@ -99,8 +99,9 @@ list_news(char *args)
 				free(m);
 				continue;
 			}
-			printf("Du har %d olästa inlägg av %d i %s\n",
-			    hln - m->rm_last_text_read, hln, rkc->rc_name);
+			nr = hln - m->rm_last_text_read;
+			printf("Du har %d oläst%s inlägg av %d i %s\n",
+			    nr, nr == 1 ? "" : "a", hln, rkc->rc_name);
 			free(rkc);
 			free(m);
 		}
