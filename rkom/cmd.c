@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.62 2002/08/31 14:17:22 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.63 2002/09/23 13:35:06 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -417,6 +417,8 @@ cmd_only(char *str)
 	only = atoi(str);
 	conf = rk_confinfo(curconf);
 	high = conf->rc_first_local_no + conf->rc_no_of_texts - 1;
+	if (only > high)
+		only = high;
 	rk_set_last_read(curconf, high - only);
 	next_resetchain();
 	next_prompt();
