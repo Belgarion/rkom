@@ -1,7 +1,11 @@
-/* $Id: conf.c,v 1.2 2000/10/15 14:18:34 jens Exp $ */
+/* $Id: conf.c,v 1.3 2000/10/15 19:14:50 jens Exp $ */
 
 #include <sys/cdefs.h>
 #include <sys/param.h>
+#include <errno.h>
+#include <string.h>
+#include <time.h>
+
 #include <curses.h>
 
 #include "conf.h"
@@ -9,8 +13,11 @@
 
 #include <assert.h>
 
+#define CTRL(x) ((int)(0xf&(x)))
+
 static WINDOW *thrdwin, *statwin, *infowin, *textwin;
 static int thrdwin_height = 10;
+static int textwin_height;
 
 /* the article shown at the top of the thrdwin window */
 static int		top_msg = 0;
@@ -28,10 +35,11 @@ static void goto_msg_num(int);
 
 static void scroll_text(int);
 
+
 void
 conference_menu(void)
 {
-	int		key;
+	int			key;
 
 	/*
 	 * Window at the top of the screen that shows all the threads in
@@ -40,13 +48,16 @@ conference_menu(void)
 	thrdwin = newwin(thrdwin_height,0, 0,0);
 
 	/* Window that show the status of the conference shown. */
-	statwin = newwin(1,0, thrdwin_height+1,0);
+	statwin = newwin(1,0, thrdwin_height,0);
+	wattrset(statwin, A_REVERSE);
 
+	textwin_height = LINES-3-thrdwin_height;
 	/* Window in which the current text is shown in */
-	textwin = newwin(LINES-3-thrdwin_height,0, thrdwin_height+2,0);
+	textwin = newwin(textwin_height,0, thrdwin_height+1,0);
 
 	/* Window which show some info of the current text */
 	infowin = newwin(1,0, LINES-2,0);
+	wattrset(infowin, A_REVERSE);
 
 	keypad(stdscr, 1);
 
@@ -54,7 +65,13 @@ conference_menu(void)
 
 	/* main loop if the conference menu */
 	for ( ;; ) {
+		/* hide cursor in something black */
+		wmove(infowin, getmaxx(infowin), getmaxy(infowin));
+		wrefresh(infowin);
+
 		key = getch();
+		werase(cmdwin);
+		wrefresh(cmdwin);
 		switch (key) {
 		case 'j':
 			goto_msg_num(at_msg + 1);
@@ -65,14 +82,24 @@ conference_menu(void)
 		case '\n':
 			scroll_text(1);
 			break;
+		case ' ':
+			scroll_text(textwin_height);
+			break;
 		case KEY_BACKSPACE:
 			scroll_text(-1);
+			break;
+		case 'b':
+		case '-':
+			scroll_text(-textwin_height);
+			break;
+		case CTRL('L'):
+			wrefresh(stdscr);
 			break;
 		case 'q':
 			goto end_menu;
 		default:
 			beep();
-			scr_warnx(cmdwin, "Unbound key '%c'", (char)key);
+			scr_warnx(cmdwin, "Unbound key %d", key);
 		}
 	}
 
@@ -87,10 +114,13 @@ end_menu:
 void
 conf_refresh(void)
 {
+	char	buf[81];
+
 	/* update status window */
 	werase(statwin);
-	wprintw(statwin, " CKom| %-30.30s |Msgs:%d New:%d Old:%d",
+	snprintf(buf, sizeof(buf), " CKom | %-30.30s | Msgs:%d New:%d Old:%d",
 		art_get_conf_name(), art_count(), art_count(), 0);
+	wprintw(statwin, "%-80.80s", buf);
 	wrefresh(statwin);
 
 	/* update thread window */
@@ -108,17 +138,52 @@ void
 conf_text_refresh(void)
 {
 	art_t	*art;
+	char	buf[81];
+	char	**msg_lines;
+	int		last_row, i, tilde_fill, num_lines;
 
 	art = art_get_num(at_msg);
 
 	wmove(infowin, 0,0);
 	werase(infowin);
-	wprintw(infowin, "  %d/%d: %-30.30s | %-30.30s",
-		at_msg , art_count(), art->art_from, art->art_real_subj);
+	snprintf(buf, sizeof(buf), "(%d): %-30.30s | %-30.30s",
+		art->art_id, art->art_from, art->art_real_subj);
+	wprintw(infowin, "%-80.80s", buf);
 	wrefresh(infowin);
 
 	werase(textwin);
-	wprintw(textwin, "hej hopp ");
+
+	num_lines = 0;
+	for (i = 0; art->art_text[i] != NULL; i++)
+		num_lines++;
+	num_lines++;
+	for (i = 0; art->art_header[i] != NULL; i++)
+		num_lines++;
+	num_lines++;
+
+	if ((msg_lines = alloca(sizeof(char *) * num_lines)) == NULL)
+		scr_errx("alloca: %s", strerror(errno));
+	num_lines = 0;
+	for (i = 0; art->art_header[i] != NULL; i++)
+		msg_lines[num_lines++] = art->art_header[i];
+	msg_lines[num_lines++] = "";
+	for (i = 0; art->art_text[i] != NULL; i++)
+		msg_lines[num_lines++] = art->art_text[i];
+	msg_lines[num_lines++] = NULL;
+
+	last_row = at_msg_top_row + textwin_height;
+	tilde_fill = 0;
+	for (i = at_msg_top_row; i < last_row; i++) {
+		if (tilde_fill || msg_lines[i] == NULL) {
+			tilde_fill = 1;
+			wmove(textwin, i - at_msg_top_row, 0);
+			wprintw(textwin, "~");
+			continue;
+		}
+		wmove(textwin, i - at_msg_top_row, 0);
+		wprintw(textwin, "%-75.75s", msg_lines[i]);
+	}
+
 	wrefresh(textwin);
 }
 
@@ -126,6 +191,7 @@ void
 conf_thrd_refresh(void)
 {
 	art_t	*art;
+	char	timestr[10];
 	int		i, last_msg;
 
 	werase(thrdwin);
@@ -133,13 +199,15 @@ conf_thrd_refresh(void)
 	for (i = top_msg; i < last_msg; i++) {
 		art = art_get_num(i);
 		wmove(thrdwin, i - top_msg, 0);
-		if (i == at_msg)
+		if (i == at_msg) {
+			wattrset(thrdwin, A_REVERSE);
 			wprintw(thrdwin, "->");
-		else
+			wattrset(thrdwin, A_NORMAL);
+		} else
 			wprintw(thrdwin, "  ");
-		wprintw(thrdwin, "%4d ", i);
-		wprintw(thrdwin, "%-20.20s (%4d) %-30.30s",
-			art->art_from, art->art_no_of_lines, art->art_subj);
+		strftime(timestr, sizeof(timestr), "%b %d", localtime(&art->art_time));
+		wprintw(thrdwin, "%4d %-6.6s %-20.20s (%4d) %-30.30s",
+			i, timestr, art->art_from, art->art_no_of_lines, art->art_subj);
 	}
 	wrefresh(thrdwin);
 }
@@ -182,5 +250,32 @@ goto_msg_num(int msg_num)
 static void
 scroll_text(int num_rows)
 {
+	art_t	*art;
+	int		i, num_lines, row_num;
+
+	row_num = at_msg_top_row + num_rows;
+	if (row_num < 0) {
+		if (at_msg_top_row == 0) {
+			beep();
+			scr_warnx(cmdwin, "Allready at top of message");
+			return;
+		} else
+			row_num = 0;
+	}
+
+	num_lines = 0;
+	art = art_get_num(at_msg);
+	for (i = 0; art->art_text[i] != NULL; i++)
+		num_lines++;
+	for (i = 0; art->art_header[i] != NULL; i++)
+		num_lines++;
+
+	if (row_num >= num_lines) {
+		beep();
+		scr_warnx(cmdwin, "Allready at end of message");
+		return;
+	}
+
+	at_msg_top_row = row_num;
 	conf_text_refresh();
 }
