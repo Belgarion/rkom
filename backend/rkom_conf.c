@@ -210,11 +210,11 @@ get_membership(int uid, int conf, struct rk_membership **member)
 			while (walker) {
 				if (walker->number == conf) {
 					*member = &walker->member;
-					return 0;
+					return -1;
 				}
 				walker = walker->next;
 			}
-			return 0; /* Didn't exist */
+			return -1; /* Didn't exist */
 		}
 		/* No, we failed cache search. Fetch from server. */
 		sprintf(buf, "99 %d 0 65535 0\n", uid);
@@ -247,7 +247,7 @@ get_membership(int uid, int conf, struct rk_membership **member)
 		}
 		get_accept('}');
 		get_eat('\n');
-		return 0;
+		return (!*member);
 	}
 	sprintf(buf, "99 %d 0 65535 0\n", uid);
 	if (send_reply(buf)) {
@@ -268,13 +268,16 @@ get_membership(int uid, int conf, struct rk_membership **member)
 		m->rm_added_by = get_int();
 		read_in_time(&m->rm_added_at);
 		m->rm_type = get_int();
-		if (m->rm_conference == conf)
+		if (m->rm_conference == conf) {
 			members = mb;
+			*member = &members;
+			get_eat('\n');
+			return 0;
+		}
 	}
 	get_accept('}');
 	get_eat('\n');
-	*member = &members;
-	return 0;
+	return -1;
 }
 
 static void
@@ -462,18 +465,17 @@ rk_local_to_global_server(u_int32_t conf, u_int32_t local)
 	return ret;
 }
 
-#if 0
 void
 conf_set_high_local(int conf, int local)
 {
-	struct get_uconf_stat_store *walker;
+	struct get_conf_stat_store *walker;
 
 	/* First, see if we have this conference in the cache */
-	if (gucs != 0) {
-		walker = gucs;
+	if (gcs != 0) {
+		walker = gcs;
 		while (walker) {
 			if (walker->number == conf) {
-				walker->confer.highest_local_no = local;
+				walker->confer.rc_no_of_texts++;
 				return;
 			}
 			walker = walker->next;
@@ -481,8 +483,6 @@ conf_set_high_local(int conf, int local)
 		printf("Internal strange... conf %d not in cache.\n", conf);
 	}
 }
-
-#endif
 
 int32_t
 rk_mark_read_server(u_int32_t conf, u_int32_t local)

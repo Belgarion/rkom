@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.5 2000/10/12 18:23:01 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.6 2000/10/13 12:42:51 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -52,29 +52,6 @@ struct rk_text_stat {
 	u_int32_t	rt_no_of_marks;
 	struct rk_misc_info rt_misc_info<>;
 	struct rk_aux_item rt_aux_item<>;
-};
-
-
-/*
- * Information of an article of imediate interest.
- */
-struct rk_article {
-	u_int32_t	ra_id;
-	u_int32_t	ra_recpt<>;
-	u_int32_t	ra_cc_recpt<>;
-	u_int32_t	ra_bcc_recpt<>;
-	u_int32_t	ra_sent_by;
-	struct rk_time ra_sent_at;
-	u_int32_t	ra_comm_to<>;
-	u_int32_t	ra_comm_in<>;
-	u_int32_t	ra_footn_to<>;
-	u_int32_t	ra_footn_in<>;
-	string		ra_subject;
-	string		ra_text;
-};
-
-struct rk_id_list {
-	u_int32_t	ri_id<>;
 };
 
 /*
@@ -167,6 +144,15 @@ struct rk_unreadconfval {
 	u_int32_t	ru_confs<>;
 };
 
+struct rk_text_retval {
+	int32_t		rtr_status;
+	u_int32_t	rtr_textnr;
+};
+
+struct rk_text_info {
+	string		rti_text;
+	struct rk_misc_info rti_misc<>;
+};
 /*
  * Login a user to the system.
  * Arguments are (userid, password).
@@ -267,3 +253,9 @@ int32_t rk_change_conference(u_int32_t);
  * Args are (conf, uid, prio, where, flags) and returns a lyskom error number.
  */
 int32_t rk_add_member(u_int32_t, u_int32_t, u_int8_t, u_int16_t, u_int32_t);
+
+/*
+ * Puts a text in the conferences described in the misc_info struct.
+ * Arg in rk_text_info and returns a status struct.
+ */
+struct	rk_text_retval rk_create_text(struct rk_text_info);

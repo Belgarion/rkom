@@ -5,9 +5,10 @@
 #include <stdlib.h>
 
 #include "rkom_proto.h"
+#include "exported.h"
 #include "backend.h"
 
-// static void async_new_text(void);
+static void async_new_text(void);
 /*
  * Handle a async message. Put it on a queue; then leave it to
  * async_handler() to do the rest.
@@ -15,11 +16,8 @@
 void
 async(int level)
 {
-get_eat('\n');
-return;
-#if 0
-	int narg, type, pers, rcpt;
-	char *s, *t;
+	int narg, type/*, pers, rcpt*/;
+//	char *s, *t;
 
 	narg = get_int();
 	type = get_int();
@@ -27,12 +25,15 @@ return;
 	switch (type) {
 	case 15: /* New text created */
 		async_new_text();
+#if 0
 		if (prompt == PROMPT_SEE_TIME)
 			prompt = PROMPT_NEXT_CONF;
 		else
 			return 0;
+#endif
 		break;
 
+#if 0
 	case 9:
 	case 13:
 		pers = get_int();
@@ -72,13 +73,13 @@ printf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 		printf("%s\n", s);
 printf("----------------------------------------------------------------\n");
 		break;
+#endif
 
 	default:
 		get_eat('\n');
-		return 0;
+		return;
 	}
-	return 1;
-#endif
+	return;
 }
 
 void
@@ -86,12 +87,11 @@ async_handle()
 {
 }
 
-#if 0
 void
 async_new_text()
 {
 	int i, type, cnt, conf, local;
-	struct Time time;
+	struct rk_time time;
 
 	get_int();
 	read_in_time(&time);
@@ -109,7 +109,8 @@ async_new_text()
 
 		case recpt:
 			conf = get_int();
-			get_int(); /* == loc_no */
+			if (get_int() != loc_no)
+				printf("async_new_text: bad protocol\n");
 			local = get_int();
 			i++;
 			conf_set_high_local(conf, local);
@@ -123,7 +124,3 @@ async_new_text()
 	get_accept('}');
 	get_eat('\n');
 }
-
-
-
-#endif

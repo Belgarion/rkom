@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "rkom_proto.h"
 #include "backend.h"
@@ -273,5 +274,44 @@ rk_textstat_server(u_int32_t nr)
 	get_eat('\n'); /* XXX */
 	return ts;
 }
+
+/*
+ * Put a text into a conference.
+ */
+struct rk_text_retval *
+rk_create_text_server(struct rk_text_info *rti)
+{
+	struct rk_text_retval *rkr;
+	struct rk_misc_info *mi;
+	extern int sockfd;
+	char buf[30];
+	int i, nmi;
+
+	sprintf(buf, "28 %dH", strlen(rti->rti_text));
+	send_reply(buf);
+	write(sockfd, rti->rti_text, strlen(rti->rti_text));
+	nmi = rti->rti_misc.rti_misc_len;
+	mi = rti->rti_misc.rti_misc_val;
+
+	sprintf(buf, " %d { ", nmi);
+	send_reply(buf);
+	for (i = 0; i < nmi; i++) {
+		sprintf(buf, "%d %d ", mi[i].rmi_type, mi[i].rmi_numeric);
+		send_reply(buf);
+	}
+	rkr = malloc(sizeof(struct rk_text_retval));
+	if (send_reply("}\n")) {
+		rkr->rtr_status = get_int();
+		get_eat('\n');
+		return rkr;
+	}
+	rkr->rtr_status = 0;
+	rkr->rtr_textnr = get_int();
+	get_accept('\n');
+	return rkr;
+}
+
+
+
 
 
