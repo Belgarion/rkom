@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.8 2000/11/22 21:26:34 jens Exp $ */
+/* $Id: parse.c,v 1.9 2000/11/22 21:43:19 jens Exp $ */
 
 #include <sys/param.h>
 
@@ -95,10 +95,12 @@ DCMD(info_time);
 DCMD(info_saveflags);
 DCMD(info_status);
 
+#if 0
 /* Commands for aliases */
 DCMD(alias_add);
 DCMD(alias_delete);
 DCMD(alias_list);
+#endif
 
 
 /* Other commands */
@@ -176,10 +178,12 @@ DROW("tiden",					0,PE_NO_ARG,info_time)
 DROW("hjälp",					0,PE_NO_ARG,info_list_commands)
 DROW("status",					0,PE_STR_ARG,info_status)
 
+#if 0
 /* Commands for aliases */
 DROW("alias",					0,PE_STR_ARG,alias_add)
 DROW("unalias",					0,PE_STR_ARG,alias_delete)
 DROW("lista alias",				0,PE_NO_ARG,alias_list)
+#endif
 
 /* Other commands */
 DROW("sätt",					0,PE_STR_ARG,other_set)
@@ -689,6 +693,7 @@ exec_info_status(int argc, char *argv[])
 	return 0;
 }
 
+#if 0
 /* Commands for aliases */
 
 static int
@@ -713,6 +718,7 @@ exec_alias_list(int argc, char *argv[])
 	parse_list_alias(cmds);
 	return 0;
 }
+#endif
 
 
 /* Other commands */
