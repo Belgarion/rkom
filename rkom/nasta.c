@@ -344,7 +344,7 @@ next_hoppa(char *str)
 	struct rk_misc_info *mi;
 	int global, len, i, hoppade;
 
-	hoppade = 0;
+	hoppade = global = 0;
 	while (1) {
 		if (pole == 0) {
 			if (hoppade == 0)

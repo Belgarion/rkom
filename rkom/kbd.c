@@ -1,6 +1,7 @@
 
 #include <strings.h>
 #include <histedit.h>
+#include <string.h>
 
 #include "rkom.h"
 

@@ -35,7 +35,7 @@ list_conf(char *str)
 	rprintf("\nSenaste inlägg   Medl. Tot Inl   Namn (typ)\n");
 	for (i = 0; i < nconfs; i++) {
 		struct rk_conference *C;
-		struct rk_membership *M;
+		struct rk_membership *M = NULL; /* GCC braino */
 
 		C = rk_confinfo(ci[i].rc_conf_no);
 		if (myuid)

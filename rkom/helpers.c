@@ -10,7 +10,7 @@ static int
 directmatch(struct rk_confinfo_retval *r, char *n)
 {
 	int num = r->rcr_ci.rcr_ci_len;
-	int i, m, nr = 0;
+	int i, m = 0, nr = 0;
 
 	for (i = 0; i < num; i++)
 		if (strcasecmp(r->rcr_ci.rcr_ci_val[i].rc_name, n) == 0) {

@@ -209,7 +209,7 @@ set_setflag(char *name, char *val)
 {
 	int inc, match, i, nc;
 
-	match = 0;
+	match = nc = 0;
 	for (i = 0; i < ncommonvars; i++) {
 		if (bcmp(commonvars[i].rv_var, name, strlen(name)) == 0) {
 			match++;

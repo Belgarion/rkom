@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.28 2001/02/12 20:23:26 ragge Exp $	*/
+/*	$Id: write.c,v 1.29 2001/03/03 11:04:14 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -568,7 +568,7 @@ void
 write_change_presentation(char *str)
 {
         struct rk_confinfo_retval *retval;
-	char *c;
+	char *c = NULL;
 
         if ((retval = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF)) == 0)
                 return;
@@ -586,7 +586,8 @@ write_change_presentation(char *str)
 		if (rc->rc_retval == 0 && rc->rc_presentation)
 			c = rk_gettext(rc->rc_presentation);
 		free(rc);
-	} else
+	}
+	if (c == NULL)
 		c = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);
 	doedit(c);
 	free(c);

@@ -1,3 +1,4 @@
+/*	$Id: cmd.c,v 1.48 2001/03/03 11:04:14 ragge Exp $	*/
 
 #include <string.h>
 #include <stdio.h>
@@ -142,7 +143,7 @@ cmd_vilka(char *str)
 	rprintf("-------------------------------------------------------\n");
 
 	for (i = 0; i < antal; i++) {
-		struct rk_conference *c1, *c2;
+		struct rk_conference *c1, *c2 = NULL; /* GCC braino */
 		struct rk_person *p;
 		char *name, *conf, *var;
 
