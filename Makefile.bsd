@@ -1,4 +1,4 @@
-#	$Id: Makefile.bsd,v 1.4 2001/11/25 21:12:19 ragge Exp $
+#	$Id: Makefile.bsd,v 1.5 2002/10/21 10:19:26 jens Exp $
 #
 UNAME!= uname
 
@@ -8,6 +8,7 @@ LIBS="XLIBS=-ltermcap"
 .else
 BACKEND_EXTRA_OBJS="EXTRA_OBJS=poll_emul.o"
 FLAGS="XFLAGS=-DSTAR_BSD -DREGEX -DPOLL_EMUL"
+LIBS="XLIBS=-ltermcap"
 .endif
 
 
