@@ -10,7 +10,7 @@
 #include "exported.h"
 #include "rkom.h"
 // #include "conf.h"
-// #include "next.h"
+#include "next.h"
 // #include "list.h"
 // #include "write.h"
 
@@ -39,8 +39,8 @@ struct cmnd cmds[] = {
 	{"logout", 0, cmd_logout },
 //	{"lägg", 0, write_put },
 //	{"mottagare:", 0, write_rcpt },
-//	{"nästa", "inlägg", next_text },
-//	{"nästa", "möte", next_conf },
+	{"nästa", "inlägg", next_text },
+	{"nästa", "möte", next_conf },
 //	{"redigera", "editor", write_editor },
 	{"sluta", 0, cmd_sluta },
 	{"säg", 0, cmd_say },
@@ -290,7 +290,6 @@ cmd_login(char *str)
 
 		for (i = 0; i < nconf; i++) {
 			struct rk_conference *rkc;
-			struct rk_membership_args *rma;
 			struct rk_membership *m;
 			int hln;
 
@@ -303,10 +302,7 @@ cmd_login(char *str)
 				continue;
 			}
 			hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
-			rma = malloc(sizeof(struct rk_membership_args));
-			rma->rma_uid = myuid;
-			rma->rma_mid = confs[i];
-			m = rk_membership(rma);
+			m = rk_membership(myuid, confs[i]);
 
 			if (m->rm_retval) {
 				printf("%d,%d sket sej med %d\n",
