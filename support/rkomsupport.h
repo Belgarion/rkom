@@ -8,7 +8,7 @@ typedef unsigned short u_int16_t;
 typedef unsigned long long u_int64_t;
 #endif /* SOLARIS */
 
-#if defined(SOLARIS) || defined(SUNOS4)
+#if defined(SOLARIS) || defined(SUNOS4) || defined(AIX)
 char *strsep(char **stringp, const char *delim);
 #endif
 
