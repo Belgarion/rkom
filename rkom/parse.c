@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.38 2002/05/19 14:23:22 ragge Exp $ */
+/* $Id: parse.c,v 1.39 2002/07/12 01:40:39 offe Exp $ */
 
 #include <sys/param.h>
 
@@ -96,6 +96,7 @@ DCMD(text_list_unread);
 DCMD(text_delete);
 DCMD(text_copy);
 DCMD(text_move);
+DCMD(text_from_swascii);
 
 /* Commands for online communication */
 DCMD(com_who);
@@ -206,6 +207,7 @@ DROW("lista olästa",			0,PE_NO_ARG,text_list_unread)
 DROW("radera",					0,PE_NUM_ARG,text_delete)
 DROW("kopia",					0,PE_NO_ARG,text_copy)
 DROW("flytta",					0,PE_NO_ARG,text_move)
+DROW("konvertera",				0,PE_NO_ARG,text_from_swascii)
 
 /* Commands for online communication */
 DROW("vilka",					0,PE_STR_ARG,com_who)
@@ -279,7 +281,7 @@ static char *cvtstr[] = {
 	"åÅ}]", "äÄ{[", "öÖ|\\", 
 };
 
-static void
+void
 chrconvert(char *str)
 {
 	int len = strlen(str);
@@ -1037,3 +1039,12 @@ exec_text_move(int argc, char *argv[])
 	return 0;
 }
 
+static int
+exec_text_from_swascii(int argc, char *argv[])
+{
+	LF;
+	OWA;
+	TT(argc != 0, "Konvertera tar inga argument.\n");
+	convert_from_swascii();
+	return 0;
+}
