@@ -19,10 +19,10 @@
 #include "set.h"
 #include "next.h"
 
-static char *get_text(void);
+static char *get_text(char *);
 static char *input_string(void);
 static void parse_text(char *);
-static void extedit(void);
+static void extedit(char *);
 static char *show_format(void);
 
 static struct rk_misc_info *mi;
@@ -55,9 +55,9 @@ write_new(char *str)
 	mi[0].rmi_numeric = curconf;
 	nmi = 1;
 	if (use_editor) {
-		extedit();
+		extedit(0);
 	} else {
-		txt = get_text();
+		txt = get_text(0);
 		parse_text(txt);
 		free(txt);
 	}
@@ -123,12 +123,17 @@ write_put(char *str)
 }
 
 char *
-get_text()
+get_text(char *sub)
 {
 	char *str, *base;
 
-	base = calloc(10, 1);
+	if (sub == 0)
+		base = calloc(10, 1);
+	else
+		base = strdup(sub);
 	printf("\nÄrende: ");
+	if (sub)
+		printf("%s\n", base);
 	fflush(stdout);
 
 	for (;;) {
@@ -179,7 +184,7 @@ void
 write_editor(char *str)
 {
 	TW;
-	extedit();
+	extedit(0);
 }
 
 void
@@ -283,7 +288,7 @@ show_format()
 }
 
 void
-extedit()
+extedit(char *sub)
 {
 	struct stat sb;
 	extern char **environ;
@@ -300,6 +305,8 @@ extedit()
 		printf("Det gick inte: %s\n", strerror(errno));
 		return;
 	}
+	if (sub)
+		ctext = strdup(sub);
 	txt = show_format();
 	write(f, txt, strlen(txt));
 	close(f);
@@ -327,7 +334,7 @@ write_cmnt(char *str)
 {
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mf;
-	char *txt;
+	char *txt, *s, *t;
 	int text, i, num;
 
 	if (is_writing) {
@@ -364,13 +371,20 @@ write_cmnt(char *str)
 	mi[nmi].rmi_type = comm_to;
 	mi[nmi].rmi_numeric = text;
 	nmi++;
-	/* XXX subject */
+
+	/* Get the subject line from commented text */
+	s = rk_gettext(text);
+	t = index(s, '\n');
+	if (t)
+		t[1] = 0;
+
 	is_writing = 1;
 	if (use_editor) {
-		extedit();
+		extedit(s);
 	} else {
-		txt = get_text();
+		txt = get_text(s);
 		parse_text(txt);
 		free(txt);
 	}
+	free(s);
 }
