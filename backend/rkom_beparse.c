@@ -344,10 +344,21 @@ back:		ts = malloc(sizeof(*ts));
 		get_accept('*');
 
 	get_eat('\n'); /* XXX */
-	tss = calloc(sizeof(*tss), 1);
-	tss->nummer = nr;
-	tss->next = pole;
-	pole = tss;
+	if (tss == 0) {
+		tss = calloc(sizeof(*tss), 1);
+		tss->nummer = nr;
+		tss->next = pole;
+		pole = tss;
+	}
+	if (tss->text == 0) {
+		sprintf(buf, "25 %d 0 2000000\n", nr);
+		if (send_reply(buf)) {
+			get_eat('\n');
+		} else {
+			tss->text = get_string();
+			get_accept('\n');
+		}
+        }
 	tss->rts = ts;
 	goto back;
 
