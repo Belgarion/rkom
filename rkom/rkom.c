@@ -26,7 +26,7 @@ int	main(int, char **);
 
 static int lasttime;
 static void sigio(int);
-static void async_collect(void);
+static int async_collect(void);
 
 char *p_next_conf = "(Gå till) nästa möte";
 char *p_next_text = "(Läsa) nästa inlägg";
@@ -80,10 +80,11 @@ main(int argc, char *argv[])
 	for (;;) {
 		printf("\n%s - ", prompt);
 		fflush(stdout);
-		kbd_input(0);
-		if (fetchstat) {
+back:		if (kbd_input(0)) {
 			fetchstat = 0;
-			async_collect();
+			if (async_collect())
+				goto back;
+			continue;
 		}
 		gettimeofday(&tp, 0);
 		if (tp.tv_sec - lasttime > 30) {
@@ -100,20 +101,25 @@ sigio(int arg)
 	fetchstat = 1;
 }
 
-void
+int
 async_collect()
 {
 	struct rk_async *ra;
+	char *hej;
+	int retval = 1;
 
 	while (1) {
 		ra = rk_async(0);
 		switch (ra->ra_type) {
 		case 0:
 			free(ra);
-			return;
+			return retval;
 
 		case 15: /* New text created */
+			hej = prompt;
 			next_prompt();
+			if (prompt != hej)
+				retval = 0;
 			break;
 
 		default:

@@ -11,7 +11,7 @@
 /*
  * Reads input from keyboard, and tries to understand it.
  */
-void
+int
 kbd_input(fd)
 {
 	int s, d;
@@ -20,7 +20,7 @@ kbd_input(fd)
 	buf = get_input_string(fd, 1);
 
 	if (buf == 0)
-		return;
+		return 1;
 	dst = alloca(strlen(buf) + 1);
 	s = d = 0; /* source/dest index in string */
 
@@ -61,6 +61,7 @@ kbd_input(fd)
 	while (isspace(dst[strlen(dst) - 1]))
 		dst[strlen(dst) - 1] = 0;
 	cmd_parse(dst);
+	return 0;
 }
 
 char *

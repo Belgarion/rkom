@@ -24,6 +24,7 @@ static void cmd_goto(char *);
 static void cmd_only(char *);
 
 struct cmnd cmds[] = {
+	{"avmarkera", 0, list_unmark },
 	{"endast", 0, cmd_only },
 	{"gå", 0, cmd_goto },
 	{"glöm", 0, write_forget },
@@ -33,11 +34,13 @@ struct cmnd cmds[] = {
 	{"kommentera", 0, write_cmnt },
 	{"kommentar", "till:", write_comment },
 	{"lista", "kommandon", list_comm },
+	{"lista", "markerade", list_marked },
 	{"lista", "möten", list_conf },
 	{"lista", "nyheter", list_news },
 	{"login", 0, cmd_login },
 	{"logout", 0, cmd_logout },
 	{"lägg", 0, write_put },
+	{"markera", 0, list_mark },
 	{"mottagare:", 0, write_rcpt },
 	{"nästa", "inlägg", next_text },
 	{"nästa", "möte", next_conf },

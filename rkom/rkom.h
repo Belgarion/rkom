@@ -12,7 +12,7 @@ struct cmnd {
 	void (*func)(char *);
 };
 
-void	kbd_input(int);
+int	kbd_input(int);
 void	msg_input(int);
 void	cmd_parse(char *);
 int	send_reply(char *);

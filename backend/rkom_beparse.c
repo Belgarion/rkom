@@ -311,6 +311,65 @@ rk_create_text_server(struct rk_text_info *rti)
 	return rkr;
 }
 
+/* Get the marked texts. */
+struct rk_mark_retval *
+rk_getmarks_server(u_int32_t arg0)
+{
+	struct rk_mark_retval *rmr;
+	struct rk_marks *rm;
+	int cnt, i;
+
+	rmr = calloc(sizeof(*rmr), 1);
+	if (send_reply("23\n")) {
+		rmr->rmr_retval = get_int();
+		get_eat('\n');
+		return rmr;
+	}
+	cnt = get_int();
+	if (cnt) {
+		rmr = realloc(rmr, sizeof(*rmr) + cnt * sizeof(*rm));
+		rmr->rmr_marks.rmr_marks_len = cnt;
+		rmr->rmr_marks.rmr_marks_val = (void *)&rmr[1];
+		rm = rmr->rmr_marks.rmr_marks_val;
+		get_accept('{');
+		for (i = 0; i < cnt; i++) {
+			rm[i].rm_text = get_int();
+			rm[i].rm_type = get_int();
+		}
+		get_accept('}');
+	} else
+		get_accept('*');
+	get_accept('\n');
+	return rmr;
+}
+
+/* Mark a text */
+int32_t
+rk_setmark_server(u_int32_t text, u_int8_t type)
+{
+	char buf[30];
+	int retval = 0;
+
+	sprintf(buf, "72 %d %d\n", text, type);
+	if (send_reply(buf))
+		retval = get_int();
+	get_eat('\n');
+	return retval;
+}
+
+/* Unmark a text */
+int32_t
+rk_unmark_server(u_int32_t text)
+{
+	char buf[30];
+	int retval = 0;
+
+	sprintf(buf, "73 %d\n", text);
+	if (send_reply(buf))
+		retval = get_int();
+	get_eat('\n');
+	return retval;
+}
 
 
 

@@ -9,6 +9,7 @@
 #include "exported.h"
 #include "rkom.h"
 #include "list.h"
+#include "next.h"
 
 void
 list_comm(char *args)
@@ -105,4 +106,79 @@ list_news(char *args)
 		}
 		printf("\n");
 	}
+}
+
+static int
+sanitycheck(char *str)
+{
+	int text;
+
+	if (myuid == 0) {
+		printf("Du måste logga in först.\n");
+		return 0;
+	}
+	if (str == 0) {
+		text = lasttext;
+		if (text == 0)
+			printf("Det har ännu inte läst någon text.\n");
+	} else if ((text = atoi(str)) == 0) {
+		printf("%s är ett dåligt inläggsnummer.\n", str);
+		return 0;
+	}
+	return text;
+}
+
+void
+list_marked(char *str)
+{
+	struct rk_mark_retval *rmr;
+	struct rk_marks *rm;
+	int i;
+
+	if (myuid == 0) {
+		printf("Du måste logga in först.\n");
+		return;
+	}
+	rmr = rk_getmarks(0);
+	rm = rmr->rmr_marks.rmr_marks_val;
+	if (rmr->rmr_retval) {
+		printf("Det sket sej: %s\n", error(rmr->rmr_retval));
+	} else if (rmr->rmr_marks.rmr_marks_len == 0) {
+		printf("Du har inga markerade inlägg.\n");
+	} else {
+		printf("Inläggsnummer\tPrioritet\n");
+		for (i = 0; i < rmr->rmr_marks.rmr_marks_len; i++)
+			printf("%d\t\t%d\n", rm[i].rm_text, rm[i].rm_type);
+		printf("\n");
+	}
+	free(rmr);
+}
+
+void    
+list_mark(char *str)
+{
+	int text, stat;
+
+	if ((text = sanitycheck(str)) == 0)
+		return;
+
+	stat = rk_setmark(text, 100);
+	if (stat)
+		printf("Det sket sej: %s\n", error(stat));
+	else
+		printf("Du har nu markerat inlägg %d.\n", text);
+}
+
+void
+list_unmark(char *str)
+{
+	int text, stat;
+
+	if ((text = sanitycheck(str)) == 0)
+		return;
+	stat = rk_unmark(text);
+	if (stat)
+		printf("Det sket sej: %d\n", stat);
+	else
+		printf("Du har nu avmarkerat inlägg %d.\n", text);
 }

@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.7 2000/10/15 10:50:24 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.8 2000/10/15 17:20:25 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -159,6 +159,16 @@ struct rk_async {
 	u_int32_t	ra_type;
 };
 
+struct rk_marks {
+	u_int32_t	rm_text;
+	u_int8_t	rm_type;
+};
+
+struct rk_mark_retval {
+	int32_t		rmr_retval;
+	struct rk_marks	rmr_marks<>;
+};
+
 /*
  * Login a user to the system.
  * Arguments are (userid, password).
@@ -272,3 +282,20 @@ struct	rk_text_retval rk_create_text(struct rk_text_info);
  */
 struct rk_async rk_async(u_int32_t);
 
+/*
+ * Get marked texts for the current user.
+ * XXX - no argument to this one.
+ */
+struct rk_mark_retval rk_getmarks(u_int32_t);
+
+/*
+ * Mark a text for the current user.
+ * Args are (text, markno). Returns a normal Lyskom error code.
+ */
+int32_t rk_setmark(u_int32_t, u_int8_t);
+
+/*
+ * Unmark a text for the current user.
+ * Arg is (text). Returns a normal Lyskom error code.
+ */
+int32_t rk_unmark(u_int32_t);
