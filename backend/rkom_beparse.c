@@ -635,13 +635,13 @@ rk_set_uarea_server(char *hej, struct rk_uarea *u)
 	*tmp = 0;
 	narea = alloca(tot + 20);
 	for (i = 0; i < len; i++) {
-		sprintf(narea, " %dH%s %dH%s\n", strlen(v[i].rv_var),
-		    v[i].rv_var, strlen(v[i].rv_val), v[i].rv_val);
+		sprintf(narea, " %ldH%s %ldH%s\n", (long)strlen(v[i].rv_var),
+		    v[i].rv_var, (long)strlen(v[i].rv_val), v[i].rv_val);
 		strcat(tmp, narea);
 	}
-	sprintf(narea, "%dH%s", strlen(tmp), tmp);
+	sprintf(narea, "%ldH%s", (long)strlen(tmp), tmp);
 	nname = alloca(strlen(hej) + 20);
-	sprintf(nname, "%dH%s", strlen(hej), hej);
+	sprintf(nname, "%ldH%s", (long)strlen(hej), hej);
 	/* Now the new uarea is in narea and its name in nname */
 	get_pers_stat(myuid, &p);
 	if (p->rp_user_area) {
@@ -666,8 +666,9 @@ rk_set_uarea_server(char *hej, struct rk_uarea *u)
 		t = strstr(ohdr, nname); /* Search for correct storage */
 		if (t == 0) { /* Not found */
 			nhdr = alloca(strlen(nname) + strlen(ohdr) + 50);
-			sprintf(nhdr, "%dH%s %s",
-			    strlen(ohdr) + strlen(nname) + 1, ohdr, nname);
+			sprintf(nhdr, "%ldH%s %s",
+			    (long)strlen(ohdr) + (long)strlen(nname) + 1,
+			    ohdr, nname);
 			t = alloca(strlen(narea) + strlen(odata) + 50);
 			sprintf(t, "%s %s", odata, narea);
 			narea = t;
@@ -678,7 +679,7 @@ rk_set_uarea_server(char *hej, struct rk_uarea *u)
 		free(txt);
 	} else {
 		nhdr = alloca(strlen(nname) + 20);
-		sprintf(nhdr, "%dH %s", strlen(nname) + 1, nname);
+		sprintf(nhdr, "%ldH %s", (long)strlen(nname) + 1, nname);
 	}
 	nlen = strlen(nhdr) + strlen(narea);
 	utstr = alloca(nlen + 50);
