@@ -247,7 +247,7 @@ set_setflag(char *name, char *val)
 	if (bcmp(name, "kom-mercial", strlen(name)) == 0)
 		if (rk_whatido(val))
 			rprintf("Byta kom-mercial sket sej.\n");
-#ifdef SOLARIS
+#if defined(SOLARIS) || defined(SUNOS4)
 #undef SIG_DFL
 #undef SIG_IGN
 #define	SIG_DFL (void(*)(int))0

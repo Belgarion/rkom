@@ -8,6 +8,7 @@
 #include <err.h>
 
 #include "rkom.h"
+#include "rkomsupport.h"
 
 static char *fel[] = {
 	"Inget fel. ??? (borde inte inträffa", /* 0 */
@@ -50,7 +51,8 @@ error(int code)
 	return fel[code];
 }
 
-#if defined(SOLARIS)
+#if defined(SOLARIS) || defined(SUNOS4)
+int vfprintf(FILE *, const char *, va_list);
 extern char * __progname;
 
 void

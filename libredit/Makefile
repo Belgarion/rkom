@@ -1,13 +1,15 @@
 #
 
-CFLAGS=	-O2 -g -Wall -Werror -Wstrict-prototypes -Wmissing-prototypes $(XFLAGS)
+CFLAGS=	-O2 -g -Wall -Werror -Wstrict-prototypes -Wmissing-prototypes \
+	-I../support $(XFLAGS)
 
 AR=	ar
 RANLIB=	ranlib
 
 OBJS=	chared.o common.o el.o emacs.o fcns.o help.o hist.o key.o map.o \
 	parse.o prompt.o read.o refresh.o search.o sig.o term.o tty.o vi.o \
-	tokenizer.o history.o fgetln.o strvis.o strunvis.o strsep.o
+	tokenizer.o history.o fgetln.o strvis.o strunvis.o strsep.o strlcpy.o \
+	strlcat.o strerror.o snprintf.o
 
 all:	libredit.a
 

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "rkom.h"
+#include "rkomsupport.h"
 
 int outlines, discard;
 
@@ -14,11 +15,12 @@ static char *cvtstr[] = {
 	"}å", "]Å", "{ä", "[Ä", "|ö", "\\Ö", 
 };
 
-#ifdef SOLARIS
+#if defined(SOLARIS) || defined(SUNOS4)
 /*
  * Simple and dumb implementation of vasprintf(): loop around and try
  * bigger and bigger buffer to print result in.
  */
+int vsnprintf(char *str, size_t count, const char *fmt, va_list args);
 static int
 vasprintf(char **ret, const char *format, va_list ap)
 {
@@ -26,7 +28,11 @@ vasprintf(char **ret, const char *format, va_list ap)
 	int size, r;
 
 	size = 128;
+#ifdef SUNOS4
+	buf = malloc(10);	/* Must have an initial value */
+#else
 	buf = NULL;
+#endif
 	do {
 		size *= 2;
 		buf = realloc(buf, size);

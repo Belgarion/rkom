@@ -1,6 +1,8 @@
-/*	$Id: strerror.c,v 1.1 2001/11/19 19:23:25 ragge Exp $	*/
+/*	$Id: strerror.c,v 1.2 2001/11/19 20:27:23 ragge Exp $	*/
 
-#include "lukemftp.h"
+#ifdef SUNOS4
+
+#include "rkomsupport.h"
 
 char *
 strerror(int n)
@@ -17,3 +19,4 @@ strerror(int n)
 		return(sys_errlist[n]);
 	}
 }
+#endif

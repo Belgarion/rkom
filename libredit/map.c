@@ -41,6 +41,7 @@
  */
 #include "sys.h"
 #include "el.h"
+#include "rkomsupport.h"
 
 #define	N_KEYS 256
 

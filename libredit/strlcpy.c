@@ -1,4 +1,4 @@
-/*	$Id: strlcpy.c,v 1.1 2001/11/18 22:35:47 ragge Exp $	*/
+/*	$Id: strlcpy.c,v 1.2 2001/11/19 20:27:23 ragge Exp $	*/
 /*	$NetBSD: strlcpy.c,v 1.5 1999/09/20 04:39:47 lukem Exp $	*/
 /*	from OpenBSD: strlcpy.c,v 1.4 1999/05/01 18:56:41 millert Exp 	*/
 
@@ -29,7 +29,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "lukemftp.h"
+#ifdef SUNOS4
+
+#include "sys.h"
 
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters
@@ -61,3 +63,4 @@ strlcpy(char *dst, const char *src, size_t siz)
 
 	return(s - src - 1);	/* count does not include NUL */
 }
+#endif

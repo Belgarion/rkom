@@ -45,6 +45,8 @@
 
 #include <stdio.h>
 
+#include "rkomsupport.h"
+
 typedef struct ttymodes_t {
 	char *m_name;
 	u_int m_value;

@@ -49,7 +49,7 @@
 #endif
 #include <signal.h>
 
-#ifdef SOLARIS
+#if defined(SOLARIS) || defined(SUNOS4)
 #undef SIG_ERR  /* XXX - bad system headers */
 #define SIG_ERR (void(*)(int))-1
 #endif

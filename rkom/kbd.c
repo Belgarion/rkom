@@ -1,5 +1,7 @@
 
+#ifndef SUNOS4
 #include <sys/ioctl.h>
+#endif
 
 #include <termcap.h>
 #include <stdio.h>

@@ -42,6 +42,8 @@
 #include "sys.h"
 #include "el.h"
 
+#include "rkomsupport.h"
+
 private el_action_t	cv_action(EditLine *, int);
 private el_action_t	cv_paste(EditLine *, int);
 

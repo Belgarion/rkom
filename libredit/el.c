@@ -41,6 +41,7 @@
  */
 #include "sys.h"
 #include "el.h"
+#include "rkomsupport.h"
 
 #include <stdarg.h>
 #ifdef SOLARIS

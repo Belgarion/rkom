@@ -59,6 +59,7 @@
  */
 #include "sys.h"
 #include "el.h"
+#include "rkomsupport.h"
 
 /*
  * The Nodes of the el->el_key.map.  The el->el_key.map is a linked list

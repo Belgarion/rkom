@@ -42,6 +42,8 @@
 #include "sys.h"
 #include "el.h"
 
+#include "rkomsupport.h"
+
 /* em_delete_or_list():
  *	Delete character under cursor or list completions if at end of line
  *	[^D]

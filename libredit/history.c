@@ -50,6 +50,8 @@ static const char hist_cookie[] = "_HiStOrY_V2_\n";
 #endif
 #include <stdarg.h>
 
+#include "rkomsupport.h"
+
 typedef int (*history_gfun_t)(ptr_t, HistEvent *);
 typedef int (*history_efun_t)(ptr_t, HistEvent *, const char *);
 typedef void (*history_vfun_t)(ptr_t, HistEvent *);

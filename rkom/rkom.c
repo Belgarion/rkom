@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.33 2001/11/18 18:23:33 ragge Exp $ */
+/* $Id: rkom.c,v 1.34 2001/11/19 20:27:23 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -7,7 +7,9 @@
 #include <sys/socket.h>
 #include <sys/poll.h>
 #include <sys/time.h>
+#ifndef SUNOS4
 #include <sys/ioctl.h>
+#endif
 
 #include <netinet/in.h>
 
@@ -62,11 +64,11 @@ prompt_fun(EditLine *el)
 {
 	static char		buf[MAX_LINE];
 
-	snprintf(buf, sizeof(buf), "%s - ", prompt);
+	sprintf(buf, "%s - ", prompt);
 	return buf;
 }
 
-#if defined(SOLARIS)
+#if defined(SOLARIS) || defined(SUNOS4)
 char * __progname;
 #endif
 
@@ -87,7 +89,7 @@ main(int argc, char *argv[])
 	int ch, noprompt;
 	char *server, *uname, *confile;
 
-#if defined(SOLARIS)
+#if defined(SOLARIS) || defined(SUNOS4)
 	__progname  = strrchr(argv[0], '/');
 	if (__progname == NULL)
 		__progname = argv[0];
@@ -224,7 +226,7 @@ sigwinch(int arg)
 {
 	struct winsize ws;
 
-	ioctl(1, TIOCGWINSZ, &ws);
+	ioctl(1, TIOCGWINSZ, (caddr_t)&ws);
 	wrows = ws.ws_row;
 	wcols = ws.ws_col;
 }
@@ -318,6 +320,11 @@ rprintf("----------------------------------------------------------------\n");
 		free(ra);
 	}
 }
+
+#ifdef SUNOS4
+void on_exit(void (*function)(void));	/* XXX */
+#define	atexit	on_exit
+#endif
 
 static void
 setup_tty(int save_old)

@@ -1,4 +1,4 @@
-/*	$Id: snprintf.c,v 1.1 2001/11/19 19:26:05 ragge Exp $	*/
+/*	$Id: snprintf.c,v 1.2 2001/11/19 20:27:23 ragge Exp $	*/
 
 /*
  * Copyright Patrick Powell 1995
@@ -57,8 +57,17 @@
  *
  **************************************************************/
 
-#include "lukemftp.h"
+#ifdef SUNOS4
 
+#include <sys/types.h>
+#include <stdarg.h>
+#include <ctype.h>
+
+#include "rkomsupport.h"
+
+#ifndef MAX
+#define	MAX(a,b)	(((a)>(b))?(a):(b))
+#endif
 
 #if HAVE_LONG_DOUBLE
 #define LDOUBLE long double
@@ -667,6 +676,7 @@ dopr_outch(char *buffer, size_t *currlen, size_t maxlen, int c)
 		buffer[(*currlen)++] = (char)c;
 }
 
+int vsnprintf(char *str, size_t count, const char *fmt, va_list args);
 int
 vsnprintf(char *str, size_t count, const char *fmt, va_list args)
 {
@@ -679,7 +689,7 @@ vsnprintf(char *str, size_t count, const char *fmt, va_list args)
 
 /* VARARGS3 */
 int
-snprintf(char *str, size_t count, const char *fmt, ...)
+snprintf(char *str, int count, const char *fmt, ...)
 {
 	va_list	 ap;
 	int	 rv;
@@ -787,3 +797,4 @@ printf("got %d >%s< (%d)\n", len, buf1, (int)strlen(buf1));
 	exit(0);
 }
 #endif /* TEST_SNPRINTF */
+#endif

@@ -245,7 +245,12 @@ put_string(char *str)
 	int len = strlen(str), totlen;
 
 	buf = malloc(len+20);
+#ifdef SUNOS4
+	sprintf(buf, " %dH%s ", len, str);
+	totlen = strlen(buf);
+#else
 	totlen = sprintf(buf, " %dH%s ", len, str);
+#endif
 	write(sockfd, buf, totlen);
 }
 

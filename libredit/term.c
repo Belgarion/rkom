@@ -44,13 +44,21 @@
 #include "sys.h"
 #include "el.h"
 
+#ifndef SUNOS4
 #include <sys/ioctl.h>
+#endif
 #include <termcap.h>
 #ifdef SOLARIS
 #undef _XPG4_2
 #include <unistd.h>
 #endif
 #include <signal.h>
+
+#include "rkomsupport.h"
+
+#ifdef SUNOS4
+int ioctl(int, int, caddr_t);
+#endif
 
 /*
  * IMPORTANT NOTE: these routines are allowed to look at the current screen

@@ -1,12 +1,20 @@
-#	$Id: Makefile,v 1.7 2001/11/18 18:23:32 ragge Exp $
+#	$Id: Makefile,v 1.8 2001/11/19 20:27:13 ragge Exp $
 #
 all:
 	@if [ `uname` = NetBSD -o `uname` = FreeBSD ]; then \
 		echo "Using *BSD" ; \
 		make -f Makefile.bsd ; \
-	elif [ `uname` = SunOS -a `uname -r` = 5.8 ]; then \
-		echo "Using Solaris" ; \
-		make -f Makefile.solaris ; \
+	elif [ `uname` = SunOS ]; then \
+		if [ `uname -r | sed 's/\.//g'` -gt 400 ]; then \
+			echo "Using SunOS4" ; \
+			make -f Makefile.sunos4 ; \
+		else \
+			echo "Using Solaris" ; \
+			make -f Makefile.solaris ; \
+		fi \
+	else \
+		echo "Unsupported OS" ; \
+		exit 1 ; \
 	fi
 
 clean:

@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.52 2001/11/18 18:05:30 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.53 2001/11/19 20:27:23 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -233,7 +233,7 @@ cmd_login(char *str)
 	if (iseql("print-number-of-unread-on-entrance", "1"))
 		list_news(0);
 
-#if defined(SOLARIS)
+#if defined(SOLARIS) || defined(SUNOS4)
 #undef SIG_IGN
 #define SIG_IGN (void(*)(int))1
 #endif

@@ -1,4 +1,4 @@
-/*	$Id: strlcat.c,v 1.1 2001/11/18 22:35:47 ragge Exp $	*/
+/*	$Id: strlcat.c,v 1.2 2001/11/19 20:27:23 ragge Exp $	*/
 /*	$NetBSD: strlcat.c,v 1.5 1999/09/20 04:39:47 lukem Exp $	*/
 /*	from OpenBSD: strlcat.c,v 1.2 1999/06/17 16:28:58 millert Exp 	*/
 
@@ -29,7 +29,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "lukemftp.h"
+#ifdef SUNOS4
+#include "sys.h"
 
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the
@@ -64,3 +65,4 @@ strlcat(char *dst, const char *src, size_t siz)
 
 	return(dlen + (s - src));	/* count does not include NUL */
 }
+#endif
