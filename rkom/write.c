@@ -92,12 +92,14 @@ write_private(int textno)
 		free(ts);
 		return;
 	}
-	mi = calloc(sizeof(struct rk_misc_info), 2);
+	mi = calloc(sizeof(struct rk_misc_info), 3);
 	mi[0].rmi_type = recpt;
 	mi[0].rmi_numeric = ts->rt_author;
 	mi[1].rmi_type = recpt;
 	mi[1].rmi_numeric = myuid;
-	nmi = 2;
+	mi[2].rmi_type = comm_to;
+	mi[2].rmi_numeric = textno;
+	nmi = 3;
 	free(ts);
 
 	/* Get the subject line from commented text */
@@ -167,15 +169,24 @@ write_put(char *str)
 	struct rk_text_stat *ts;
 	struct rk_text_info *rti;
 	struct rk_text_retval *rtr;
+	struct rk_aux_item_input *rtii;
 	struct rk_misc_info *imi;
 	int cnt, i, conf;
 
 	TW;
 
-	rti = malloc(sizeof(struct rk_text_info));
+	rti = alloca(sizeof(struct rk_text_info));
 	rti->rti_misc.rti_misc_len = nmi;
 	rti->rti_misc.rti_misc_val = mi;
 	rti->rti_text = ctext;
+
+	rtii = alloca(sizeof(*rtii));
+	rtii->raii_tag = RAI_TAG_CREATING_SW;
+	rtii->inherit_limit = 0;
+	rtii->raii_data = "raggkom ett.ett.beta"; /* XXX */
+	rti->rti_input.rti_input_len = 1;
+	rti->rti_input.rti_input_val = rtii;
+
 	rtr = rk_create_text(rti);
 	if (rtr->rtr_status)
 		rprintf("write_new: %s\n", error(rtr->rtr_status));
@@ -197,7 +208,6 @@ write_put(char *str)
 	free(ctext);
 	free(mi);
 	free(rtr);
-	free(rti);
 	nmi = 0;
 	is_writing = 0;
 	ctext = 0;
