@@ -28,6 +28,7 @@ void	cmd_add_rcpt(void);
 void	cmd_sub_rcpt(void);
 void	cmd_delete(int);
 void	cmd_create(void);
+void	cmd_copy(void);
 
 /* error.c */
 char *	error(int);

@@ -20,6 +20,14 @@ Ord inom parantes ska inte skrivas.
     (Skicka) brev (till)
     Personligt (svar)
     Lägga (in texten)
+    Extrakopia: (till)
+    Mottagare:
+    Ärende:
+    Kommentar till:
+    Lägga (in texten)
+    Glöm (bort texten du skriver)
+    (Visa) hela (texten du skriver)
+    Redigera (med extern editor)
 
   Kommandon för möten:
     Addera medlem (till möte)
@@ -34,13 +42,6 @@ Ord inom parantes ska inte skrivas.
   Kommandon för texter:
     Addera mottagare (till inlägg)
     Subtrahera mottagare (till inlägg)
-    Lägga (in texten)
-    Mottagare:
-    Ärende:
-    Kommentar till:
-    Glöm (bort texten du skriver)
-    (Visa) hela (texten du skriver)
-    Redigera (med extern editor)
     Markera (inlägg)
     Avmarkera (inlägg)
     Lista (alla) markerade
@@ -48,6 +49,7 @@ Ord inom parantes ska inte skrivas.
     Lista (alla) ärenden
     Lista olästa (ärenden)
     Radera (inlägg)
+    Kopia (till)
 
   Kommandon för onlinekommunikation:
     Vilka (är inloggade) [ synliga | osynliga | klienter | <inaktivtid> ]

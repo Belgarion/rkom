@@ -640,7 +640,7 @@ cmd_sub_member()
 		printf("Det gick inte: %s\n", error(rv));
 }
 
-void    
+void
 cmd_add_rcpt()
 {
 	struct rk_confinfo_retval *retval;
@@ -655,7 +655,7 @@ cmd_add_rcpt()
 		free(name);
 		return;
 	}
-	retval = match_complain(name, MATCHCONF_CONF);
+	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
 	free(name);
 	if (retval == NULL)
 		return;
@@ -705,7 +705,7 @@ cmd_sub_rcpt()
 		free(name);
 		return;
 	}
-	retval = match_complain(name, MATCHCONF_CONF);
+	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
 	free(name);
 	if (retval == NULL)
 		return;
@@ -785,3 +785,54 @@ cmd_create(void)
 	}
 	free(name);
 }
+
+void
+cmd_copy()
+{
+	struct rk_confinfo_retval *retval;
+	int rv, conf, text;
+	char *name, buf[50];
+
+	printf("(Skicka) kopia\n\n");
+
+	name = getstr("Vart skall kopian skickas? ");
+	if (strlen(name) == 0) {
+		printf("Nähej.\n"); 
+		free(name);
+		return;
+	}
+	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
+	free(name);
+	if (retval == NULL)
+		return;
+	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	if (lasttext)
+		sprintf(buf, "Vilken text skall ha en kopia? (%d) ", lasttext);
+	else
+		sprintf(buf, "Vilken text skall ha en kopia? ");
+	name = getstr(buf);
+	if ((strlen(name) == 0) && lasttext) {
+		text = lasttext;
+	} else if (strlen(name) == 0) {
+		printf("Nähej.\n");
+		free(name);
+		free(retval);
+		return;
+	} else 
+		text = atoi(name);
+	free(name);
+	if (text == 0) {
+		printf("Det var ett dåligt textnummer.\n");
+		free(retval);
+		return;
+	}
+	rv = rk_add_rcpt(text, conf, cc_recpt);
+	if (rv)
+		printf("Det gick inte: %s\n", error(rv));
+	else
+		printf("Text %d adderad till %s.\n", text,
+		    retval->rcr_ci.rcr_ci_val[0].rc_name);
+	free(retval);
+}
+

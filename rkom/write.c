@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.26 2001/01/15 20:23:04 ragge Exp $	*/
+/*	$Id: write.c,v 1.27 2001/01/27 11:08:42 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -152,7 +152,9 @@ parse_text(char *txt)
 		if (txt == NULL || arg == NULL)
 			return;
 		if (strncasecmp(cmd, "Mottagare:", strlen(cmd)) == 0)
-			write_rcpt(arg);
+			write_rcpt(arg, recpt);
+		else if (strncasecmp(cmd, "Extrakopia:", strlen(cmd)) == 0)
+			write_rcpt(arg, cc_recpt);
 		else if (strncasecmp(cmd, "Ärende:", strlen(cmd)) == 0) {
 			arg[strlen(arg)] = '\n';
 			ctext = strdup(arg);
@@ -295,7 +297,7 @@ write_editor(char *str)
 }
 
 void
-write_rcpt(char *str)
+write_rcpt(char *str, int type)
 {
 	struct rk_confinfo_retval *cr;
 	int conf, i;
@@ -311,7 +313,7 @@ write_rcpt(char *str)
 			return;
 	nmi++;
 	mi = realloc(mi, sizeof(struct rk_misc_info) * nmi);
-	mi[nmi-1].rmi_type = recpt;
+	mi[nmi-1].rmi_type = type;
 	mi[nmi-1].rmi_numeric = conf;
 }
 
@@ -381,11 +383,15 @@ show_format()
 
 	for (i = 0; i < nmi; i++) {
 		switch(mi[i].rmi_type) {
+		case cc_recpt:
 		case recpt:
 			conf = rk_confinfo(mi[i].rmi_numeric);
 			r = conf->rc_name;
 			ret = realloc(ret, strlen(ret) + strlen(r) + 30);
-			strcat(ret, "!Mottagare: ");
+			if (mi[i].rmi_type == cc_recpt)
+				strcat(ret, "!Extrakopia: ");
+			else
+				strcat(ret, "!Mottagare: ");
 			strcat(ret, r);
 			strcat(ret, "\n");
 			free(conf);

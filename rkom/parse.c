@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.26 2001/01/20 15:38:23 jens Exp $ */
+/* $Id: parse.c,v 1.27 2001/01/27 11:08:42 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -78,6 +78,7 @@ DCMD(text_add_rcpt_late);
 DCMD(text_sub_rcpt_late);
 DCMD(text_put);
 DCMD(text_add_rcpt);
+DCMD(text_add_copy);
 DCMD(text_add_cmt_to);
 DCMD(text_forget);
 DCMD(text_show);
@@ -89,6 +90,7 @@ DCMD(text_save);
 DCMD(text_list_subject);
 DCMD(text_list_unread);
 DCMD(text_delete);
+DCMD(text_copy);
 
 /* Commands for online communication */
 DCMD(com_who);
@@ -176,6 +178,7 @@ DROW("addera mottagare",			0,PE_NO_ARG,text_add_rcpt_late)
 DROW("subtrahera mottagare",			0,PE_NO_ARG,text_sub_rcpt_late)
 DROW("lägga",					0,PE_NO_ARG,text_put)
 DROW("mottagare:",				0,PE_STR_ARG,text_add_rcpt)
+DROW("extrakopia:",				0,PE_STR_ARG,text_add_copy)
 DROW("kommentar till:",			0,PE_NUM_ARG,text_add_cmt_to)
 DROW("glöm",					0,PE_NO_ARG,text_forget)
 DROW("hela",					0,PE_NO_ARG,text_show)
@@ -188,6 +191,7 @@ DROW("spara flaggor",				0,PE_NO_ARG,info_saveflags)
 DROW("lista ärenden",			0,PE_NO_ARG,text_list_subject)
 DROW("lista olästa",			0,PE_NO_ARG,text_list_unread)
 DROW("radera",					0,PE_NUM_ARG,text_delete)
+DROW("kopia",					0,PE_NO_ARG,text_copy)
 
 /* Commands for online communication */
 DROW("vilka",					0,PE_STR_ARG,com_who)
@@ -556,11 +560,20 @@ exec_text_put(int argc, char *argv[])
 }
 
 static int
+exec_text_add_copy(int argc, char *argv[])
+{
+	OWA;
+	TT(argc < 1, "Handhavande:\nextrakopia: <mottagarnamn>\n");
+	write_rcpt(re_concat(argc, argv), cc_recpt);
+	return 0;
+}
+
+static int
 exec_text_add_rcpt(int argc, char *argv[])
 {
 	OWA;
 	TT(argc < 1, "Handhavande:\nmottagare: <mottagarnamn>\n");
-	write_rcpt(re_concat(argc, argv));
+	write_rcpt(re_concat(argc, argv), recpt);
 	return 0;
 }
 
@@ -894,7 +907,16 @@ static int
 exec_conf_create(int argc, char *argv[])
 {
 	LF;
-	TT(argc > 0, "Skapa mötetar inga argument.\n");
+	TT(argc > 0, "Skapa möte tar inga argument.\n");
 	cmd_create();
+	return 0;
+}
+
+static int
+exec_text_copy(int argc, char *argv[])
+{
+	LF;
+	TT(argc > 0, "Kopia tar inga argument.\n");
+	cmd_copy();
 	return 0;
 }
