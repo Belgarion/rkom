@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.39 2001/11/25 15:19:56 ragge Exp $	*/
+/*	$Id: write.c,v 1.40 2001/11/25 16:46:32 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -426,9 +426,8 @@ int
 extedit(char *sub)
 {
 	struct stat sb;
-	extern char **environ;
 	char *editor;
-	char *txt, fil[30], *args[4], buf[10];
+	char *txt, fil[30], *buf;
 	int f;
 
 	editor = getenv("RKOM_EDITOR");
@@ -438,9 +437,8 @@ extedit(char *sub)
 		editor = _PATH_VI;
 
 	strcpy(fil, "/tmp/raggkom.XXXXXX");
-	f = mkstemp(fil);
-	if (f == -1) {
-		rprintf("Det gick inte: %s\n", strerror(errno));
+	if ((f = mkstemp(fil)) < 0) {
+		rprintf("mkstemp() gick inte: %s\n", strerror(errno));
 		return 0;
 	}
 	if (sub)
@@ -449,22 +447,15 @@ extedit(char *sub)
 	write(f, txt, strlen(txt));
 	close(f);
 	free(txt);
-	args[0] = editor;
-	sprintf(buf, "+%d", nmi + 1);
-	args[1] = buf;
-	args[2] = fil;
-	args[3] = 0;
-	if (fork() == 0) {
-		execve(editor, args, environ);
-		exit(errno); /* Only if exec failed */
-	}
-	wait(&f);
-	if (WEXITSTATUS(f)) {
+
+	buf = alloca(strlen(editor) + 40);
+	sprintf(buf, "%s +%d %s", editor, nmi + 1, fil);
+	if (system(buf)) {
 		unlink(fil);
-		rprintf("Kunde inte anropa %s: %s\n", editor, 
-		    strerror(WEXITSTATUS(f)));
+		rprintf("Kunde inte anropa %s: %s\n", editor, strerror(errno));
 		return 1;
 	}
+
 	stat(fil, &sb);
 	txt = calloc(sb.st_size + 5, 1);
 	f = open(fil, O_RDONLY);
