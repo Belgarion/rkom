@@ -17,13 +17,12 @@ extern int myuid;
 struct rk_time *
 rk_time(void)
 {
-	struct rk_time *ret;
+	static struct rk_time rkt;
 
-	ret = calloc(sizeof(struct rk_time), 1);
 	send_reply("35\n");
-	read_in_time(ret);
+	read_in_time(&rkt);
 	get_accept('\n');
-	return ret;
+	return &rkt;
 }
 
 static void
@@ -142,90 +141,86 @@ rk_unreadconf(u_int32_t uid)
 struct rk_uconference *
 rk_uconfinfo(u_int32_t mid) 
 {
-	struct rk_uconference *ru;
+	static struct rk_uconference rku;
 	char buf[40];
 
-	ru = calloc(sizeof(struct rk_uconference), 1);
 	sprintf(buf, "78 %d\n", mid);
 	if (send_reply(buf)) {
-		ru->ru_name = "";
-		ru->ru_retval = get_int();
+		rku.ru_name = "";
+		rku.ru_retval = get_int();
 		get_eat('\n');
-		return ru;
+		return &rku;
 	}
-	ru->ru_name = get_string();
-	ru->ru_type = get_int();
-	ru->ru_highest_local_no = get_int();
-	ru->ru_nice = get_int();
+	rku.ru_name = get_string();
+	rku.ru_type = get_int();
+	rku.ru_highest_local_no = get_int();
+	rku.ru_nice = get_int();
 	get_accept('\n');
-	return ru;
+	return &rku;
 }
 
 struct rk_conference *
 rk_confinfo(u_int32_t mid)
 {
-	struct rk_conference *ret, *conf;
+	static struct rk_conference rkc;
+	struct rk_conference *conf;
 
-	ret = calloc(sizeof(struct rk_conference), 1);
-	ret->rc_name = "";
-	ret->rc_retval = get_conf_stat(mid, &conf);
-	if (ret->rc_retval)
-		return ret;
-	bcopy(conf, ret, sizeof(struct rk_conference));
-	return ret;
+	rkc.rc_name = "";
+	rkc.rc_retval = get_conf_stat(mid, &conf);
+	if (rkc.rc_retval)
+		return &rkc;
+	bcopy(conf, &rkc, sizeof(struct rk_conference));
+	return &rkc;
 }
 
 struct rk_person *
 rk_persinfo(u_int32_t uid)
 {
-	struct rk_person *ret, *r2; 
+	static struct rk_person rkp;
+	struct rk_person *r2; 
 
-	ret = calloc(sizeof(struct rk_person), 1);
-	ret->rp_retval = get_pers_stat(uid, &r2);
-	if (ret->rp_retval)
-		return ret;
-	bcopy(r2, ret, sizeof(struct rk_person));
-	ret->rp_retval = 0;
-	return ret;
+	rkp.rp_retval = get_pers_stat(uid, &r2);
+	if (rkp.rp_retval)
+		return &rkp;
+	return r2;
 }               
 
 struct rk_membership *
 rk_membership(u_int32_t uid, u_int32_t mid)
 {
-	struct rk_membership *m, *ret;
+	static struct rk_membership rkm;
+	struct rk_membership *m;
 
-	ret = calloc(sizeof(struct rk_membership), 1);
-	ret->rm_retval = get_membership(uid, mid, &m);
-	if (ret->rm_retval)
-		return ret;
-	bcopy(m, ret, sizeof(struct rk_membership));
-	ret->rm_retval = 0;
-	return ret;
+	rkm.rm_retval = get_membership(uid, mid, &m);
+	if (rkm.rm_retval)
+		return &rkm;
+	return m;
 }
 
 struct rk_dynamic_session_info_retval *
 rk_vilka(u_int32_t secs, u_int32_t flags)
 {
-	struct rk_dynamic_session_info_retval *pp;
-	struct rk_dynamic_session_info *ppp;
+	static struct rk_dynamic_session_info_retval rkd;
+	static struct rk_dynamic_session_info *ppp;
 	char buf[50];
 	int antal, i;
 
+	if (ppp != NULL)
+		free(ppp);
 	sprintf(buf, "83 %d %d %d\n", (flags & WHO_VISIBLE) != 0, 
 	    (flags & WHO_INVISIBLE) != 0, secs);
 	send_reply(buf);
 
 	antal = get_int();
-	pp = calloc(sizeof(struct rk_dynamic_session_info_retval) +
-	    sizeof(struct rk_dynamic_session_info) * antal, 1);
-	pp->rdv_rds.rdv_rds_val = (struct rk_dynamic_session_info *)&pp[1];
-	pp->rdv_rds.rdv_rds_len = antal;
+	rkd.rdv_rds.rdv_rds_val =
+	    calloc(sizeof(struct rk_dynamic_session_info), antal);
+	rkd.rdv_rds.rdv_rds_len = antal;
 
 	if (antal == 0) {
 		get_eat('\n');
-		return pp;
+		return &rkd;
 	}
-	ppp = pp->rdv_rds.rdv_rds_val;
+	ppp = rkd.rdv_rds.rdv_rds_val;
 	get_accept('{');
 	for (i = 0; i < antal; i++) {
 		ppp[i].rds_session = get_int();
@@ -237,42 +232,46 @@ rk_vilka(u_int32_t secs, u_int32_t flags)
 	}
 	get_accept('}');
 	get_accept('\n');
-	return pp;
+	return &rkd;
 }
 
 char *
 rk_client_name(u_int32_t vers)
 {
-	char *ret;
+	static char *ret;
 	char buf[50];
 
+	if (ret != NULL)
+		free(ret);
 	sprintf(buf, "70 %d\n", vers);
 	if (send_reply(buf)) {
 		get_eat('\n');
-		return "";
+		return NULL;
 	}
 	ret = get_string();
 	get_eat('\n');
 	if (*ret == 0)
-		ret = calloc(10,1);
+		ret = NULL;
 	return ret;
 }
 
 char *
 rk_client_version(u_int32_t vers)
 {
-	char *ret;
+	static char *ret;
 	char buf[50];
 
+	if (ret != NULL)
+		free(ret);
 	sprintf(buf, "71 %d\n", vers);
 	if (send_reply(buf)) {
 		get_eat('\n');
-		return "";
+		return NULL;
 	}
 	ret = get_string();
 	get_eat('\n');
 	if (*ret == 0)
-		ret = calloc(10,1);
+		ret = NULL;
 	return ret;
 }
 
