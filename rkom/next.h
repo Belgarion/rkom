@@ -7,5 +7,6 @@ void	next_comment(char *);
 void	next_resetchain(void);
 void	next_prompt(void);
 void	next_again(char *);
+void	next_hoppa(char *);
 
 extern int lasttext;

@@ -27,11 +27,13 @@ static void cmd_leave(char *);
 
 struct cmnd cmds[] = {
 	{"avmarkera", 0, list_unmark },
+	{"brev", 0, write_brev },
 	{"endast", 0, cmd_only },
 	{"fotnot", 0, write_footnote },
 	{"gå", 0, cmd_goto },
 	{"glöm", 0, write_forget },
 	{"hela", 0, write_whole },
+	{"hoppa", 0, next_hoppa },
 	{"igen", 0, next_again },
 	{"inlägg", 0, write_new },
 	{"kommentera", 0, write_cmnt },
@@ -91,6 +93,9 @@ cmd_parse(str)
 			    (str && bcmp(str, "föregående", strlen(str)) == 0)))
 				break; /* Match on only 'k' if necessary */
 
+			if (strcmp(arg1, "g") == 0 && 
+			    strcmp(cmds[i].arg1, "gå") == 0)
+				break;
 			/* END QUIRK QUIRK QUIRK */
 		}
 

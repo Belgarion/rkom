@@ -9,5 +9,6 @@ void	write_footnote(char *);
 void	write_cmnt(char *);
 void	write_put(char *);
 void	write_whole(char *);
+void	write_brev(char *);
 
 int	is_writing; /* Is writing text right now */

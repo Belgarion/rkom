@@ -298,3 +298,40 @@ next_again(char *str)
 {
 	show_text(lasttext);
 }
+
+void
+next_hoppa(char *str)
+{
+	struct rk_text_stat *ts;
+	struct rk_misc_info *mi;
+	int global, len, i, hoppade;
+
+	hoppade = 0;
+	while (1) {
+		if (pole == 0) {
+			if (hoppade == 0)
+				printf("Du hoppade inte över några inlägg.\n");
+			else
+				printf("Du hoppade över %d inlägg.\n", hoppade);
+			return;
+		}
+		ts = rk_textstat(pole->textnr);
+		len = ts->rt_misc_info.rt_misc_info_len;
+		mi = ts->rt_misc_info.rt_misc_info_val;
+		for (i = pole->listidx; i < len; i++)
+			if (mi[i].rmi_type == footn_in ||
+			    mi[i].rmi_type == comm_in)
+				break;
+		if (i == len) {
+			free(ts);
+			next_action(global);
+			continue;
+		}
+		global = mi[i].rmi_numeric;
+		free(ts);
+		mark_read(global);
+		hoppade++;
+		next_action(global);
+		lasttext = global;
+	}
+}

@@ -30,24 +30,54 @@ static int nmi = 0;
 static char *ctext = 0;
 
 #define	TW if (!is_writing) {printf("Du skriver ingen text just nu.\n");return;}
+#define IW if (is_writing) {printf("Du håller redan på att skriva en text.\n");return;}
+#define	LF if (myuid == 0) {printf("Du måste logga in först.\n");return;}
+#define	NC if (curconf == 0) {printf("Du måste gå till ett möte först.\n");return;}
+
+void
+write_brev(char *str)
+{
+	struct rk_confinfo_retval *retval;
+	char *txt;
+
+	IW;
+	LF;
+	if (str == 0) {
+		printf("Du måste ange mottagare.\n");
+		return;
+	}
+	if ((retval = match_complain(str, MATCHCONF_PERSON)) == 0)
+		return;
+
+	printf("(Skicka) brev (till) %s\n",
+	    retval->rcr_ci.rcr_ci_val[0].rc_name);
+	is_writing = 1;
+	mi = calloc(sizeof(struct rk_misc_info), 2);
+	mi[0].rmi_type = recpt;
+	mi[0].rmi_numeric = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	mi[1].rmi_type = recpt;
+	mi[1].rmi_numeric = myuid;
+	nmi = 2;
+a:      if (use_editor) {
+		if (extedit(0)) {
+			use_editor = 0;
+			goto a;
+		}
+	} else {
+		txt = get_text(0);
+		parse_text(txt);
+		free(txt);
+	}
+}
 
 void
 write_new(char *str)
 {
 	char *txt;
 
-	if (is_writing) {
-		printf("Du håller redan på att skriva en text.\n");
-		return;
-	}
-	if (myuid == 0) {
-		printf("Du måste logga in först.\n");
-		return;
-	}
-	if (curconf == 0) {
-		printf("Du måste gå till ett möte först.\n");
-		return;
-	}
+	IW;
+	LF;
+	NC;
 
 	is_writing = 1;
 	mi = calloc(sizeof(struct rk_misc_info), 1);
@@ -354,10 +384,7 @@ write_internal(char *str, char *typ, int ktyp)
 	char *txt, *s, *t;
 	int text, i, num;
 
-	if (is_writing) {
-		printf("Du håller redan på att skriva en text.\n");
-		return;
-	}
+	IW;
 	if (myuid == 0) {
 		printf("Du måste logga in först.\n");
 		return;
