@@ -22,10 +22,14 @@ show_superhoppa(char *arg)
 {
 	char *c;
 
+	if (lasttext == 0) {
+		rprintf("Du måste läsa ett inlägg först.\n");
+		return;
+	}
 	supstr = rk_gettext(lasttext);
 	if ((c = index(supstr, '\n')))
 		*c = 0;
-	printf("Superhoppar över alla inlägg med ärenderad '%s'\n",
+	rprintf("Superhoppar över alla inlägg med ärenderad '%s'\n",
 	    supstr);
 }
 
