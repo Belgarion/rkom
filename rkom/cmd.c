@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.76 2003/10/13 20:53:53 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.77 2003/11/14 22:45:54 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -303,6 +303,7 @@ cmd_say(char *str)
 void
 cmd_where(char *str)
 {
+	struct rk_membership *m;
 	struct rk_conference *conf;
 
 	if (myuid == 0)
@@ -310,12 +311,15 @@ cmd_where(char *str)
 	else if (curconf == 0)
 		rprintf("Du är inte närvarande någonstans");
 	else {
-		if ((conf = rk_confinfo(curconf)) == NULL)
-			rprintf("Du är i voiden");
-		else
-			rprintf("Du är i möte %s", conf->rc_name);
+		if ((conf = rk_confinfo(curconf)) == NULL) {
+			rprintf("Du är i voiden på server %s.\n", server);
+		} else {
+			m = rk_membership(myuid, curconf);
+			rprintf("Du är i möte %s med %d olästa inlägg.\n",
+			    conf->rc_name, conf->rc_first_local_no + 
+			    conf->rc_no_of_texts - 1 - m->rm_last_text_read);
+		}
 	}
-	rprintf(" på server %s.\n", server);
 }
 
 void
