@@ -224,6 +224,21 @@ back:		printf("Det finns ingen nästa kommentar.\n");
 	lasttext = global;
 }
 
+void
+next_resee(char *str)
+{
+	int num;
 
+	if (str == 0) {
+		printf("Du måste get ett argument till \"återse\"\n");
+		return;
+	}
+	num = atoi(str);
+	if (num == 0) {
+		printf("\"%s\" är ett dåligt inläggsnunmmer.\n", str);
+		return;
+	}
+	show_text(num);
+}
 
 

@@ -48,6 +48,7 @@ struct cmnd cmds[] = {
 	{"tiden", 0, cmd_tiden },
 	{"var", 0, cmd_where },
  	{"vilka", 0, cmd_vilka },
+	{"återse", 0, next_resee },
 };
 static int ncmds = sizeof(cmds)/sizeof(cmds[0]);
 
@@ -479,6 +480,7 @@ cmd_only(char *str)
 	conf = rk_confinfo(curconf);
 	high = conf->rc_first_local_no + conf->rc_no_of_texts - 1;
 	rk_set_last_read(curconf, high - only);
+	next_resetchain();
 	if (only == 0)
 		prompt = PROMPT_NEXT_CONF;
 	else
