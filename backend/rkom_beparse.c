@@ -724,3 +724,22 @@ rk_send_msg_server(u_int32_t dest, char *string)
 	get_eat('\n');
 	return i;
 }
+
+int32_t 
+rk_setpass_server(u_int32_t uid, char *oldpass, char *newpass)
+{
+	int i, totlen;
+	char *buf;
+
+	totlen = strlen(oldpass) + strlen(newpass) + 50;
+	buf = alloca(totlen);
+	sprintf(buf, "8 %d %ldH%s %ldH%s\n", uid, (long)strlen(oldpass),
+	    oldpass, (long)strlen(newpass), newpass);
+	if (send_reply(buf)) {
+		i = get_int();
+		get_eat('\n');
+		return i;
+	}
+	get_accept('\n');
+	return 0;
+}

@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.15 2000/11/18 10:35:58 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.16 2000/11/19 18:22:19 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -379,3 +379,9 @@ struct rk_uarea rk_get_uarea(string);
  * Returns a normal Lyskom error code.
  */
 int32_t rk_set_uarea(string, struct rk_uarea);
+
+/*
+ * Change password for an user.
+ * Arguments are (uid, oldpass, newpass). Returns a normal Lyskom error code.
+ */
+int32_t	rk_setpass(u_int32_t, string, string);
