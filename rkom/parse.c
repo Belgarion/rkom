@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.9 2000/11/22 21:43:19 jens Exp $ */
+/* $Id: parse.c,v 1.10 2000/11/28 22:32:20 jens Exp $ */
 
 #include <sys/param.h>
 
@@ -95,12 +95,10 @@ DCMD(info_time);
 DCMD(info_saveflags);
 DCMD(info_status);
 
-#if 0
 /* Commands for aliases */
 DCMD(alias_add);
 DCMD(alias_delete);
 DCMD(alias_list);
-#endif
 
 
 /* Other commands */
@@ -178,12 +176,10 @@ DROW("tiden",					0,PE_NO_ARG,info_time)
 DROW("hjälp",					0,PE_NO_ARG,info_list_commands)
 DROW("status",					0,PE_STR_ARG,info_status)
 
-#if 0
 /* Commands for aliases */
 DROW("alias",					0,PE_STR_ARG,alias_add)
 DROW("unalias",					0,PE_STR_ARG,alias_delete)
 DROW("lista alias",				0,PE_NO_ARG,alias_list)
-#endif
 
 /* Other commands */
 DROW("sätt",					0,PE_STR_ARG,other_set)
@@ -205,7 +201,7 @@ do { \
 	} \
 } while (0)
 
-static cmd_lst_t *cmds;
+static cmds_t *cmds;
 static int inited = 0;
 
 static void p_init(void);
@@ -216,7 +212,7 @@ p_init(void)
 	struct command_list *c;
 
 	c = commands;
-	cmds = parse_new_cmd_lst();
+	cmds = parse_new_cmds();
 	for (c = commands; c->cl_str != NULL; c++)
 		parse_add_cmd(cmds, c->cl_str, c->cl_prio,
 		    c->cl_takes_arg, c->cl_exec);
@@ -693,14 +689,13 @@ exec_info_status(int argc, char *argv[])
 	return 0;
 }
 
-#if 0
 /* Commands for aliases */
 
 static int
 exec_alias_add(int argc, char *argv[])
 {
 	TT(argc <= 1, "Handhavande:\nalias <alias> <commnad>\n");
-	parse_add_alias(cmds, argv[0], argc - 1, &argv[1]);
+	parse_add_alias(cmds, argc, argv);
 	return 0;
 }
 
@@ -718,7 +713,6 @@ exec_alias_list(int argc, char *argv[])
 	parse_list_alias(cmds);
 	return 0;
 }
-#endif
 
 
 /* Other commands */
