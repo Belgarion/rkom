@@ -6,6 +6,7 @@
 #include <sys/poll.h>
 #endif
 
+#include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -45,7 +46,7 @@ int
 rkom_loop()
 {
 	struct pollfd pfd[2];
-	int err = 0;
+	int erra = 0;
 
 	/*
 	 * Set up the poll descriptors.
@@ -79,7 +80,20 @@ rkom_loop()
 			spc_process_request();
 		if (pfd[1].revents & (POLLIN|POLLPRI)) {
 			int i;
-			char c = get_char();
+			char c;
+
+			/* Check if there are anything available */
+			if (fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1)
+				err(1, "fcntl");
+			if (read(sockfd, &c, 1) != 1) {
+				warn("read sockfd");
+				continue;
+			}
+			unget = c;
+			if (fcntl(sockfd, F_SETFL, 0) == -1)
+				err(1, "fcntl2");
+
+			c = get_char();
 
 			switch (c) {
 			case ':':
@@ -96,7 +110,7 @@ rkom_loop()
 					}
 					errx(56, "Hejdå!");
 				}
-				err = -1;
+				erra = -1;
 				unget = c;
 				/* FALLTHROUGH */
 			case '=':
@@ -104,13 +118,13 @@ rkom_loop()
 				if (wait_for_reply_no == i) {
 					wait_for_reply_no = 0;
 					level--;
-					return err;
+					return erra;
 				} else {
 					struct callback *nc = 0, *cc = cpole;
 					while (cc) {
 						if (cc->msgid == i) {
 							(*cc->func)
-							    (err, cc->arg);
+							    (erra, cc->arg);
 							if (cc == cpole) {
 								cpole =
 								    cc->next;
@@ -119,7 +133,7 @@ rkom_loop()
 								    cc->next;
 							}
 							free(cc);
-							err = 0;
+							erra = 0;
 							break;
 						}
 						nc = cc;
