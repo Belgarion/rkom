@@ -721,19 +721,17 @@ rk_memberconf(u_int32_t uid)
 
 	ps = findperson(uid);
 	if (ps == 0) {
-		if (rk_persinfo(uid) == NULL) {
-			rkm.rm_retval = -1;
-			return &rkm;
-		}
+		if (rk_persinfo(uid) == NULL)
+			return NULL;
 		ps = findperson(uid); /* Cannot fail here */
 		if (ps == 0)
 			printf("EEEK! Person %d finns inte!\n", uid);
 	}
 	if (ps->nconfs == 0) {
 		if (send_reply("46 %d 0 65535 0\n", uid)) {
-			rkm.rm_retval = get_int();
+			komerr = get_int();
 			get_eat('\n');
-			return &rkm;
+			return NULL;
 		}
 		ps->nconfs = get_int();
 		if (ps->nconfs) {

@@ -109,9 +109,9 @@ rk_unreadconf(u_int32_t uid)
 		free(arr);
 	arr = NULL;
 	if ((i = send_reply("52 %d\n", uid))) {
-		rku.ru_retval = get_int();
+		komerr = get_int();
 		get_eat('\n');
-		return &rku;
+		return NULL;
 	}
 	nconfs = get_int();
 	rku.ru_confs.ru_confs_len = nconfs;
@@ -135,10 +135,9 @@ rk_uconfinfo(u_int32_t mid)
 	static struct rk_uconference rku;
 
 	if (send_reply("78 %d\n", mid)) {
-		rku.ru_name = "";
-		rku.ru_retval = get_int();
+		komerr = get_int();
 		get_eat('\n');
-		return &rku;
+		return NULL;
 	}
 	rku.ru_name = get_string();
 	rku.ru_type = get_int();
@@ -422,12 +421,12 @@ reread_text_stat_bg(int text)
 /*
  * Put a text into a conference.
  */
-struct rk_text_retval *
+u_int32_t
 rk_create_text(struct rk_text_info *rti)
 {
-	static struct rk_text_retval rkt;
 	struct rk_misc_info *mi;
 	struct rk_aux_item_input *raii;
+	u_int32_t textnr;
 	int i, nmi, nraii;
 
 	send_reply("86 %ldH", (long)strlen(rti->rti_text));
@@ -436,9 +435,8 @@ rk_create_text(struct rk_text_info *rti)
 	mi = rti->rti_misc.rti_misc_val;
 
 	send_reply(" %d { ", nmi);
-	for (i = 0; i < nmi; i++) {
+	for (i = 0; i < nmi; i++)
 		send_reply("%d %d ", mi[i].rmi_type, mi[i].rmi_numeric);
-	}
 	nraii = rti->rti_input.rti_input_len;
 	raii = rti->rti_input.rti_input_val;
 	send_reply("} %d { ", nraii);
@@ -450,14 +448,14 @@ rk_create_text(struct rk_text_info *rti)
 	}
 
 	if (send_reply("}\n")) {
-		rkt.rtr_status = get_int();
+		komerr = get_int();
 		get_eat('\n');
-		return &rkt;
+		return 0;
 	}
-	rkt.rtr_textnr = get_int();
+	textnr = get_int();
 	get_accept('\n');
 
-	return &rkt;
+	return textnr;
 }
 
 /* Get the marked texts. */
@@ -469,9 +467,9 @@ rk_getmarks(void)
 	int cnt, i;
 
 	if (send_reply("23\n")) {
-		rkm.rmr_retval = get_int();
+		komerr = get_int();
 		get_eat('\n');
-		return &rkm;
+		return NULL;
 	}
 	cnt = get_int();
 	if (cnt) {
@@ -573,10 +571,10 @@ rk_change_name(u_int32_t uid, char *newname)
 int32_t
 rk_set_presentation(u_int32_t conf, struct rk_text_info *rti)
 {
-	struct rk_text_retval *rtr;
 	struct rk_misc_info *rkm;
 	struct rk_conference *c;
 	int i, presconf, oldn, nrkm;
+	u_int32_t textno;
 	void *old;
 
 	/* Get conference info (pers/conf) */
@@ -609,14 +607,13 @@ rk_set_presentation(u_int32_t conf, struct rk_text_info *rti)
 	rti->rti_misc.rti_misc_len = nrkm;
 
 	/* create text */
-	rtr = rk_create_text(rti);
-	if (rtr->rtr_status)
-		return rtr->rtr_status;
+	if ((textno = rk_create_text(rti)) == 0)
+		return komerr;
 
 	rti->rti_misc.rti_misc_len = oldn;
 	rti->rti_misc.rti_misc_val = old;
 	/* Set text as presentation */
-	if (send_reply("16 %d %d\n", conf, rtr->rtr_textnr)) {
+	if (send_reply("16 %d %d\n", conf, textno)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -670,8 +667,8 @@ rk_delete_text(u_int32_t text)
 int32_t
 rk_set_motd(u_int32_t conf, struct rk_text_info *rti)
 {
-	struct rk_text_retval *rtr;
 	int i, motdconf, oldn;
+	u_int32_t textnr;
 	void *old;
 
 	if (*rti->rti_text == 0) { /* Remove motd */
@@ -700,14 +697,14 @@ rk_set_motd(u_int32_t conf, struct rk_text_info *rti)
 	rti->rti_misc.rti_misc_len = 1;
 
 	/* create text */
-	rtr = rk_create_text(rti);
-	if (rtr->rtr_status)
-		return rtr->rtr_status;
+	textnr = rk_create_text(rti);
+	if (textnr == 0)
+		return komerr;
 
 	rti->rti_misc.rti_misc_len = oldn;
 	rti->rti_misc.rti_misc_val = old;
 	/* Set text as presentation */
-	if (send_reply("17 %d %d\n", conf, rtr->rtr_textnr)) {
+	if (send_reply("17 %d %d\n", conf, textnr)) {
 		i = get_int();
 		get_eat('\n');
 		return i;

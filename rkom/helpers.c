@@ -67,8 +67,7 @@ ismember(int conf)
 	struct rk_memberconflist *mcl;
 	int i, rv = 0;
 
-	mcl = rk_memberconf(myuid);
-	if (mcl->rm_retval == 0)
+	if ((mcl = rk_memberconf(myuid)) != NULL)
 		for (i = 0; i < mcl->rm_confs.rm_confs_len; i++)
 			if (mcl->rm_confs.rm_confs_val[i] == conf) {
 				rv = 1;

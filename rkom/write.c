@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.58 2003/09/25 11:45:05 ragge Exp $	*/
+/*	$Id: write.c,v 1.59 2003/09/25 15:40:59 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -161,18 +161,17 @@ parse_text(char *txt)
 static int
 change_faq(int confno, struct rk_text_info *rti)
 {
-	struct rk_text_retval *rv;
 	struct rk_modifyconfinfo *rkm;
 	struct rk_conference *rcp;
 	struct rk_aux_item *rai;
 	struct rk_aux_item_input *raii;
 	u_int32_t rmtext = 0;
+	u_int32_t textnr;
 	char buf[20];
 	int i, nrai, top;
 
-	rv = rk_create_text(rti);
-	if (rv->rtr_status)
-		return rv->rtr_status;
+	if ((textnr = rk_create_text(rti)) == 0)
+		return komerr;
 	rkm = alloca(sizeof(struct rk_modifyconfinfo));
 	rkm->rkm_conf = confno;
 	rkm->rkm_add.rkm_add_len = 0;
@@ -202,7 +201,7 @@ change_faq(int confno, struct rk_text_info *rti)
 	raii->raii_tag = RAI_TAG_FAQ_TEXT;
 	raii->raii_flags = 0;
 	raii->inherit_limit = 0;
-	sprintf(buf, "%d", rv->rtr_textnr);
+	sprintf(buf, "%d", textnr);
 	raii->raii_data = buf;
 	return rk_modify_conf_info(rkm);
 }
@@ -242,8 +241,8 @@ void
 write_put(char *str)
 {
 	struct rk_text_info *rti;
-	struct rk_text_retval *rtr;
 	struct rk_aux_item_input *rtii;
+	u_int32_t textnr;
 
 	if (isneq("write-convert-from-swascii", "0"))
 		convert_from_swascii();
@@ -300,13 +299,12 @@ write_put(char *str)
 			rprintf("Lappen ditsatt.\n");
 		islapp = 0;
 	} else {
-		rtr = rk_create_text(rti);
-		if (rtr->rtr_status)
-			rprintf("write_new: %s\n", error(rtr->rtr_status));
+		if ((textnr = rk_create_text(rti)) == 0)
+			rprintf("write_new: %s\n", error(komerr));
 		else
-			rprintf("Text %d har skapats.\n", rtr->rtr_textnr);
+			rprintf("Text %d har skapats.\n", textnr);
 		lastlasttext = lasttext;
-		lasttext = rtr->rtr_textnr;
+		lasttext = textnr;
 	}
 	free(ctext);
 	free(mi);

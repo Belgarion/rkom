@@ -40,8 +40,7 @@ list_conf_q(char *str)
 	for (i = 0; i < nconfs; i++) {
 		struct rk_uconference *UC;
 
-		UC = rk_uconfinfo(ci[i].rc_conf_no);
-		if (UC->ru_retval)
+		if ((UC = rk_uconfinfo(ci[i].rc_conf_no)) == NULL)
 			continue;
 
 		rprintf("%08d  %s\n", UC->ru_type, UC->ru_name);
@@ -178,11 +177,10 @@ list_marked(char *str)
 		rprintf("Du måste logga in först.\n");
 		return;
 	}
-	rmr = rk_getmarks();
+	if ((rmr = rk_getmarks()) == NULL)
+		return rprintf("Det sket sej: %s\n", error(komerr));
 	rm = rmr->rmr_marks.rmr_marks_val;
-	if (rmr->rmr_retval) {
-		rprintf("Det sket sej: %s\n", error(rmr->rmr_retval));
-	} else if (rmr->rmr_marks.rmr_marks_len == 0) {
+	if (rmr->rmr_marks.rmr_marks_len == 0) {
 		rprintf("Du har inga markerade inlägg.\n");
 	} else {
 		rprintf("Inläggsnummer\tPrioritet\n");

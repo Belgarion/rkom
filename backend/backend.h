@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.21 2003/09/25 15:13:06 ragge Exp $	*/
+/*	$Id: backend.h,v 1.22 2003/09/25 15:40:56 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -81,7 +81,12 @@ char *	rk_gettext(u_int32_t nr);
  * Return NULL if something failed and set komerr to the error number.
  */
 struct	rk_text_stat *rk_textstat(u_int32_t nr);
-struct	rk_text_retval *rk_create_text(struct rk_text_info *rti);
+
+/*
+ * Create a text. Return the new global text number if succeeded, 
+ * otherwise return 0 and set komerr to the error number.
+ */
+u_int32_t rk_create_text(struct rk_text_info *rti);
 struct	rk_mark_retval *rk_getmarks(void);
 int32_t rk_setmark(u_int32_t text, u_int8_t type);
 int32_t rk_unmark(u_int32_t text);
@@ -175,38 +180,38 @@ enum Misc_Info_types {
 /* Struct definitions */
 
 struct rk_time {
-		u_int8_t	rt_seconds;
-		u_int8_t	rt_minutes;
-		u_int8_t	rt_hours;
-		u_int8_t	rt_day;
-		u_int8_t	rt_month;
-		u_int16_t	rt_year;
-		u_int8_t	rt_day_of_week;
-		u_int16_t	rt_day_of_year;
-		u_int8_t	rt_is_dst;
+	u_int8_t	rt_seconds;
+	u_int8_t	rt_minutes;
+	u_int8_t	rt_hours;
+	u_int8_t	rt_day;
+	u_int8_t	rt_month;
+	u_int16_t	rt_year;
+	u_int8_t	rt_day_of_week;
+	u_int16_t	rt_day_of_year;
+	u_int8_t	rt_is_dst;
 };
 
 struct rk_misc_info {
-		u_int32_t	rmi_type;
-		u_int32_t	rmi_numeric;
-		struct rk_time	rmi_time;
+	u_int32_t	rmi_type;
+	u_int32_t	rmi_numeric;
+	struct rk_time	rmi_time;
 };
 
 struct rk_aux_item {
-		u_int32_t	rai_aux_no;
-		u_int32_t	rai_tag;
-		u_int32_t	rai_creator;
-		struct rk_time	rai_created_at;
-		u_int32_t	rai_flags;
-		u_int32_t	inherit_limit;
-		char *	rai_data;
+	u_int32_t	rai_aux_no;
+	u_int32_t	rai_tag;
+	u_int32_t	rai_creator;
+	struct rk_time	rai_created_at;
+	u_int32_t	rai_flags;
+	u_int32_t	inherit_limit;
+	char *	rai_data;
 };
 
 struct rk_aux_item_input {
-		u_int32_t	raii_tag;
-		u_int32_t	raii_flags;
-		u_int32_t	inherit_limit;
-		char *	raii_data;
+	u_int32_t	raii_tag;
+	u_int32_t	raii_flags;
+	u_int32_t	inherit_limit;
+	char *	raii_data;
 };
 
 struct rk_text_stat {
@@ -264,11 +269,10 @@ struct rk_conference {
 };
 
 struct rk_uconference {
-		int32_t	ru_retval;
-		char *	ru_name;
-		u_int32_t	ru_type;
-		u_int32_t	ru_highest_local_no;
-		u_int32_t	ru_nice;
+	char *	ru_name;
+	u_int32_t	ru_type;
+	u_int32_t	ru_highest_local_no;
+	u_int32_t	ru_nice;
 };
 
 struct rk_person {
@@ -292,9 +296,9 @@ struct rk_person {
 };
 
 struct rk_confinfo {
-		char *	rc_name;
-		u_int32_t	rc_type;
-		u_int32_t	rc_conf_no;
+	char *	rc_name;
+	u_int32_t	rc_type;
+	u_int32_t	rc_conf_no;
 };
 
 struct rk_confinfo_retval {
@@ -305,12 +309,12 @@ struct rk_confinfo_retval {
 };
 
 struct rk_dynamic_session_info {
-		u_int32_t	rds_session;
-		u_int32_t	rds_person;
-		u_int32_t	rds_conf;
-		u_int32_t	rds_idletime;
-		u_int32_t	rds_flags;
-		char *	rds_doing;
+	u_int32_t	rds_session;
+	u_int32_t	rds_person;
+	u_int32_t	rds_conf;
+	u_int32_t	rds_idletime;
+	u_int32_t	rds_flags;
+	char *	rds_doing;
 };
 
 struct rk_dynamic_session_info_retval {
@@ -321,7 +325,6 @@ struct rk_dynamic_session_info_retval {
 };
 
 struct rk_unreadconfval {
-		int32_t	ru_retval;
 	struct {
 		u_int32_t	ru_confs_len;
 		u_int32_t	*ru_confs_val;
@@ -329,20 +332,14 @@ struct rk_unreadconfval {
 };
 
 struct rk_memberconflist {
-		int32_t	rm_retval;
 	struct {
 		u_int32_t	rm_confs_len;
 		u_int32_t	*rm_confs_val;
 	} rm_confs;
 };
 
-struct rk_text_retval {
-		int32_t	rtr_status;
-		u_int32_t	rtr_textnr;
-};
-
 struct rk_text_info {
-		char *	rti_text;
+	char *	rti_text;
 	struct {
 		u_int32_t	rti_misc_len;
 		struct rk_misc_info	*rti_misc_val;
@@ -354,7 +351,7 @@ struct rk_text_info {
 };
 
 struct rk_modifyconfinfo {
-		u_int32_t	rkm_conf;
+	u_int32_t	rkm_conf;
 	struct {
 		u_int32_t	rkm_delete_len;
 		u_int32_t	*rkm_delete_val;
@@ -366,21 +363,20 @@ struct rk_modifyconfinfo {
 };
 
 struct rk_async {
-		u_int32_t	ra_type;
-		u_int32_t	ra_conf;
-		u_int32_t	ra_pers;
-		u_int32_t	ra_text;
-		char *	ra_message;
-		char *	ra_message2;
+	u_int32_t	ra_type;
+	u_int32_t	ra_conf;
+	u_int32_t	ra_pers;
+	u_int32_t	ra_text;
+	char *	ra_message;
+	char *	ra_message2;
 };
 
 struct rk_marks {
-		u_int32_t	rm_text;
-		u_int8_t	rm_type;
+	u_int32_t	rm_text;
+	u_int8_t	rm_type;
 };
 
 struct rk_mark_retval {
-		int32_t	rmr_retval;
 	struct {
 		u_int32_t	rmr_marks_len;
 		struct rk_marks	*rmr_marks_val;
@@ -388,8 +384,8 @@ struct rk_mark_retval {
 };
 
 struct rk_val {
-		char *	rv_var;
-		char *	rv_val;
+	char *	rv_var;
+	char *	rv_val;
 };
 
 struct rk_uarea {

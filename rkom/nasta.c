@@ -298,10 +298,9 @@ next_marked(char *str)
 	struct rk_marks *rm;
 	int i;
 
-	rmr = rk_getmarks();
+	if ((rmr = rk_getmarks()) == NULL)
+		return rprintf("Det sket sej: %s\n", error(komerr));
 	rm = rmr->rmr_marks.rmr_marks_val;
-	if (rmr->rmr_retval)
-		return rprintf("Det sket sej: %s\n", error(rmr->rmr_retval));
 	if (rmr->rmr_marks.rmr_marks_len == 0)
 		return rprintf("Du har inga markerade inlägg.\n");
 	rprintf("(Återse) nästa markerade inlägg.\n");
