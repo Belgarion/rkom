@@ -662,6 +662,8 @@ rk_mark_read(u_int32_t conf, u_int32_t local)
 		} else {
 			txts = m->rm_read_texts.rm_read_texts_val;
 			num = m->rm_read_texts.rm_read_texts_len;
+			if (num == 0)
+				txts = NULL;
 			for (i = 0; i < num; i++)
 				if (txts[i] == local)
 					break;
