@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.23 2001/01/14 19:43:47 offe Exp $ */
+/* $Id: rkom.c,v 1.24 2001/01/15 16:25:11 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -170,7 +170,8 @@ main(int argc, char *argv[])
 			strncpy(buf, lf->buffer, MAX_LINE);
 			buf[MAX_LINE-1] = 0;
 			len = strlen(buf);
-			while(len > 0 && buf[len - 1] == '\n' || isspace(buf[len-1])) {
+			while((len > 0 && buf[len - 1] == '\n') ||
+			    isspace(buf[len-1])) {
 				buf[len - 1] = '\0';
 				len--;
 			}

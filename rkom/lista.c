@@ -9,6 +9,7 @@
 #include "rkom.h"
 #include "list.h"
 #include "next.h"
+#include "set.h"
 
 void
 list_comm(char *args)
