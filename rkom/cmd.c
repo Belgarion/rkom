@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
-#include <time.h>
 #include <pwd.h>
 
+#include "rkom_proto.h"
 #include "exported.h"
 #include "rkom.h"
 // #include "conf.h"
@@ -145,24 +145,25 @@ static char *dyidx[] = {"natten", "morgonen", "eftermiddagen", "kvällen" };
 void
 cmd_tiden(char *str)
 {
-	struct tm tm;
+	struct rk_time *tm;
 
-	rkom_time(&tm);
+	tm = rk_time(0);
 
 	printf("Klockan är ");
-	if (tm.tm_min > 30)
-		printf("%d minuter i %s", 60 - tm.tm_min,
-		    tindx[((tm.tm_hour + 1)%12)]);
-	else if (tm.tm_min == 30)
-		printf("halv %s", tindx[((tm.tm_hour+1)%12)]);
-	else if (tm.tm_min == 0)
-		printf("prick %s", tindx[(tm.tm_hour%12)]);
+	if (tm->rt_minutes > 30)
+		printf("%d minuter i %s", 60 - tm->rt_minutes,
+		    tindx[((tm->rt_hours + 1)%12)]);
+	else if (tm->rt_minutes == 30)
+		printf("halv %s", tindx[((tm->rt_hours+1)%12)]);
+	else if (tm->rt_minutes == 0)
+		printf("prick %s", tindx[(tm->rt_hours%12)]);
 	else
-		printf("%d minuter över %s", tm.tm_min, tindx[(tm.tm_hour%12)]);
-	printf(" på %s", dyidx[tm.tm_hour/6]);
-	printf(",\n%sdagen den %d %s %d", dindx[tm.tm_wday], tm.tm_mday,
-	    mindx[tm.tm_mon], tm.tm_year + 1900);
-	if (tm.tm_isdst)
+		printf("%d minuter över %s", tm->rt_minutes,
+		    tindx[(tm->rt_hours%12)]);
+	printf(" på %s", dyidx[tm->rt_hours/6]);
+	printf(",\n%sdagen den %d %s %d", dindx[tm->rt_day_of_week], tm->rt_day,
+	    mindx[tm->rt_month], tm->rt_year + 1900);
+	if (tm->rt_is_dst)
 		printf(" (sommartid)");
 	printf(" (enligt servern)\n");
 }
@@ -170,14 +171,19 @@ cmd_tiden(char *str)
 void
 cmd_vilka(char *str)
 {
+	struct rk_dynamic_session_info_retval *ppp;
+	struct rk_dynamic_session_info *pp;
+	struct rk_vilka_args *rva;
 	int i, antal;
-	struct dynamic_session_info *pp;
 
-	rkom_who(0, WHO_VISIBLE, &pp);
+	rva = alloca(sizeof(struct rk_vilka_args));
+	rva->rva_secs = 0;
+	rva->rva_flags = WHO_VISIBLE;
 
-	for (antal = 0; pp[antal].session; antal++)
-		;
+	ppp = rk_vilka(rva);
 
+	antal = ppp->rdv_rds.rdv_rds_len;
+	pp = ppp->rdv_rds.rdv_rds_val;
 	if (antal == 0) {
 		printf("Det är inga påloggade alls.\n");
 		return;
@@ -188,109 +194,138 @@ cmd_vilka(char *str)
 	printf("-------------------------------------------------------\n");
 
 	for (i = 0; i < antal; i++) {
-		struct conference *c1, *c2;
-		struct person *p;
+		struct rk_conference *c1, *c2;
+		struct rk_person *p;
 		char *name, *conf, *var;
 
-		rkom_confinfo(pp[i].person, &c1);
-		name = c1->name;
-		if (pp[i].conf) {
-			rkom_confinfo(pp[i].conf, &c2);
-			conf = c2->name;
+		c1 = rk_confinfo(pp[i].rds_person);
+		name = c1->rc_name;
+		if (pp[i].rds_conf) {
+			c2 = rk_confinfo(pp[i].rds_conf);
+			conf = c2->rc_name;
 		} else
 			conf = "Inte närvarande någonstans";
-		rkom_persinfo(pp[i].person, &p);
-		var = p->username;
+		p = rk_persinfo(pp[i].rds_person);
+		var = p->rp_username;
 		if (strlen(name) > 33)
 			printf("%5d %s\n%40s%s\n",
-			    pp[i].session, name, "", conf);
+			    pp[i].rds_session, name, "", conf);
 		else
-			printf("%5d %-33s %-40s\n", pp[i].session, name, conf);
+			printf("%5d %-33s %-40s\n",
+			    pp[i].rds_session, name, conf);
 		if (strlen(var) > 36)
-			printf("   %s\n%40s%s\n\n", var, "", pp[i].doing);
+			printf("   %s\n%40s%s\n\n", var, "", pp[i].rds_doing);
 		else
-			printf("   %-37s%s\n\n", var, pp[i].doing);
+			printf("   %-37s%s\n\n", var, pp[i].rds_doing);
 		free(c1);
-		if (pp[i].conf)
+		if (pp[i].rds_conf)
 			free(c2);
 		free(p);
 	}
 	printf("-------------------------------------------------------\n");
-	free(pp);
+	free(ppp);
 }
 
 void
 cmd_login(char *str)
 {
-	struct membership *m;
-	struct conference *confer;
-	struct confinfo *matched;
-	char *passwd;
+	struct rk_matchconfargs *args;
+	struct rk_loginargs *loginargs;
+	struct rk_confinfo_retval *retval;
+	struct rk_unreadconfval *conf;
+	struct rk_whatidoargs *whatidoargs;
+
 	int i, num, *confs, nconf;
 
 	if (str == 0) {
 		printf("Du måste ange vem du vill logga in som.\n");
 		return;
 	}
-	num = rkom_matchconf(str, MATCHCONF_PERSON, &matched);
+	args = malloc(sizeof(struct rk_matchconfargs));
+	args->rm_name = str;
+	args->rm_flags = MATCHCONF_PERSON;
+	retval = rk_matchconf(args);
+
+	num = retval->rcr_ci.rcr_ci_len;
 	if (num == 0) {
 		printf("Det finns ingen person som matchar \"%s\".\n", str);
 		return;
 	} else if (num > 1) {
 		printf("Namnet \"%s\" är flertydigt. Du kan mena:\n", str);
 		for (i = 0; i < num; i++)
-			printf("%s\n", matched[i].name);
+			printf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
 		printf("\n");
-		free(matched[0].name);
-		free(matched);
+		free(retval);
 		return;
 	}
-	printf("%s\n", matched[0].name);
-	passwd = getpass("Lösenord: ");
-	if (rkom_login(matched[0].conf_no, passwd)) {
+	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	loginargs = malloc(sizeof(struct rk_loginargs));
+	loginargs->rk_userid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	loginargs->rk_passwd = getpass("Lösenord: ");
+	if (rk_login(loginargs)) {
 		printf("Felaktigt lösenord.\n\n");
-		free(matched[0].name);free(matched);
+		free(retval);
 		return;
 	}
-	myuid = matched[0].conf_no;
+	myuid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	free(retval);
 
 	/*
 	 * Set some informative text.
 	 */
-	if (rkom_whatido("Kör raggeklienten (nu med login!)"))
+	whatidoargs = malloc(sizeof(struct rk_whatidoargs));
+	whatidoargs->rw_whatido = "Kör raggeklienten (nu med login!)";
+	if (rk_whatido(whatidoargs))
 		printf("Set what-i-am-doing sket sej\n");
 
 	/*
 	 * Get number of unread texts.
 	 */
-	if (rkom_unreadconf(myuid, &confs, &nconf))
-		printf("rkom_unreadconf sket sej\n");
-	
+	conf = rk_unreadconf(myuid);
+
 	/* Show where we have unread texts. */
+	nconf = conf->ru_confs.ru_confs_len;
 	if (nconf) {
+		confs = conf->ru_confs.ru_confs_val;
+
 		for (i = 0; i < nconf; i++) {
+			struct rk_conference *rkc;
+			struct rk_membership_args *rma;
+			struct rk_membership *m;
 			int hln;
 
-			if (rkom_confinfo(confs[i], &confer)) {
-				printf("%d sket sej\n", confs[i]);
+			rkc = rk_confinfo(confs[i]);
+
+			if (rkc->rc_retval) {
+				printf("%d sket sej med %d\n",
+				    confs[i], rkc->rc_retval);
+				free(rkc);
 				continue;
 			}
-			hln = confer->first_local_no + confer->no_of_texts - 1;
-			if (rkom_membership(myuid, confs[i], &m)) {
-				printf("%d,%d sket sej\n", confs[i], myuid);
+			hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
+			rma = malloc(sizeof(struct rk_membership_args));
+			rma->rma_uid = myuid;
+			rma->rma_mid = confs[i];
+			m = rk_membership(rma);
+
+			if (m->rm_retval) {
+				printf("%d,%d sket sej med %d\n",
+				    confs[i], myuid, m->rm_retval);
+				free(rkc);
+				free(m);
 				continue;
 			}
 			printf("Du har %d olästa inlägg av %d i %s\n",
-			    hln - m->last_text_read, hln, confer->name);
-			free(confer);
+			    hln - m->rm_last_text_read, hln, rkc->rc_name);
+			free(rkc);
 			free(m);
 		}
-		free(confs);
 		printf("\n");
 		prompt = PROMPT_NEXT_CONF;
 	} else {
 		printf("\nDu har inga olästa inlägg.\n");
 	}
+	free(conf);
 }
 
 void

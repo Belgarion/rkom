@@ -1,10 +1,10 @@
-#	$Id: Makefile,v 1.3 2000/10/07 11:36:56 jens Exp $
+#	$Id: Makefile,v 1.4 2000/10/08 14:26:29 ragge Exp $
 #
 # Rkom backend library Makefile
 #
 
 LIB=	rkom
-SRCS=	rkom_subr.c rkom_lyskom.c rkom_be.c rkom_beparse.c rkom_conf.c \
+SRCS=	rkom_subr.c rkom_lyskom.c rkom_beparse.c rkom_conf.c \
 	rkom_helpers.c rkom_proto.c
 
 MKLINT=	no	# No lint library

@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "rkom_proto.h"
 #include "exported.h"
 #include "rkom.h"
 #include "set.h"
@@ -71,7 +72,7 @@ main(int argc, char *argv[])
 		kbd_input(0);
 		gettimeofday(&tp, 0);
 		if (tp.tv_sec - lasttime > 30) {
-			rkom_alive();
+			rk_alive(0);
 			lasttime = tp.tv_sec;
 		}
 	}

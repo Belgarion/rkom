@@ -2,17 +2,17 @@
 #include <sys/types.h>
 
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "rkom_proto.h"
 #include "exported.h"
 #include "backend.h"
 
 struct person_store {
 	struct person_store *next;
 	int uid;
-	struct person person;
+	struct rk_person person;
 };
 
 static struct person_store *gps;
@@ -20,10 +20,10 @@ static struct person_store *gps;
  * Return the person struct.
  */
 int
-get_pers_stat(int uid, struct person **person)
+get_pers_stat(int uid, struct rk_person **person)
 {
 	struct person_store *walker, *pp;
-	struct person *p;
+	struct rk_person *p;
 	int i;
 	char buf[20];
 
@@ -46,23 +46,23 @@ get_pers_stat(int uid, struct person **person)
 	pp = calloc(sizeof(struct person_store), 1);
 	pp->uid = uid;
 	p = &pp->person;
-	p->username = get_string();
-	p->privileges = get_int();
-	p->flags = get_int();
-	read_in_time(&p->last_login);
-	p->user_area = get_int();
-	p->total_time_present = get_int();
-	p->sessions = get_int();
-	p->created_lines = get_int();
-	p->created_bytes = get_int();
-	p->read_texts = get_int();
-	p->no_of_text_fetches = get_int();
-	p->created_persons = get_int();
-	p->created_confs = get_int();
-	p->first_created_local_no = get_int();
-	p->no_of_created_texts = get_int();
-	p->no_of_marks = get_int();
-	p->no_of_confs = get_int();
+	p->rp_username = get_string();
+	p->rp_privileges = get_int();
+	p->rp_flags = get_int();
+	read_in_time(&p->rp_last_login);
+	p->rp_user_area = get_int();
+	p->rp_total_time_present = get_int();
+	p->rp_sessions = get_int();
+	p->rp_created_lines = get_int();
+	p->rp_created_bytes = get_int();
+	p->rp_read_texts = get_int();
+	p->rp_no_of_text_fetches = get_int();
+	p->rp_created_persons = get_int();
+	p->rp_created_confs = get_int();
+	p->rp_first_created_local_no = get_int();
+	p->rp_no_of_created_texts = get_int();
+	p->rp_no_of_marks = get_int();
+	p->rp_no_of_confs = get_int();
 	get_accept('\n');
 	pp->next = gps;
 	gps = pp;
@@ -105,7 +105,7 @@ conf_delete(char *name)
 struct get_conf_stat_store {
 	struct get_conf_stat_store *next;
 	int number;
-	struct conference confer;
+	struct rk_conference confer;
 };
 
 static struct get_conf_stat_store *gcs;
@@ -115,11 +115,11 @@ static struct get_conf_stat_store *gcs;
  * If it's not in the cache; ask the server for it.
  */
 int
-get_conf_stat(int conf, struct conference **confer)
+get_conf_stat(int conf, struct rk_conference **confer)
 {
 	struct get_conf_stat_store *walker;
-	struct conference *c;
-	int i, cnt;
+	struct rk_conference *c;
+	int i;
 	char buf[20];
 
 	/* First, see if we have this conference in the cache */
@@ -145,22 +145,23 @@ get_conf_stat(int conf, struct conference **confer)
 	walker->number = conf;
 	c = &walker->confer;
 
-	c->name = get_string();
-	c->type = get_int();
-	read_in_time(&c->creation_time);
-	read_in_time(&c->last_written);
-	c->creator = get_int();
-	c->presentation = get_int();
-	c->supervisor = get_int();
-	c->permitted_submitters = get_int();
-	c->super_conf = get_int();
-	c->msg_of_day = get_int();
-	c->nice = get_int();
-	c->keep_commented = get_int();
-	c->no_of_members = get_int();
-	c->first_local_no = get_int();
-	c->no_of_texts = get_int();
-	c->expire = get_int();
+	c->rc_name = get_string();
+	c->rc_type = get_int();
+	read_in_time(&c->rc_creation_time);
+	read_in_time(&c->rc_last_written);
+	c->rc_creator = get_int();
+	c->rc_presentation = get_int();
+	c->rc_supervisor = get_int();
+	c->rc_permitted_submitters = get_int();
+	c->rc_super_conf = get_int();
+	c->rc_msg_of_day = get_int();
+	c->rc_nice = get_int();
+	c->rc_keep_commented = get_int();
+	c->rc_no_of_members = get_int();
+	c->rc_first_local_no = get_int();
+	c->rc_no_of_texts = get_int();
+	c->rc_expire = get_int();
+#if 0
 	cnt = get_int();
 	if (cnt) {
 		get_accept('{');
@@ -173,6 +174,9 @@ get_conf_stat(int conf, struct conference **confer)
 		get_accept('*');
 	}
 	get_accept('\n');
+#else
+	get_eat('\n');
+#endif
 	walker->next = gcs;
 	gcs = walker;
 	*confer = c;
@@ -183,18 +187,18 @@ get_conf_stat(int conf, struct conference **confer)
 struct get_membership_store {
 	struct get_membership_store *next;
 	int number;
-	struct membership member;
+	struct rk_membership member;
 };
 
 static struct get_membership_store *gms;
-static struct membership members;
+static struct rk_membership members;
 
 int
-get_membership(int uid, int conf, struct membership **member)
+get_membership(int uid, int conf, struct rk_membership **member)
 {
 	struct get_membership_store *walker;
-	struct membership mb;
-	struct membership *m = &mb;
+	struct rk_membership mb;
+	struct rk_membership *m = &mb;
 	int i, cnt;
 	char buf[30];
 
@@ -222,23 +226,23 @@ get_membership(int uid, int conf, struct membership **member)
 		cnt = get_int();
 		get_accept('{');
 		for (i = 0; i < cnt; i++) {
-			m->position = get_int();
-			read_in_time(&m->last_time_read);
-			m->conference = get_int();
-			m->priority = get_int();
-			m->last_text_read = get_int();
-			m->nread_texts = get_int();
+			m->rm_position = get_int();
+			read_in_time(&m->rm_last_time_read);
+			m->rm_conference = get_int();
+			m->rm_priority = get_int();
+			m->rm_last_text_read = get_int();
+			m->rm_read_texts.rm_read_texts_len = get_int();
 			get_accept('*');
-			m->added_by = get_int();
-			read_in_time(&m->added_at);
-			m->type = get_int();
+			m->rm_added_by = get_int();
+			read_in_time(&m->rm_added_at);
+			m->rm_type = get_int();
 
 			walker = malloc(sizeof(struct get_membership_store));
-			walker->number = m->conference;
+			walker->number = m->rm_conference;
 			walker->member = mb;
 			walker->next = gms;
 			gms = walker;
-			if (m->conference == conf)
+			if (m->rm_conference == conf)
 				*member = &walker->member;
 		}
 		get_accept('}');
@@ -254,17 +258,17 @@ get_membership(int uid, int conf, struct membership **member)
 	cnt = get_int();
 	get_accept('{');
 	for (i = 0; i < cnt; i++) {
-		m->position = get_int();
-		read_in_time(&m->last_time_read);
-		m->conference = get_int();
-		m->priority = get_int();
-		m->last_text_read = get_int();
-		m->nread_texts = get_int();
+		m->rm_position = get_int();
+		read_in_time(&m->rm_last_time_read);
+		m->rm_conference = get_int();
+		m->rm_priority = get_int();
+		m->rm_last_text_read = get_int();
+		m->rm_read_texts.rm_read_texts_len = get_int();
 		get_accept('*');
-		m->added_by = get_int();
-		read_in_time(&m->added_at);
-		m->type = get_int();
-		if (m->conference == conf)
+		m->rm_added_by = get_int();
+		read_in_time(&m->rm_added_at);
+		m->rm_type = get_int();
+		if (m->rm_conference == conf)
 			members = mb;
 	}
 	get_accept('}');

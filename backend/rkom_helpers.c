@@ -3,21 +3,22 @@
 
 #include <time.h>
 
+#include "rkom_proto.h"
 #include "exported.h"
 #include "backend.h"
 
 void
-read_in_time(struct tm *t)
+read_in_time(struct rk_time *t)
 {
-	t->tm_sec = get_int();
-	t->tm_min = get_int();
-	t->tm_hour = get_int();
-	t->tm_mday = get_int();
-	t->tm_mon = get_int();
-	t->tm_year = get_int();
-	t->tm_wday = get_int();
-	t->tm_yday = get_int();
-	t->tm_isdst = get_int();
+	t->rt_seconds = get_int();
+	t->rt_minutes = get_int();
+	t->rt_hours = get_int();
+	t->rt_day = get_int();
+	t->rt_month = get_int();
+	t->rt_year = get_int();
+	t->rt_day_of_week = get_int();
+	t->rt_day_of_year = get_int();
+	t->rt_is_dst = get_int();
 }
 
 void

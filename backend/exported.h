@@ -1,4 +1,4 @@
-/*	$Id: exported.h,v 1.3 2000/10/07 10:38:46 ragge Exp $	*/
+/*	$Id: exported.h,v 1.4 2000/10/08 14:26:29 ragge Exp $	*/
 /*
  * Exported functions from the rkom frontend/backend communication system.
  *
@@ -23,7 +23,7 @@ struct aux_item {
 	int		aux_no;
 	int		tag;
 	int		creator;
-	struct tm	created_at;
+	struct rk_time	created_at;
 	int		flags;
 	int		inherit_limit;
 	char *		data;
@@ -37,19 +37,20 @@ struct aux_item {
 #define MT_PASSIVE	0x40
 #define MT_SECRET	0x20
 
+#if 0
 struct membership {
 	int		position;
-	struct tm	last_time_read;
+	struct rk_time	last_time_read;
 	int		conference;
 	int		priority;
 	int		last_text_read;
 	int		nread_texts; /* Size of the following array */
 	int *		read_texts;
 	int		added_by;
-	struct tm	added_at;
+	struct rk_time	added_at;
 	int		type;
 };
-
+#endif
 
 /* Extended-Conf-Type described as bits in an int */
 #define ECT_RD_PROT	0x80
@@ -59,7 +60,7 @@ struct membership {
 #define ECT_ALLOW_ANON	0x08
 #define ECT_FORBID_SECR 0x04
 
-
+#if 0
 /* Full information about a conference */
 struct conference {
 	char *		name;
@@ -96,7 +97,7 @@ struct person {
 	char 		*username;
 	int		privileges;
 	int		flags;
-	struct tm	last_login;
+	struct rk_time	last_login;
 	int		user_area;
 	int		total_time_present;
 	int		sessions;
@@ -111,6 +112,7 @@ struct person {
 	int		no_of_marks;
 	int		no_of_confs;
 };
+#endif
 
 /*
  * Forks the backend process. This call should be the first call.
@@ -146,7 +148,9 @@ int	rkom_connect(char *server, char *frontend, char *os_username);
  */
 #define MATCHCONF_PERSON	1
 #define MATCHCONF_CONF		2
+#ifdef notanymore
 int	rkom_matchconf(char *user, int flags, struct confinfo **matched);
+#endif
 
 /*
  * Login user on the current system.
@@ -158,7 +162,9 @@ int	rkom_matchconf(char *user, int flags, struct confinfo **matched);
  *	0		Login succeeded
  *	-1		Login failed
  */
+#ifdef notanymore
 int	rkom_login(int userid, char *passwd);
+#endif
 
 /*
  * Log out the user from the current system.
@@ -208,7 +214,9 @@ void	rkom_time(struct tm *tm);
  * Set the what-i-am-doing string for the logged-in user.
  * This call may fail with a normal Lyskom error code.
  */
+#if 0
 int	rkom_whatido(char *str);
+#endif
 
 /*
  * Get the conference numbers with unread texts for a user.
@@ -236,7 +244,9 @@ int	rkom_unreadconf(int mid, int **confs, int *nconf);
  *
  *	The conference struct must be free'd after use.
  */
+#if 0
 int	rkom_confinfo(int mid, struct conference **conf);
+#endif
 
 /*
  * Get information about a person.
@@ -249,7 +259,9 @@ int	rkom_confinfo(int mid, struct conference **conf);
  *
  *	The person struct must be free'd after use.
  */
+#if 0
 int	rkom_persinfo(int uid, struct person **person);
+#endif
 
 /*
  * Get status for a user in a conference.
@@ -263,7 +275,9 @@ int	rkom_persinfo(int uid, struct person **person);
  *
  *	The membership struct must be free'd after use.
  */
+#if 0
 int	rkom_membership(int uid, int conf, struct membership **members);
+#endif
 
 /*
  * Get info about who is logged on to the server.
@@ -278,7 +292,9 @@ int	rkom_membership(int uid, int conf, struct membership **members);
  */
 #define WHO_VISIBLE	1
 #define WHO_INVISIBLE	2
+#if 0
 void	rkom_who(int secs, int flags, struct dynamic_session_info **info);
+#endif
 
 /*
  * Async messages:

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <err.h>
 
+#include "rkom_proto.h"
 #include "backend.h"
 
 static int reqnr;
@@ -60,7 +61,8 @@ rkom_loop()
 		if (pfd[0].revents) {
 			if (handling++)
 				warn("front-end unwanted talk");
-			bgreceive();
+			spc_process_request();
+//			bgreceive();
 			handling = 0;
 		}
 		if (pfd[1].revents & (POLLIN|POLLPRI)) {
