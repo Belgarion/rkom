@@ -1,0 +1,15 @@
+#	$Id: Makefile.aix,v 1.1 2001/11/24 20:28:40 offe Exp $
+#
+
+FLAGS="XFLAGS=-DAIX -DREGEX" CC=gcc
+LIBS="XLIBS=-lcurses"
+
+all:
+	@(cd backend; make $(FLAGS))
+	@(cd libredit; make $(FLAGS))
+	@(cd rkom; make $(FLAGS) $(LIBS))
+
+clean:
+	@(cd backend; make clean)
+	@(cd libredit; make clean)
+	@(cd rkom; make clean)
