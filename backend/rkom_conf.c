@@ -601,7 +601,7 @@ conf_set_high_local(int conf, int local, int global)
 			if (walker->confer.rc_no_of_texts < tt)
 				walker->confer.rc_no_of_texts = tt;
 			if (walker->map == NULL)
-				read_lgtable(walker);
+				return;
 
 			if (walker->mapsz <= local) {
 				int *tpt = calloc(local+50, sizeof(int));
