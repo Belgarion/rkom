@@ -13,7 +13,6 @@
 
 static int reqnr;
 static int handling;	/* Handling front-end request right now */
-// static int lasttime;
 static int wait_for_reply_no;
 int sockfd;
 static int unget;
@@ -26,7 +25,6 @@ static int level;
 int
 rkom_loop()
 {
-//	struct timeval tp;
 	struct pollfd pfd[2];
 	int err = 0;
 
@@ -46,6 +44,10 @@ rkom_loop()
 	for (;;) {
 		int rv;
 	
+#ifdef notyet
+		if (level == 0)
+			async_handle();
+#endif
 		/* Wait for something to happen */
 		rv = poll(pfd, 2, INFTIM);
 		if (rv == 0)
@@ -60,13 +62,6 @@ rkom_loop()
 				warn("front-end unwanted talk");
 			bgreceive();
 			handling = 0;
-#if 0
-			gettimeofday(&tp, 0);
-			if (tp.tv_sec - lasttime > 30) {
-				send_reply("82\n");
-				get_accept('\n');
-			}
-#endif
 		}
 		if (pfd[1].revents & (POLLIN|POLLPRI)) {
 			int i;
@@ -74,8 +69,10 @@ rkom_loop()
 
 			switch (c) {
 			case ':':
-//				rkom_async(level);
+#ifdef notyet
+				async(level);
 				break;
+#endif
 
 			case '%':
 				c = get_char();

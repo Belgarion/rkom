@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.2 2000/10/01 14:10:41 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.3 2000/10/07 10:38:46 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -21,7 +21,7 @@
 #include "protocol.h"
 #include "backend.h"
 
-int sockfd, readfd, writefd;
+int sockfd, readfd, writefd, async;
 static char *version = "noll";
 static int childpid;
 /*
@@ -33,7 +33,7 @@ rkom_connect(char *server, char *frontend, char *os_username)
 {
 	struct sockaddr_in sin;
 	struct hostent *hp;
-	int toback[2], fromback[2];
+	int toback[2], fromback[2], asyncio[2];
 	char *buf, *buf2;
 
 	/* Locate our KOM server */
@@ -77,21 +77,26 @@ rkom_connect(char *server, char *frontend, char *os_username)
 
 	pipe(toback);
 	pipe(fromback);
+	pipe(asyncio);
 
 	/* Ok, now fork the backend process */
 	if ((childpid = fork()) == 0) {
 		close(0);
 		close(toback[1]);
 		close(fromback[0]);
+		close(asyncio[0]);
 		writefd = fromback[1];
 		readfd = toback[0];
+		async = asyncio[1];
 		rkom_loop(); /* Backend main loop */
 	}
 
 	writefd = toback[1];
 	readfd = fromback[0];
+	async = asyncio[0];
 	close(toback[0]);
 	close(fromback[1]);
+	close(asyncio[1]);
 	close(sockfd);
 	return 0;
 }

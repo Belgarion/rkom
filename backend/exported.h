@@ -1,4 +1,4 @@
-/*	$Id: exported.h,v 1.2 2000/10/01 14:10:41 ragge Exp $	*/
+/*	$Id: exported.h,v 1.3 2000/10/07 10:38:46 ragge Exp $	*/
 /*
  * Exported functions from the rkom frontend/backend communication system.
  *
@@ -279,10 +279,12 @@ int	rkom_membership(int uid, int conf, struct membership **members);
 #define WHO_VISIBLE	1
 #define WHO_INVISIBLE	2
 void	rkom_who(int secs, int flags, struct dynamic_session_info **info);
+
 /*
- * ASYNC MESSAGES:
- *	TBD...
+ * Async messages:
+ *	
  */
+
 /*
  * CONFERENCE STRINGS:
  *	TBD...

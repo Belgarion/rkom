@@ -9,92 +9,33 @@
 #include "exported.h"
 #include "backend.h"
 
-#if 0
-/*
- * Simple struct describing an user.
- */
-struct conf {
-	struct conf *p_next;	/* To next entry in the linked list */
-	int p_uid;		/* Conf number */
-	char *p_name;		/* Real name */
-	char *p_varifrom;	/* From where the user logged in. */
+struct person_store {
+	struct person_store *next;
+	int uid;
+	struct person person;
 };
 
-static struct conf *person = 0;
-
-static struct conf *
-findconf(int num)
-{
-	struct conf *w = person;
-
-	while (w) {
-		if (w->p_uid == num)
-			return w;
-		w = w->p_next;
-	}
-	return 0;
-}
-
-/*
- * Return a string containing the conference name (if any).
- */
-char *
-conf_num2name(int num)
-{
-	struct conf *p;
-	int junk;
-	char buf[20];
-
-	if ((p = findconf(num)))
-		return p->p_name;
-	sprintf(buf, "78 %d\n", num);
-
-	if (send_reply(buf)) {
-		get_eat('\n');
-		return 0;
-	}
-	p = calloc(sizeof(struct conf), 1);
-	p->p_uid = num;
-	p->p_name = get_string();
-	p->p_next = person;
-	person = p;
-	junk = get_int();
-	junk = get_int();
-	junk = get_int();
-	get_accept('\n');
-	return p->p_name;
-}
-
-/*
- * The same as above, but we can't wait for a response if the name isn't
- * in the cache (and we don't have a cache yet).
- */
-char *
-conf_num2name_nowait(int num)
-{
-	struct conf *p;
-	static char buf[25];
-
-	if ((p = findconf(num)))
-		return p->p_name;
-
-	sprintf(buf, "Person %d", num);
-	return buf;
-}
-#endif
-
-static	struct person ppp;
+static struct person_store *gps;
 /*
  * Return the person struct.
  */
 int
 get_pers_stat(int uid, struct person **person)
 {
+	struct person_store *walker, *pp;
 	struct person *p;
 	int i;
 	char buf[20];
 
-	p = &ppp;
+	walker = gps;
+	while (walker) {
+		if (walker->uid == uid) {
+			*person = &walker->person;
+			return 0;
+		}
+		walker = walker->next;
+	}
+
 	sprintf(buf, "49 %d\n", uid);
 	if (send_reply(buf)) {
 		i = get_int();
@@ -102,6 +43,9 @@ get_pers_stat(int uid, struct person **person)
 		return i;
 	}
 
+	pp = calloc(sizeof(struct person_store), 1);
+	pp->uid = uid;
+	p = &pp->person;
 	p->username = get_string();
 	p->privileges = get_int();
 	p->flags = get_int();
@@ -120,6 +64,8 @@ get_pers_stat(int uid, struct person **person)
 	p->no_of_marks = get_int();
 	p->no_of_confs = get_int();
 	get_accept('\n');
+	pp->next = gps;
+	gps = pp;
 	*person = p;
 	return 0;
 }
