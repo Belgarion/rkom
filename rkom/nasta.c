@@ -143,6 +143,7 @@ next_conf(char *str)
 
 	conf = rk_confinfo(curconf);
 	member = rk_membership(myuid, curconf);
+	rk_change_conference(curconf);
 
 	printf("Nästa möte: %s\n\n", conf->rc_name);
 	printf("Du har %d olästa inlägg.\n", conf->rc_first_local_no +
@@ -162,16 +163,13 @@ mark_read(int nr)
 	ts = rk_textstat(nr);
 	len = ts->rt_misc_info.rt_misc_info_len;
 	mi = ts->rt_misc_info.rt_misc_info_val;
-//printf("Inlägg %d markera: ", nr);
 	for (i = 0; i < len; i++) {
 		if (mi[i].rmi_type != recpt && mi[i].rmi_type != cc_recpt)
 			continue;
 		if (mi[i+1].rmi_type != loc_no)
 			continue;
 		rk_mark_read(mi[i].rmi_numeric, mi[i+1].rmi_numeric);
-//printf("möte %d local %d ", mi[i].rmi_numeric, mi[i+1].rmi_numeric);
 	}
-//printf("\n");
 	free(ts);
 }
 
