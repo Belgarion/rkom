@@ -9,31 +9,48 @@
 #include "exported.h"
 #include "backend.h"
 
+struct membership_store {
+	int mid;
+	struct membership_store *next;
+	struct rk_membership member;
+};
+
 struct person_store {
-	struct person_store *next;
 	int uid;
+	struct person_store *nextp;
+	struct membership_store *next;
 	struct rk_person person;
 };
 
 static struct person_store *gps;
+
+static struct person_store *
+findperson(int uid)
+{
+	struct person_store *walker;
+
+	walker = gps;
+	while (walker) {
+		if (walker->uid == uid)
+			return walker;
+		walker = walker->nextp;
+	}
+	return 0;
+}
 /*
  * Return the person struct.
  */
 int
 get_pers_stat(int uid, struct rk_person **person)
 {
-	struct person_store *walker, *pp;
+	struct person_store *pp;
 	struct rk_person *p;
 	int i;
 	char buf[20];
 
-	walker = gps;
-	while (walker) {
-		if (walker->uid == uid) {
-			*person = &walker->person;
-			return 0;
-		}
-		walker = walker->next;
+	if ((pp = findperson(uid))) {
+		*person = &pp->person;
+		return 0;
 	}
 
 	sprintf(buf, "49 %d\n", uid);
@@ -64,7 +81,7 @@ get_pers_stat(int uid, struct rk_person **person)
 	p->rp_no_of_marks = get_int();
 	p->rp_no_of_confs = get_int();
 	get_accept('\n');
-	pp->next = gps;
+	pp->nextp = gps;
 	gps = pp;
 	*person = p;
 	return 0;
@@ -184,71 +201,39 @@ get_conf_stat(int conf, struct rk_conference **confer)
 	return 0;
 }
 
-struct get_membership_store {
-	struct get_membership_store *next;
-	int number;
-	struct rk_membership member;
-};
-
-static struct get_membership_store *gms;
-static struct rk_membership members;
+static struct membership_store *
+findmember(int conf, struct membership_store *mb)
+{
+	while (mb) {
+		if (mb->mid == conf)
+			return mb;
+		mb = mb->next;
+	}
+	return 0;
+}
 
 int
 get_membership(int uid, int conf, struct rk_membership **member)
 {
-	struct get_membership_store *walker;
-	struct rk_membership mb;
-	struct rk_membership *m = &mb;
+	struct membership_store *mb;
+	struct rk_membership *m;
+	struct person_store *pp;
+	struct rk_person *p;
+	char buf[50];
 	int i, cnt;
-	char buf[30];
 
-	*member = 0;
-	/* Only do this if I am the one in charge */
-	if (uid == myuid) {
-		if (gms != 0) {
-			walker = gms;
-			while (walker) {
-				if (walker->number == conf) {
-					*member = &walker->member;
-					return -1;
-				}
-				walker = walker->next;
-			}
-			return -1; /* Didn't exist */
-		}
-		/* No, we failed cache search. Fetch from server. */
-		sprintf(buf, "99 %d 0 65535 0\n", uid);
-		if (send_reply(buf)) {
-			i = get_int();
-			get_eat('\n');
-			return i;
-		}
-		cnt = get_int();
-		get_accept('{');
-		for (i = 0; i < cnt; i++) {
-			m->rm_position = get_int();
-			read_in_time(&m->rm_last_time_read);
-			m->rm_conference = get_int();
-			m->rm_priority = get_int();
-			m->rm_last_text_read = get_int();
-			m->rm_read_texts.rm_read_texts_len = get_int();
-			get_accept('*');
-			m->rm_added_by = get_int();
-			read_in_time(&m->rm_added_at);
-			m->rm_type = get_int();
+	/* First, force the user into the cache */
+	if (get_pers_stat(uid, &p))
+		return -1; /* The person do not exist, or something */
 
-			walker = malloc(sizeof(struct get_membership_store));
-			walker->number = m->rm_conference;
-			walker->member = mb;
-			walker->next = gms;
-			gms = walker;
-			if (m->rm_conference == conf)
-				*member = &walker->member;
-		}
-		get_accept('}');
-		get_eat('\n');
-		return (!*member);
+	pp = findperson(uid);
+	if (pp->next) {
+		mb = findmember(conf, pp->next);
+		if (mb == 0)
+			return -1;
 	}
+
+	/* No, we failed cache search. Fetch from server. */
 	sprintf(buf, "99 %d 0 65535 0\n", uid);
 	if (send_reply(buf)) {
 		i = get_int();
@@ -256,59 +241,60 @@ get_membership(int uid, int conf, struct rk_membership **member)
 		return i;
 	}
 	cnt = get_int();
+	mb = calloc(sizeof(struct membership_store), cnt);
 	get_accept('{');
 	for (i = 0; i < cnt; i++) {
+		m = &mb[i].member;
 		m->rm_position = get_int();
 		read_in_time(&m->rm_last_time_read);
 		m->rm_conference = get_int();
 		m->rm_priority = get_int();
 		m->rm_last_text_read = get_int();
-		m->rm_read_texts.rm_read_texts_len = get_int();
+		m->rm_read_texts.rm_read_texts_len = 0;get_int();
 		get_accept('*');
 		m->rm_added_by = get_int();
 		read_in_time(&m->rm_added_at);
 		m->rm_type = get_int();
-		if (m->rm_conference == conf) {
-			members = mb;
-			*member = &members;
-			get_eat('\n');
-			return 0;
-		}
+
+		mb[i].mid = m->rm_conference;
+		mb[i].next = pp->next;
+		pp->next = &mb[i];
 	}
 	get_accept('}');
 	get_eat('\n');
-	return -1;
+	if ((mb = findmember(conf, pp->next)) == 0)
+		return -1;
+	*member = &mb->member;
+	return 0;
 }
 
 static void
-delete_membership_internal(void)
+delete_membership_internal(int uid)
 {
-	struct get_membership_store *walker, *owalker;
+	struct person_store *pp;
 
-	if (gms == 0)
-		return;
+	if ((pp = findperson(uid)) == 0)
+		return; /* Nothing in cache */
 
-	walker = gms;
-	while (walker) {
-		owalker = walker->next;
-		free(walker);
-		walker = owalker;
-	}
-	gms = 0;
+	if (pp->next)
+		free(pp->next);
+	pp->next = 0;
 }
 
 static void
 set_last_read_internal(int conf, int local)
 {
-	struct get_membership_store *walker;
+	struct membership_store *mb;
+	struct person_store *pp;
 
-	walker = gms;
-	while (walker) {
-		if (walker->number == conf) {
-			walker->member.rm_last_text_read = local;
+	if ((pp = findperson(myuid)) == 0)
+		return; /* Nothing in cache */
+
+	if (pp->next) {
+		mb = findmember(conf, pp->next);
+		if (mb == 0)
 			return;
-		}
-		walker = walker->next;
+		mb->member.rm_last_text_read = local;
 	}
 }
 
@@ -529,6 +515,6 @@ rk_add_member_server(u_int32_t conf, u_int32_t uid, u_int8_t prio,
 		return ret;
 	}
 	get_accept('\n');
-	delete_membership_internal();
+	delete_membership_internal(uid);
 	return ret;
 }
