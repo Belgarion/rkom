@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.13 2000/10/21 12:14:21 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.14 2000/10/24 15:05:30 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -160,6 +160,7 @@ struct rk_async {
 	u_int32_t	ra_conf;
 	u_int32_t	ra_sender;
 	string		ra_message;
+	string		ra_message2;
 };
 
 struct rk_marks {

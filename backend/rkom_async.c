@@ -18,6 +18,7 @@ struct mesg {
 	int conf;
 	int pers;
 	char *msg;
+	char *msg2;
 };
 static struct mesg *pole;
 
@@ -29,8 +30,7 @@ void
 async(int level)
 {
 	struct mesg *m;
-	int narg, type/*, pers, rcpt*/;
-//	char *s, *t;
+	int narg, type;
 
 	narg = get_int();
 	type = get_int();
@@ -55,30 +55,26 @@ async(int level)
 		m->next = pole;
 		pole = m;
 		break;
-#if 0
 	case 9:
 	case 13:
-		pers = get_int();
+		m = malloc(sizeof(struct mesg));
+		m->type = type;
+		m->pers = get_int();
+		m->conf = get_int();
 		get_eat('\n');
-		if (level == 0)
-			s = conf_num2name(pers);
-		else
-			s = conf_num2name_nowait(pers);
-		printf("\n%s har just loggat %s.\n", s,
-		    (type == 13 ? "ut" : "in"));
+		m->next = pole;
+		pole = m;
 		break;
 
 	case 5:
-		pers = get_int();
-		s = get_string();
-		t = get_string();
+		m = malloc(sizeof(struct mesg));
+		m->pers = get_int();
+		m->msg = get_string();
+		m->msg2 = get_string();
 		get_eat('\n');
-		printf("\n%s bytte just namn till %s.\n", s, t);
-		conf_delete(s);
-		free(s);
-		free(t);
+		m->next = pole;
+		pole = m;
 		break;
-#endif
 
 	default:
 		get_eat('\n');
@@ -116,20 +112,34 @@ rk_async_server(u_int32_t arg)
 		size = sizeof(struct rk_async);
 		if (pole->type == 12)
 			size += strlen(pole->msg) + 1;
-		ra = calloc(size, 1);
+		if (pole->type == 5)
+			size += strlen(pole->msg) + strlen(pole->msg2) + 2;
+		ra = calloc(size, 2);
 		ra->ra_type = pole->type;
 		ra->ra_conf = pole->conf;
 		ra->ra_sender = pole->pers;
-		ra->ra_message = (void *)&ra[1];
-		strcpy(ra->ra_message, pole->msg);
-		if (pole->type == 12)
+		ra->ra_message = ra->ra_message2 = "";
+		if (pole->type == 12 || pole->type == 5) {
+			ra->ra_message = (void *)&ra[1];
+			strcpy(ra->ra_message, pole->msg);
+		}
+		if (pole->type == 5) {
+			ra->ra_message2 =
+			    ra->ra_message + strlen(pole->msg2) + 1;
+			strcpy(ra->ra_message2, pole->msg2);
+		} else
+			ra->ra_message2 = "";
+		if (pole->type == 12 || pole->type == 5)
 			free(pole->msg);
+		if (pole->type == 5)
+			free(pole->msg2);
 		m = pole;
 		pole = pole->next;
 		free(m);
 	} else {
 		ra = calloc(sizeof(struct rk_async), 1);
 		ra->ra_message = "";
+		ra->ra_message2 = "";
 	}
 	return ra;
 }
