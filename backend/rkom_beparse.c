@@ -417,6 +417,7 @@ reread_text_stat_bg_callback(int err, int arg)
 		tss->rts = 0;
 		return;
 	}
+	tss->rts = calloc(sizeof(struct rk_text_stat), 1);
 	readin_textstat(tss->rts);
 	return;
 }
@@ -435,14 +436,16 @@ reread_text_stat_bg(int text)
 		tss->next = pole;
 		pole = tss;
 	}
-	if (tss->rts == 0)
-		tss->rts = calloc(sizeof(struct rk_text_stat), 1);
-	ts = tss->rts;
-	if (ts->rt_misc_info.rt_misc_info_len)
-		free(ts->rt_misc_info.rt_misc_info_val);
-	if (ts->rt_aux_item.rt_aux_item_len)
-		free(ts->rt_aux_item.rt_aux_item_val);
-	/* XXX loosing rai_data */
+	if (tss->rts) {
+		ts = tss->rts;
+		if (ts->rt_misc_info.rt_misc_info_len)
+			free(ts->rt_misc_info.rt_misc_info_val);
+		if (ts->rt_aux_item.rt_aux_item_len)
+			free(ts->rt_aux_item.rt_aux_item_val);
+		/* XXX loosing rai_data */
+		free(tss->rts);
+		tss->rts = NULL;
+	}
 	sprintf(buf, "90 %d\n", text);
 	send_callback(buf, text, reread_text_stat_bg_callback);
 }
