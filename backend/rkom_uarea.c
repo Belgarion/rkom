@@ -126,7 +126,7 @@ get_uarea(int uid)
 	struct rk_person *p;
 
 	if (upole)
-		free(upole);
+		free(upole), upole = NULL;
 	p = rk_persinfo(myuid);
 	if (p->rp_user_area == 0)
 		return NULL;
