@@ -1,4 +1,4 @@
-#	$Id: Makefile.inc,v 1.4 2001/01/28 16:40:36 ragge Exp $
+#	$Id: Makefile.inc,v 1.5 2001/03/17 00:02:24 offe Exp $
 #
 
 LIBRKOM != cd ${.CURDIR}/../backend;\
@@ -7,6 +7,10 @@ LIBRKOM != cd ${.CURDIR}/../backend;\
 CPPFLAGS+=-I${.CURDIR}/../backend -g
 DPADD+= ${LIBRKOM}/librkom.a
 LDADD+=	-L${LIBRKOM} -lrkom -static
+
+LIBDIR= /usr/local/lib
+BINDIR= /usr/local/bin
+MANDIR= /usr/local/man
 
 #NOGCCERROR=1
 #LDADD+=-L../../libedit
