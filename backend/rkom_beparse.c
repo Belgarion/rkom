@@ -164,8 +164,9 @@ rk_vilka(u_int32_t secs, u_int32_t flags)
 			ppp[i].rds_flags = get_int();
 			ppp[i].rds_doing = get_string();
 		}
-	}
-	get_accept('}');
+		get_accept('}');
+	} else
+		get_accept('*');
 	get_accept('\n');
 	return ppp;
 }
