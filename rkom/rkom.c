@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.49 2003/08/21 15:12:31 ragge Exp $ */
+/* $Id: rkom.c,v 1.50 2003/08/22 07:01:20 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -328,7 +328,8 @@ rprintf("----------------------------------------------------------------\n");
 			if (prompt != PROMPT_NEXT_COMMENT)
 				next_prompt();
 			if (prompt != hej) {
-				putchar(007); /* Signal new text */
+				if (iseql("disable-beep-on-new-messages", "0"))
+					putchar(007); /* Signal new text */
 				retval = 0;
 			}
 			break;
