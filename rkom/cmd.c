@@ -45,6 +45,7 @@ struct cmnd cmds[] = {
 	{"lista", "markerade", list_marked },
 	{"lista", "möten", list_conf },
 	{"lista", "nyheter", list_news },
+	{"lista", "ärenden", list_subject },
 	{"login", 0, cmd_login },
 	{"logout", 0, cmd_logout },
 	{"lägga", 0, write_put },

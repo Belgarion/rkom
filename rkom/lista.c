@@ -183,3 +183,59 @@ list_unmark(char *str)
 	else
 		printf("Du har nu avmarkerat inlägg %d.\n", text);
 }
+
+void
+list_subject(char *str)  
+{
+	struct rk_conference *conf;
+	struct rk_text_stat *ts;
+	int high, low, i, nr, rows;
+	char *gubbe, *text, *c;
+
+	if (curconf == 0) {
+		printf("Du befinner dej inte i något möte.\n");
+		return;
+	}
+	conf = rk_confinfo(curconf);
+	if (conf->rc_retval) {
+		printf("rk_confinfo sket sej: %s\n", error(conf->rc_retval));
+		return;
+	}
+	printf("Lista ärenden\n");
+	printf("Inlägg\tDatum\t  Författare           Ärende\n");
+	high = conf->rc_no_of_texts + conf->rc_first_local_no - 1;
+	low = conf->rc_first_local_no;
+	free(conf);
+	rows = 4;
+	for (i = high; i >= low; i--) {
+		nr = rk_local_to_global(curconf, i);
+		if (nr == 0)
+			continue;
+		ts = rk_textstat(nr);
+		text = rk_gettext(nr);
+		gubbe = vem(ts->rt_author);
+		printf("%d\t%d", nr, ts->rt_time.rt_year + 1900);
+		printf("%s%d", ts->rt_time.rt_month > 8 ? "" : "0",
+		    ts->rt_time.rt_month + 1);
+		printf("%s%d  ", ts->rt_time.rt_day > 9 ? "" : "0",
+		    ts->rt_time.rt_day);
+		if (strlen(gubbe) > 20)
+			gubbe[20] = 0;
+		if ((c = index(text, '\n')))
+			*c = 0;
+		if (strlen(text) > 40)
+			text[40] = 0;
+		printf("%-21s%s\n", gubbe, text);
+		free(ts);
+		free(text);
+		if (rows++ == wrows - 4) {
+			printf("(Tryck retur)");
+			fflush(stdout);
+			if (getchar() == 'q') {
+				getchar();
+				return;
+			}
+			rows = 0;
+		}
+	}
+}

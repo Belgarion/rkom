@@ -180,7 +180,8 @@ next_conf(char *str)
 
 	printf("Nästa möte: %s\n\n", conf->rc_name);
 	printf("Du har %d olästa inlägg.\n", conf->rc_first_local_no +
-	    conf->rc_no_of_texts - member->rm_last_text_read - 1);
+	    conf->rc_no_of_texts - member->rm_last_text_read - 1 -
+	    member->rm_read_texts.rm_read_texts_len);
 	prompt = PROMPT_NEXT_TEXT;
 	free(conf);
 	free(member);

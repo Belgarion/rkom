@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <sys/poll.h>
 #include <sys/time.h>
+#include <sys/ioctl.h>
 
 #include <netinet/in.h>
 
@@ -26,6 +27,7 @@ int	main(int, char **);
 
 static int lasttime;
 static void sigio(int);
+static void sigwinch(int);
 static int async_collect(void);
 
 char *p_next_conf = "(Gå till) nästa möte";
@@ -33,6 +35,7 @@ char *p_next_text = "(Läsa) nästa inlägg";
 char *p_see_time  = "(Se) tiden";
 char *p_next_comment = "(Läsa) nästa kommentar";
 char *prompt;
+int wrows;
 
 int
 main(int argc, char *argv[])
@@ -59,6 +62,9 @@ main(int argc, char *argv[])
 	argc -= optind;
 
 	signal(SIGIO, sigio);
+	signal(SIGWINCH, sigwinch);
+
+	sigwinch(0);
 
 	if (argc != 1) {
 		if ((server = getenv("KOMSERVER")) == 0)
@@ -112,6 +118,15 @@ main(int argc, char *argv[])
 void
 sigio(int arg)
 {
+}
+
+void
+sigwinch(int arg)
+{
+	struct winsize ws;
+
+	ioctl(1, TIOCGWINSZ, &ws);
+	wrows = ws.ws_row;
 }
 
 int

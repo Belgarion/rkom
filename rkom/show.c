@@ -15,7 +15,7 @@
 #include "set.h"
 #include "next.h"
 
-static char *
+char *
 vem(int num)
 {
 	struct rk_conference *conf;
