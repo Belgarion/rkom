@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.6 2000/11/19 18:28:51 ragge Exp $ */
+/* $Id: parse.c,v 1.7 2000/11/22 11:58:25 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -93,6 +93,7 @@ DCMD(info_list_commands);
 DCMD(info_flags);
 DCMD(info_time);
 DCMD(info_saveflags);
+DCMD(cmd_status);
 
 /* Other commands */
 DCMD(other_set);
@@ -167,6 +168,7 @@ DROW("lista kommandon",			0,PE_NO_ARG,info_list_commands)
 DROW("flaggor",					0,PE_NO_ARG,info_flags)
 DROW("tiden",					0,PE_NO_ARG,info_time)
 DROW("hjälp",					0,PE_NO_ARG,info_list_commands)
+DROW("status",					0,PE_STR_ARG,cmd_status)
 
 /* Other commands */
 DROW("sätt",					0,PE_STR_ARG,other_set)
@@ -201,12 +203,35 @@ p_init(void)
 	c = commands;
 	cmds = parse_new_cmd_lst();
 	for (c = commands; c->cl_str != NULL; c++)
-		parse_add_cmd(cmds, c->cl_str, c->cl_prio, c->cl_takes_arg, c->cl_exec);
+		parse_add_cmd(cmds, c->cl_str, c->cl_prio,
+		    c->cl_takes_arg, c->cl_exec);
+}
+
+static char *cvtstr[] = {
+	"åÅ}]", "äÄ{[", "öÖ|\\", 
+};
+
+static void
+chrconvert(char *str)
+{
+	int len = strlen(str);
+	int i, j;
+
+	for (i = 0; i < len; i++) {
+		for (j = 0; j < sizeof(cvtstr)/sizeof(char *); j++)
+			if (index(cvtstr[j], str[i]))
+				str[i] = cvtstr[j][0];
+		if (str[i] > 0)
+			str[i] = tolower(str[i]);
+	}
 }
 
 int
 exec_cmd(const char *str)
 {
+	char *arg;
+	int rv;
+
 	CHK_INIT;
 
 	if (strlen(str) == 0) {
@@ -219,17 +244,20 @@ exec_cmd(const char *str)
 		else if (prompt == PROMPT_NEXT_COMMENT)
 			next_comment(NULL);
 		else
-			printf("Okänd prompt %s\n", prompt);
+			rprintf("Okänd prompt %s\n", prompt);
 		return 0;
 	}
-
-	return parse_exec(cmds, str);
+	arg = strdup(str);
+	chrconvert(arg);
+	rv = parse_exec(cmds, arg);
+	free(arg);
+	return rv;
 }
 
 /* Helpers */
 #define XXTEST(name, test, text) \
-static int name(void) {if(test)printf(text);else return 0;return 1;}
-#define TT(cmp, str) if (cmp) {printf(str);return 0;}
+static int name(void) {if(test)rprintf(text);else return 0;return 1;}
+#define TT(cmp, str) if (cmp) {rprintf(str);return 0;}
 
 XXTEST(nwa, is_writing, "Du håller redan på att skriva en text.\n")
 #define NWA if (nwa()) return 0
@@ -268,10 +296,10 @@ re_concat(int argc, char *argv[])
 do { \
 	int i; \
  \
-	printf("%s: ", __FUNCTION__); \
+	rprintf("%s: ", __FUNCTION__); \
 	for (i = 0; i < argc; i++) \
-		printf("%s ", argv[i]); \
-	printf("\n"); \
+		rprintf("%s ", argv[i]); \
+	rprintf("\n"); \
 } while (0)
 
 /* Commands for reading */
@@ -455,8 +483,8 @@ static int
 exec_conf_leave(int argc, char *argv[])
 {
 	LF;
-	TT(argc != 1, "Handhavande:\nutträda <mötesnamn>\n");
-	cmd_leave(argv[0]);
+	TT(argc < 1, "Handhavande:\nutträda <mötesnamn>\n");
+	cmd_leave(re_concat(argc, argv));
 	return 0;
 }
 
@@ -474,8 +502,8 @@ static int
 exec_text_add_rcpt(int argc, char *argv[])
 {
 	OWA;
-	TT(argc != 1, "Handhavande:\nmottagare: <mottagarnamn>\n");
-	write_rcpt(argv[0]);
+	TT(argc < 1, "Handhavande:\nmottagare: <mottagarnamn>\n");
+	write_rcpt(re_concat(argc, argv));
 	return 0;
 }
 
@@ -483,8 +511,8 @@ static int
 exec_text_add_cmt_to(int argc, char *argv[])
 {
 	OWA;
-	TT(argc != 1, "Handhavande:\nkommentar till: <ärendenummer>\n");
-	write_comment(argv[0]);
+	TT(argc < 1, "Handhavande:\nkommentar till: <ärendenummer>\n");
+	write_comment(re_concat(argc, argv));
 	return 0;
 }
 
@@ -606,7 +634,7 @@ static int
 exec_com_say(int argc, char *argv[])
 {
 	LF;
-	TT(argc != 1, "Handhavande:\nsäg <mottagare>\n");
+	TT(argc < 1, "Handhavande:\nsäg <mottagare>\n");
 	cmd_say(re_concat(argc, argv));
 	return 0;
 }
@@ -682,5 +710,12 @@ exec_cmd_password(int argc, char *argv[])
 {
 	LF;
 	cmd_password();
+	return 0;
+}
+
+static int
+exec_cmd_status(int argc, char *argv[])
+{
+	cmd_status(re_concat(argc, argv));
 	return 0;
 }

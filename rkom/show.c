@@ -44,14 +44,14 @@ printcmnt(struct rk_misc_info *mi, int len, int p)
 		    mi[i].rmi_type == comm_in) {
 			struct rk_text_stat *tt;
 
-			printf("%s%s i text %d", p ? "(" : "",
+			rprintf("%s%s i text %d", p ? "(" : "",
 			    (mi[i].rmi_type == footn_in ?
 			    "Fotnot" : "Kommentar"), mi[i].rmi_numeric);
 			tt = rk_textstat(mi[i].rmi_numeric);
 			if (tt->rt_retval == 0)
-				printf(" av %s", vem(tt->rt_author));
+				rprintf(" av %s", vem(tt->rt_author));
 			free(tt);
-			printf("%s\n", p ? ")" : "");
+			rprintf("%s\n", p ? ")" : "");
 		}
 	}
 }
@@ -67,7 +67,7 @@ show_text(int nr)
 
 	ts = rk_textstat(nr);
 	if (ts->rt_retval) {
-		printf("För din del så finns inte text %d\n", nr);
+		rprintf("För din del så finns inte text %d\n", nr);
 		free(ts);
 		return;
 	}
@@ -78,7 +78,7 @@ show_text(int nr)
 		sprintf(namn, "Person %d (hemlig)", ts->rt_author);
 	} else
 		namn = conf->rc_name;
-	printf("\n(%d) %s /%d rad%s/ %s\n", nr,
+	rprintf("\n(%d) %s /%d rad%s/ %s\n", nr,
 	    get_date_string(&ts->rt_time), ts->rt_no_of_lines,
 	    ts->rt_no_of_lines == 2 ? "er" : "", namn);
 	free(conf);
@@ -87,30 +87,30 @@ show_text(int nr)
 	len = ts->rt_misc_info.rt_misc_info_len;
 	for (i = 0; i < len; i++) {
 		if (mi[i].rmi_type == recpt)
-			printf("Mottagare: %s\n", vem(mi[i].rmi_numeric));
+			rprintf("Mottagare: %s\n", vem(mi[i].rmi_numeric));
 
 		if (mi[i].rmi_type == cc_recpt)
-			printf("Extra kopia: %s\n", vem(mi[i].rmi_numeric));
+			rprintf("Extra kopia: %s\n", vem(mi[i].rmi_numeric));
 		if (mi[i].rmi_type == comm_to) {
 			struct rk_text_stat *tt;
 
-			printf("Kommentar till text %d", mi[i].rmi_numeric);
+			rprintf("Kommentar till text %d", mi[i].rmi_numeric);
 			tt = rk_textstat(mi[i].rmi_numeric);
 			if (tt->rt_retval == 0)
-				printf(" av %s", vem(tt->rt_author));
+				rprintf(" av %s", vem(tt->rt_author));
 			free(tt);
-			printf("\n");
+			rprintf("\n");
 		}
 
 		if (mi[i].rmi_type == footn_to) {
 			struct rk_text_stat *tt;
 
-			printf("Fotnot till text %d", mi[i].rmi_numeric);
+			rprintf("Fotnot till text %d", mi[i].rmi_numeric);
 			tt = rk_textstat(mi[i].rmi_numeric);
 			if (tt->rt_retval == 0)
-					printf(" av %s", vem(tt->rt_author));
+					rprintf(" av %s", vem(tt->rt_author));
 			free(tt);
-			printf("\n");
+			rprintf("\n");
 		}
 	}
 	p = iseql("reading-puts-comments-in-pointers-last", "1");
@@ -118,26 +118,26 @@ show_text(int nr)
 		printcmnt(mi, len, p);
 
 	if (ts->rt_no_of_marks)
-		printf("Texten markerad av %d person%s.\n", ts->rt_no_of_marks,
+		rprintf("Texten markerad av %d person%s.\n", ts->rt_no_of_marks,
 		    ts->rt_no_of_marks == 1 ? "" : "er");
 	c = rk_gettext(nr);
-	printf("Ärende: ");
+	rprintf("Ärende: ");
 	cc = c;
 	while (*cc && (*cc != '\n'))
-		printf("%c", *cc++);
+		rprintf("%c", *cc++);
 	if (isneq("dashed-lines", "0"))
-		printf("\n------------------------------------------------------------");
+		rprintf("\n------------------------------------------------------------");
 	if (*cc) {
-		printf("%s", cc);
+		rprintf("%s", cc);
 		if (cc[strlen(cc) - 1] != '\n')
-			printf("\n");
+			rprintf("\n");
 	} else
-		printf("\n");
+		rprintf("\n");
 	sprintf(buf, "(%d)", nr);
 	if (isneq("dashed-lines", "0"))
-		printf("%s%s", buf, &"------------------------------------------------------------\n"[strlen(buf)]);
+		rprintf("%s%s", buf, &"------------------------------------------------------------\n"[strlen(buf)]);
 	else
-		printf("\n");
+		rprintf("\n");
 	free(c);
 	if (p)
 		printcmnt(mi, len, p);
@@ -162,12 +162,12 @@ show_savetext(char *str)
 	int fd, outfd;
 
 	if (str == 0) {
-		printf("Du måste ange filnamn att spara till.\n");
+		rprintf("Du måste ange filnamn att spara till.\n");
 		return;
 	}
 	fd = open(str, O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR);
 	if (fd < 0) {
-		printf("Det sket sej att skapa filen: %s\n", strerror(errno));
+		rprintf("Det sket sej att skapa filen: %s\n", strerror(errno));
 		return;
 	}
 	/* This is a quite strange way to save the message... */

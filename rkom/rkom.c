@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.15 2000/11/18 10:50:55 ragge Exp $ */
+/* $Id: rkom.c,v 1.16 2000/11/22 11:58:25 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -46,7 +46,7 @@ char *p_next_text = "(Läsa) nästa inlägg";
 char *p_see_time  = "(Se) tiden";
 char *p_next_comment = "(Läsa) nästa kommentar";
 char *prompt;
-int wrows;
+int wrows, swascii;
 
 static char *
 prompt_fun(EditLine *el)
@@ -76,15 +76,19 @@ main(int argc, char *argv[])
 
 	confile = 0;
 	prompt = p_see_time;
-	while ((ch = getopt(argc, argv, "f:")) != -1)
+	while ((ch = getopt(argc, argv, "sf:")) != -1)
 		switch (ch) {
+		case 's':
+			swascii++;
+			break;
+
 		case 'f':
 			confile = optarg;
 			break;
 
 		default:
 			(void)fprintf(stderr,
-			    "usage: %s [-f file] [server]\n", argv[0]);
+			    "usage: %s [-s] [-f file] [server]\n", argv[0]);
 			exit(1);
 		}
 	argv += optind;
@@ -130,7 +134,7 @@ main(int argc, char *argv[])
 		if (noprompt)
 			noprompt = 0;
 		else
-			printf("\n%s - ", prompt);
+			rprintf("\n%s - ", prompt);
 		fflush(stdout);
 
 		setup_tty(0);
@@ -148,7 +152,7 @@ main(int argc, char *argv[])
 			 * Go to the beginning of the line to allow libedit to start
 			 * from column 0 and overwrite the current prompt.
 			 */
-			printf("%c", '\r');	
+			rprintf("%c", '\r');	
 			if (el_gets(el, &num) == NULL) {
 				if (nullar > 20)
 					exit(0);
@@ -174,6 +178,7 @@ main(int argc, char *argv[])
 				rk_alive(0);
 				lasttime = tp.tv_sec;
 			}
+			outlines = 0;
 		}
 		async_collect();
 	}
@@ -214,7 +219,7 @@ async_collect()
 
 			if (iseql("presence-messages", "1")) {
 				sender = rk_confinfo(ra->ra_sender);
-				printf("\n%s har just loggat %s.",
+				rprintf("\n%s har just loggat %s.",
 				    sender->rc_name,
 				    (ra->ra_type == 13 ? "ut" : "in"));
 				free(sender);
@@ -225,7 +230,7 @@ async_collect()
 
 		case 5: 
 			if (iseql("presence-messages", "1")) {
-				printf("\n%s bytte just namn till %s.",
+				rprintf("\n%s bytte just namn till %s.",
 				    ra->ra_message, ra->ra_message2);
 				retval = 0;
 			}
@@ -235,21 +240,21 @@ async_collect()
 			struct rk_conference *sender, *rcpt;
 
 			sender = rk_confinfo(ra->ra_sender);
-printf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 			if (ra->ra_conf == 0)
-				printf("Allmänt meddelande från %s\n\n",
+				rprintf("Allmänt meddelande från %s\n\n",
 				    sender->rc_name);
 			else if (ra->ra_conf == myuid)
-				printf("Personligt meddelande från %s\n\n",
+				rprintf("Personligt meddelande från %s\n\n",
 				    sender->rc_name);
 			else {
 				rcpt = rk_confinfo(ra->ra_conf);
-				printf("Meddelande till %s från %s\n\n",
+				rprintf("Meddelande till %s från %s\n\n",
 				    rcpt->rc_name, sender->rc_name);
 				free(rcpt);
 			}
-			printf("%s\n", ra->ra_message);
-printf("----------------------------------------------------------------\n");
+			rprintf("%s\n", ra->ra_message);
+rprintf("----------------------------------------------------------------\n");
 			retval = 0;
 		}
 		break;
@@ -263,7 +268,7 @@ printf("----------------------------------------------------------------\n");
 			break;
 
 		default:
-			printf("Ohanterat async %d\n", ra->ra_type);
+			rprintf("Ohanterat async %d\n", ra->ra_type);
 			break;
 		}
 		free(ra);

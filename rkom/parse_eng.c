@@ -1,4 +1,4 @@
-/* $Id: parse_eng.c,v 1.1 2000/11/05 16:26:19 jens Exp $ */
+/* $Id: parse_eng.c,v 1.2 2000/11/22 11:58:25 ragge Exp $ */
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
@@ -15,6 +15,7 @@
 #include "container.h"
 
 #include "parse_eng.h"
+#include "rkom.h"
 
 #include <assert.h>
 
@@ -234,7 +235,7 @@ skip:
 	if (max_prio < 0) {
 		/* There are no matches */
 		ret = -1;
-		printf("Okänt kommando: '%s'\n", str);
+		rprintf("Okänt kommando: '%s'\n", str);
 
 	} else if (ce_max_prio != NULL) {
 		/* We have only one possible match */
@@ -248,11 +249,11 @@ skip:
 		} else {
 			/* There are several matches */
 			ret = -1;
-			printf("Flertydigt kommando. Du kan mena:\n\n");
+			rprintf("Flertydigt kommando. Du kan mena:\n\n");
 			for (cl_pos = NULL; cl_ce_walk(cl_matches, &cl_pos, &ce) == 0;) {
 				for (i = 0; i < ce->ce_argc; i++)
-					printf("%s ", ce->ce_argv[i]);
-				printf("\n");
+					rprintf("%s ", ce->ce_argv[i]);
+				rprintf("\n");
 			}
 		}
 	}

@@ -161,7 +161,7 @@ next_conf(char *str)
 	unread = retval->ru_confs.ru_confs_val;
 	len = retval->ru_confs.ru_confs_len;
 	if (len == 0) {
-		printf("Du har inga olästa inlägg.\n");
+		rprintf("Du har inga olästa inlägg.\n");
 		prompt = PROMPT_SEE_TIME;
 		return;
 	}
@@ -177,8 +177,8 @@ next_conf(char *str)
 	member = rk_membership(myuid, curconf);
 	rk_change_conference(curconf);
 
-	printf("Nästa möte: %s\n\n", conf->rc_name);
-	printf("Du har %d olästa inlägg.\n", conf->rc_first_local_no +
+	rprintf("Nästa möte: %s\n\n", conf->rc_name);
+	rprintf("Du har %d olästa inlägg.\n", conf->rc_first_local_no +
 	    conf->rc_no_of_texts - member->rm_last_text_read - 1 -
 	    member->rm_read_texts.rm_read_texts_len);
 	prompt = PROMPT_NEXT_TEXT;
@@ -214,7 +214,7 @@ next_text(char *str)
 
 	local = rk_next_unread(curconf, myuid);
 	if (local == 0) {
-		printf("Du har inga mer olästa inlägg.\n");
+		rprintf("Du har inga mer olästa inlägg.\n");
 		next_prompt();
 		return;
 	}
@@ -234,7 +234,7 @@ next_comment(char *str)
 	int global, len, i;
 
 	if (pole == 0) {
-back:		printf("Det finns ingen nästa kommentar.\n");
+back:		rprintf("Det finns ingen nästa kommentar.\n");
 		prompt = PROMPT_NEXT_TEXT;
 		return;
 	}
@@ -275,7 +275,7 @@ next_resee_comment()
 		    mi[i].rmi_type == footn_to)
 			break;
 	if (i == len) {
-		printf("Inlägget är varken kommentar eller fotnot.\n");
+		rprintf("Inlägget är varken kommentar eller fotnot.\n");
 		free(ts);
 		return;
 	}
@@ -310,9 +310,9 @@ next_hoppa(char *str)
 	while (1) {
 		if (pole == 0) {
 			if (hoppade == 0)
-				printf("Du hoppade inte över några inlägg.\n");
+				rprintf("Du hoppade inte över några inlägg.\n");
 			else
-				printf("Du hoppade över %d inlägg.\n", hoppade);
+				rprintf("Du hoppade över %d inlägg.\n", hoppade);
 			return;
 		}
 		ts = rk_textstat(pole->textnr);

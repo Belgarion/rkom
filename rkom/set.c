@@ -7,6 +7,7 @@
 #include <err.h>
 
 #include "rkom_proto.h"
+#include "rkom.h"
 
 #include "set.h"
 
@@ -74,7 +75,7 @@ parsefile(char *fname)
 
 			if (setcmnds[i].type == STRING) {
 				if (arg == 0) {
-					printf("%s: syntax error at line %d\n",
+					rprintf("%s: syntax error at line %d\n",
 					    fname, line);
 					break;
 				}
@@ -85,7 +86,7 @@ parsefile(char *fname)
 			break;
 		}
 		if (i == ncs)
-			printf("%s: bad line %d\n", fname, line);
+			rprintf("%s: bad line %d\n", fname, line);
 	}
 	fclose(fd);
 }
@@ -178,12 +179,12 @@ set_flags()
 {
 	int i;
 
-	printf("(Lista) flaggor\n");
+	rprintf("(Lista) flaggor\n");
 	for (i = 0; i < ncommonvars; i++)
-		printf("\t%s  %s\n", commonvars[i].rv_var, commonvars[i].rv_val);
+		rprintf("\t%s  %s\n", commonvars[i].rv_var, commonvars[i].rv_val);
 	for (i = 0; i < nrkomvars; i++)
-		printf("\t%s  %s\n", rkomvars[i].rv_var, rkomvars[i].rv_val);
-	printf("\n");
+		rprintf("\t%s  %s\n", rkomvars[i].rv_var, rkomvars[i].rv_val);
+	rprintf("\n");
 }
 
 void
@@ -206,10 +207,10 @@ set_setflag(char *name, char *val)
 		}
 	}
 	if (match == 0) {
-		printf("Flaggan finns inte.\n");
+		rprintf("Flaggan finns inte.\n");
 		return;
 	} else if (match > 1) {
-		printf("Flaggans namn är inte entydigt.\n");
+		rprintf("Flaggans namn är inte entydigt.\n");
 		return;
 	}
 	if (inc) {
@@ -230,13 +231,13 @@ set_saveflags()
 		ru.ru_val.ru_val_len = ncommonvars;
 		ru.ru_val.ru_val_val = commonvars;
 		if (rk_set_uarea("common", &ru))
-			printf("rk_set_uarea(common) sket sej\n");
+			rprintf("rk_set_uarea(common) sket sej\n");
 	}
 	if (rmod) {
 		ru.ru_val.ru_val_len = nrkomvars;
 		ru.ru_val.ru_val_val = rkomvars;
 		if (rk_set_uarea("rkom", &ru))
-			printf("rk_set_uarea(rkom) sket sej\n");
+			rprintf("rk_set_uarea(rkom) sket sej\n");
 	}
 	cmod = rmod = 0;
 }

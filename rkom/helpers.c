@@ -42,16 +42,16 @@ match_complain(char *str, int type)
 	num = retval->rcr_ci.rcr_ci_len;
 
 	if (num == 0) {
-		printf("Det finns ingenting som matchar \"%s\".\n", str);
+		rprintf("Det finns ingenting som matchar \"%s\".\n", str);
 		free(retval);
 		return 0;
 	} else if (num > 1) {
 		if (directmatch(retval, str))
 			return retval;
-		printf("Texten \"%s\" är flertydig. Du kan mena:\n", str);
+		rprintf("Texten \"%s\" är flertydig. Du kan mena:\n", str);
 		for (i = 0; i < num; i++)
-			printf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
-		printf("\n");
+			rprintf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
+		rprintf("\n");
 		free(retval);
 		return 0;
 	}

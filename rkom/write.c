@@ -29,10 +29,10 @@ static struct rk_misc_info *mi;
 static int nmi = 0;
 static char *ctext = 0;
 
-#define	TW if (!is_writing) {printf("Du skriver ingen text just nu.\n");return;}
-#define IW if (is_writing) {printf("Du håller redan på att skriva en text.\n");return;}
-#define	LF if (myuid == 0) {printf("Du måste logga in först.\n");return;}
-#define	NC if (curconf == 0) {printf("Du måste gå till ett möte först.\n");return;}
+#define	TW if (!is_writing) {rprintf("Du skriver ingen text just nu.\n");return;}
+#define IW if (is_writing) {rprintf("Du håller redan på att skriva en text.\n");return;}
+#define	LF if (myuid == 0) {rprintf("Du måste logga in först.\n");return;}
+#define	NC if (curconf == 0) {rprintf("Du måste gå till ett möte först.\n");return;}
 
 static void
 doedit(char *s)
@@ -59,13 +59,13 @@ write_brev(char *str)
 	IW;
 	LF;
 	if (str == 0) {
-		printf("Du måste ange mottagare.\n");
+		rprintf("Du måste ange mottagare.\n");
 		return;
 	}
 	if ((retval = match_complain(str, MATCHCONF_PERSON)) == 0)
 		return;
 
-	printf("(Skicka) brev (till) %s\n",
+	rprintf("(Skicka) brev (till) %s\n",
 	    retval->rcr_ci.rcr_ci_val[0].rc_name);
 	is_writing = 1;
 	mi = calloc(sizeof(struct rk_misc_info), 2);
@@ -83,11 +83,11 @@ write_private(int textno)
 	struct rk_text_stat *ts;
 	char *s, *t;
 
-	printf("Personligt (svar till text %d)\n", textno);
+	rprintf("Personligt (svar till text %d)\n", textno);
 	is_writing = 1;
 	ts = rk_textstat(textno);
 	if (ts->rt_retval) {
-		printf("Kunde inte svara personligt på texten: %s\n",
+		rprintf("Kunde inte svara personligt på texten: %s\n",
 		    error(ts->rt_retval));
 		free(ts);
 		return;
@@ -157,7 +157,7 @@ parse_text(char *txt)
 		} else if (strncasecmp(cmd, "Fotnot", strlen(cmd)) == 0) {
 			wfotnot(arg);
 		} else
-			printf("%s förstods inte.\n", cmd);
+			rprintf("%s förstods inte.\n", cmd);
 	}
 }
 
@@ -178,9 +178,9 @@ write_put(char *str)
 	rti->rti_text = ctext;
 	rtr = rk_create_text(rti);
 	if (rtr->rtr_status)
-		printf("write_new: %s\n", error(rtr->rtr_status));
+		rprintf("write_new: %s\n", error(rtr->rtr_status));
 	else
-		printf("Text %d har skapats.\n", rtr->rtr_textnr);
+		rprintf("Text %d har skapats.\n", rtr->rtr_textnr);
 	if (isneq("created-texts-are-read", "0") && (rtr->rtr_status == 0)) {
 		ts = rk_textstat(rtr->rtr_textnr);
 		imi = ts->rt_misc_info.rt_misc_info_val;
@@ -212,9 +212,9 @@ get_text(char *sub)
 		base = calloc(10, 1);
 	else
 		base = strdup(sub);
-	printf("\nÄrende: ");
+	rprintf("\nÄrende: ");
 	if (sub)
-		printf("%s\n", base);
+		rprintf("%s\n", base);
 	fflush(stdout);
 
 	for (;;) {
@@ -249,9 +249,9 @@ void
 write_forget(char *str)
 {
 	if (is_writing)
-		printf("Texten du höll på att skriva är nu bortkastad.\n");
+		rprintf("Texten du höll på att skriva är nu bortkastad.\n");
 	else
-		printf("Du håller inte på att skriva någon text.\n");
+		rprintf("Du håller inte på att skriva någon text.\n");
 	is_writing = 0;
 	if (ctext)
 		free(ctext);
@@ -300,7 +300,7 @@ wfotnot(char *str)
 	if (p)
 		nr = atoi(p);
 	if (p == 0 || nr == 0) {
-		printf("Det var ett hemskt dåligt inläggsnummer.\n");
+		rprintf("Det var ett hemskt dåligt inläggsnummer.\n");
 		return;
 	}
 	for (i = 0; i < nmi; i++)
@@ -321,7 +321,7 @@ write_comment(char *str)
 	TW;
 	nr = atoi(str);
 	if (nr == 0) {
-		printf("Det var ett hemskt dåligt inläggsnummer.\n");
+		rprintf("Det var ett hemskt dåligt inläggsnummer.\n");
 		return;
 	}
 	for (i = 0; i < nmi; i++)
@@ -375,7 +375,7 @@ show_format()
 			strcat(ret, buf);
 			break;
 		default:
-			printf("Unknown text type %d.\n", mi[i].rmi_type);
+			rprintf("Unknown text type %d.\n", mi[i].rmi_type);
 			break;
 		}
 	}
@@ -401,7 +401,7 @@ extedit(char *sub)
 	strcpy(fil, "/tmp/raggkom.XXXXX");
 	f = mkstemp(fil);
 	if (f == -1) {
-		printf("Det gick inte: %s\n", strerror(errno));
+		rprintf("Det gick inte: %s\n", strerror(errno));
 		return 0;
 	}
 	if (sub)
@@ -421,7 +421,7 @@ extedit(char *sub)
 	wait(&f);
 	if (WEXITSTATUS(f)) {
 		unlink(fil);
-		printf("Kunde inte anropa %s: %s\n", editor, 
+		rprintf("Kunde inte anropa %s: %s\n", editor, 
 		    strerror(WEXITSTATUS(f)));
 		return 1;
 	}
@@ -446,13 +446,13 @@ write_internal(int text, int ktyp)
 
 	ts = rk_textstat(text);
 	if (ts->rt_retval) {
-		printf("Text %d är inte läsbar, tyvärr...\n", text);
+		rprintf("Text %d är inte läsbar, tyvärr...\n", text);
 		free(ts);
 		return;
 	}
 
 	if (ktyp == footn_to && ts->rt_author != myuid) {
-		printf("Du kan bara skriva fotnötter till dina egna inlägg.\n");
+		rprintf("Du kan bara skriva fotnötter till dina egna inlägg.\n");
 		free(ts);
 		return;
 	}
@@ -485,17 +485,17 @@ void
 write_cmnt_last()
 {
 	if (lastlasttext == 0) {
-		printf("Det finns inget föregående läst inlägg.\n");
+		rprintf("Det finns inget föregående läst inlägg.\n");
 		return;
 	}
-	printf("Kommentera föregående (inlägg) (%d)\n", lastlasttext);
+	rprintf("Kommentera föregående (inlägg) (%d)\n", lastlasttext);
 	write_internal(lastlasttext, comm_to);
 }
 
 void
 write_cmnt_no(nr)
 {
-	printf("Kommentera (inlägg %d)\n", nr);
+	rprintf("Kommentera (inlägg %d)\n", nr);
 	write_internal(nr, comm_to);
 }
 
@@ -503,10 +503,10 @@ void
 write_cmnt()
 {
 	if (lasttext == 0) {
-		printf("Du har inte läst något inlägg.\n");
+		rprintf("Du har inte läst något inlägg.\n");
 		return;
 	}
-	printf("Kommentera (inlägg %d)\n", lasttext);
+	rprintf("Kommentera (inlägg %d)\n", lasttext);
 	write_internal(lasttext, comm_to);
 }
 
@@ -514,16 +514,16 @@ void
 write_footnote()
 {
 	if (lasttext == 0) {
-		printf("Du har inte läst något inlägg.\n");
+		rprintf("Du har inte läst något inlägg.\n");
 		return;
 	}
-	printf("Fotnot (till inlägg %d)\n", lasttext);
+	rprintf("Fotnot (till inlägg %d)\n", lasttext);
 	write_internal(lasttext, footn_to);
 }
 
 void
 write_footnote_no(int num)
 {
-	printf("Fotnot (till inlägg %d)\n", num);
+	rprintf("Fotnot (till inlägg %d)\n", num);
 	write_internal(num, footn_to);
 }

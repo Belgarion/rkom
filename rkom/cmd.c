@@ -42,24 +42,24 @@ cmd_tiden(char *str)
 
 	tm = rk_time(0);
 
-	printf("Klockan är ");
+	rprintf("Klockan är ");
 	if (tm->rt_minutes > 30)
-		printf("%d minut%s i %s",  60 - tm->rt_minutes,
+		rprintf("%d minut%s i %s",  60 - tm->rt_minutes,
 		    tm->rt_minutes == 59 ? "" : "er",
 		    tindx[((tm->rt_hours + 1)%12)]);
 	else if (tm->rt_minutes == 30)
-		printf("halv %s", tindx[((tm->rt_hours+1)%12)]);
+		rprintf("halv %s", tindx[((tm->rt_hours+1)%12)]);
 	else if (tm->rt_minutes == 0)
-		printf("prick %s", tindx[(tm->rt_hours%12)]);
+		rprintf("prick %s", tindx[(tm->rt_hours%12)]);
 	else
-		printf("%d minut%s över %s", tm->rt_minutes,
+		rprintf("%d minut%s över %s", tm->rt_minutes,
 		    tm->rt_minutes == 1 ? "" : "er", tindx[(tm->rt_hours%12)]);
-	printf(" på %s", dyidx[tm->rt_hours/6]);
-	printf(",\n%sdagen den %d %s %d", dindx[tm->rt_day_of_week], tm->rt_day,
+	rprintf(" på %s", dyidx[tm->rt_hours/6]);
+	rprintf(",\n%sdagen den %d %s %d", dindx[tm->rt_day_of_week], tm->rt_day,
 	    mindx[tm->rt_month], tm->rt_year + 1900);
 	if (tm->rt_is_dst)
-		printf(" (sommartid)");
-	printf(" (enligt servern)\n");
+		rprintf(" (sommartid)");
+	rprintf(" (enligt servern)\n");
 }
 
 static char *
@@ -120,14 +120,14 @@ cmd_vilka(char *str)
 	antal = ppp->rdv_rds.rdv_rds_len;
 	pp = ppp->rdv_rds.rdv_rds_val;
 	if (antal == 0) {
-		printf("Det är inga påloggade alls.\n");
+		rprintf("Det är inga påloggade alls.\n");
 		free(ppp);
 		return;
 	}
 
-	printf("Det är %d person%s påloggade.\n",
+	rprintf("Det är %d person%s påloggade.\n",
 	    antal, antal == 1 ? "" : "er");
-	printf("-------------------------------------------------------\n");
+	rprintf("-------------------------------------------------------\n");
 
 	for (i = 0; i < antal; i++) {
 		struct rk_conference *c1, *c2;
@@ -146,32 +146,32 @@ cmd_vilka(char *str)
 		p = rk_persinfo(pp[i].rds_person);
 		var = p->rp_username;
 		if (strlen(name) > 33)
-			printf("%5d %s\n%40s%s\n",
+			rprintf("%5d %s\n%40s%s\n",
 			    pp[i].rds_session, name, "", conf);
 		else
-			printf("%5d %-33s %-40s\n",
+			rprintf("%5d %-33s %-40s\n",
 			    pp[i].rds_session, name, conf);
 		if (strlen(var) > 36)
-			printf("   %s\n%40s%s\n", var, "", pp[i].rds_doing);
+			rprintf("   %s\n%40s%s\n", var, "", pp[i].rds_doing);
 		else
-			printf("   %-37s%s\n", var, pp[i].rds_doing);
+			rprintf("   %-37s%s\n", var, pp[i].rds_doing);
 		if (clients) {
 			char *nn, *vv;
 
 			nn = rk_client_name(pp[i].rds_session);
 			vv = rk_client_version(pp[i].rds_session);
-			printf("   %-37s", (strlen(nn) == 0 ? "(Okänd)" : nn));
-			printf("%s\n", (strlen(vv) == 0 ? "(Okänt)" : vv));
+			rprintf("   %-37s", (strlen(nn) == 0 ? "(Okänd)" : nn));
+			rprintf("%s\n", (strlen(vv) == 0 ? "(Okänt)" : vv));
 			free(nn);
 			free(vv);
 		}
-		printf("\n");
+		rprintf("\n");
 		free(c1);
 		if (pp[i].rds_conf)
 			free(c2);
 		free(p);
 	}
-	printf("-------------------------------------------------------\n");
+	rprintf("-------------------------------------------------------\n");
 	free(ppp);
 }
 
@@ -184,18 +184,18 @@ cmd_login(char *str)
 	char *passwd;
 
 	if (str == 0) {
-		printf("Du måste ange vem du vill logga in som.\n");
+		rprintf("Du måste ange vem du vill logga in som.\n");
 		return;
 	}
 	retval = match_complain(str, MATCHCONF_PERSON);
 	if (retval == NULL)
 		return;
 
-	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
 	userid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
-	passwd = getpass("Lösenord: ");
+	passwd = getpass(swascii ? "L|senord: " : "Lösenord: ");
 	if (rk_login(userid, passwd)) {
-		printf("Felaktigt lösenord.\n\n");
+		rprintf("Felaktigt lösenord.\n\n");
 		free(retval);
 		return;
 	}
@@ -207,7 +207,7 @@ cmd_login(char *str)
 	 * Set some informative text.
 	 */
 	if (rk_whatido("Kör raggeklienten (nu med login!)"))
-		printf("Set what-i-am-doing sket sej\n");
+		rprintf("Set what-i-am-doing sket sej\n");
 
 	/* Show where we have unread texts. */
 	if (iseql("print-number-of-unread-on-entrance", "1"))
@@ -229,13 +229,13 @@ cmd_logout(char *str)
 void
 cmd_sluta(char *str)
 {
-	printf("Sluta\n");
+	rprintf("Sluta\n");
 	if (is_writing) {
-		printf("Du håller på att skriva en text. ");
-		printf("Lägg in eller glöm den först.\n");
+		rprintf("Du håller på att skriva en text. ");
+		rprintf("Lägg in eller glöm den först.\n");
 		return;
 	}
-	printf("Nu avslutar du rkom.\n");
+	rprintf("Nu avslutar du rkom.\n");
 	exit(0);
 }
 
@@ -244,13 +244,13 @@ cmd_send(char *str)
 {
 	char *buf;
 
-	printf("Sänd (alarmmeddelande till alla)\nMeddelande: ");
+	rprintf("Sänd (alarmmeddelande till alla)\nMeddelande: ");
 	fflush(stdout);
 
 	buf = get_input_string(0, 0); /* XXX */
 
 	if (strlen(buf) == 0)
-		printf("Nähej.");
+		rprintf("Nähej.");
 	else
 		rk_send_msg(0, buf);
 	free(buf);
@@ -263,22 +263,22 @@ cmd_say(char *str)
 	char *buf;
 
 	if (str == 0) {
-		printf("Du måste ange vem du vill skicka meddelande till.\n");
+		rprintf("Du måste ange vem du vill skicka meddelande till.\n");
 		return;
 	}
 	retval = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF);
 	if (retval == 0)
 		return;
 
-	printf("Sänd meddelande till %s\nMeddelande: ",
+	rprintf("Sänd meddelande till %s\nMeddelande: ",
 	    retval->rcr_ci.rcr_ci_val[0].rc_name);
 	fflush(stdout);
 	buf = get_input_string(0, 0); /* XXX */
 	if (strlen(buf) == 0)
-		printf("Nähej.");
+		rprintf("Nähej.");
 	else {
 		rk_send_msg(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, buf);
-		printf("\nMeddelandet sänt till %s.\n", 
+		rprintf("\nMeddelandet sänt till %s.\n", 
 		    retval->rcr_ci.rcr_ci_val[0].rc_name);
 	}
 	free(buf);
@@ -291,12 +291,12 @@ cmd_where(char *str)
 	struct rk_conference *conf;
 
 	if (myuid == 0)
-		printf("Du är inte ens inloggad.\n");
+		rprintf("Du är inte ens inloggad.\n");
 	else if (curconf == 0)
-		printf("Du är inte närvarande någonstans.\n");
+		rprintf("Du är inte närvarande någonstans.\n");
 	else {
 		conf = rk_confinfo(curconf);
-		printf("Du är i möte %s.\n", conf->rc_name);
+		rprintf("Du är i möte %s.\n", conf->rc_name);
 		free(conf);
 	}
 }
@@ -311,11 +311,11 @@ cmd_goto(char *str)
 	char *ch, *name;
 
 	if (myuid == 0) {
-		printf("Logga in först.\n");
+		rprintf("Logga in först.\n");
 		return;
 	}
 	if (str == 0) {
-		printf("Du måste ge ett möte som argument.\n");
+		rprintf("Du måste ge ett möte som argument.\n");
 		return;
 	}
 	retval = match_complain(str, MATCHCONF_CONF);
@@ -328,41 +328,41 @@ cmd_goto(char *str)
 	ret = rk_change_conference(conf);
 	if (ret == 0) {
 		curconf = conf;
-		printf("Du gick nu till möte %s.\n", name);
+		rprintf("Du gick nu till möte %s.\n", name);
 		next_resetchain();
 		return;
 	}
 	/* XXX Check why change_conference failed; status of conf etc */
 	if (ret == 13) { /* XXX should be define */
-		printf("Du är inte medlem i %s.\n", name);
+		rprintf("Du är inte medlem i %s.\n", name);
 		do {
-			printf("Vill du bli medlem? (ja, nej) - ");
+			rprintf("Vill du bli medlem? (ja, nej) - ");
 			fflush(stdout);
 			ch = get_input_string(0, 0); /* XXX */
 		} while (strcasecmp("ja", ch) && strcasecmp("nej", ch));
 		if (strcasecmp("nej", ch) == 0) {
-			printf("Nehepp.\n");
+			rprintf("Nehepp.\n");
 			next_resetchain();
 			return;
 		}
 	} else if (ret != 0) {
-		printf("%s\n", error(ret));
+		rprintf("%s\n", error(ret));
 		return;
 	}
 	if ((ret = rk_add_member(conf, myuid, 100, 3, 0))) {
-		printf("%s\n", error(ret));
+		rprintf("%s\n", error(ret));
 		return;
 	}
 	curconf = conf;
-	printf("Du är nu medlem i %s.\n", name);
+	rprintf("Du är nu medlem i %s.\n", name);
 	rkc = rk_confinfo(conf);
 	m = rk_membership(myuid, conf);
 	ret = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1 -
 	    m->rm_last_text_read;
 	if (ret) {
-		printf("\nDu har %d olästa inlägg.\n", ret);
+		rprintf("\nDu har %d olästa inlägg.\n", ret);
 	} else {
-		printf("\nDu har inga olästa inlägg.\n");
+		rprintf("\nDu har inga olästa inlägg.\n");
 	}
 	next_resetchain();
 }
@@ -387,20 +387,12 @@ cmd_leave(char *str)
 	struct rk_confinfo_retval *retval;
 	int ret;
 
-	if (myuid == 0) {
-		printf("Logga in först.\n");
-		return;
-	}
-	if (str == 0) {
-		printf("Du måste ge ett möte som argument.\n");
-		return;
-	}
 	retval = match_complain(str, MATCHCONF_CONF);
 	if (retval == NULL)
 		return;
 	ret = rk_sub_member(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, myuid);
 	if (ret)
-		printf("Det sket sej: %s\n", error(ret));
+		rprintf("Det sket sej: %s\n", error(ret));
 	free(retval);
 }
 
@@ -410,19 +402,51 @@ cmd_password()
 	char *opass, *npass1, *npass2;
 	int rv;
 
-	printf("Ändra lösenord\n");
+	rprintf("Ändra lösenord\n");
 	opass = strdup(getpass("Ange gamla lösenordet: "));
 	npass1 = strdup(getpass("Ange nya lösenordet: "));
 	npass2 = strdup(getpass("Ange nya lösenordet igen: "));
 
 	if (strcmp(npass1, npass2)) {
-		printf("Du skrev olika nya lösenord, försök igen.\n");
+		rprintf("Du skrev olika nya lösenord, försök igen.\n");
 	} else {
 		rv = rk_setpass(myuid, opass, npass1);
 		if (rv)
-			printf("Det sket sej: %s\n", error(rv));
+			rprintf("Det sket sej: %s\n", error(rv));
 	}
 	free(opass);
 	free(npass1);
 	free(npass2);
+}
+
+static void
+persstat(int uid)
+{
+	struct rk_person *p;
+
+	p = rk_persinfo(uid);
+	rprintf("Nummer: Person %-5d\t\tNamn: %s\n", uid, p->rp_username);
+
+	free(p);
+}
+
+static void
+confstat(int mid)
+{
+}
+
+void
+cmd_status(char *name)
+{
+	struct rk_confinfo_retval *retval;
+
+	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
+	if (retval == NULL)
+		return;
+	rprintf("Status (för) %s\n\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	if (retval->rcr_ci.rcr_ci_val[0].rc_type & RK_CONF_TYPE_LETTERBOX)
+		persstat(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
+	else
+		confstat(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
+	free(retval);
 }

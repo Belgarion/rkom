@@ -13,7 +13,7 @@
 void
 list_comm(char *args)
 {
-	printf(
+	rprintf(
 #include "kommandon"
 	);
 }
@@ -31,7 +31,7 @@ list_conf(char *str)
 		return;
 	ci = rv->rcr_ci.rcr_ci_val;
 
-	printf("\nSenaste inlägg   Medl. Tot Inl   Namn (typ)\n");
+	rprintf("\nSenaste inlägg   Medl. Tot Inl   Namn (typ)\n");
 	for (i = 0; i < nconfs; i++) {
 		struct rk_conference *C;
 		struct rk_membership *M;
@@ -40,7 +40,7 @@ list_conf(char *str)
 		if (myuid)
 			M = rk_membership(myuid, ci[i].rc_conf_no);
 
-		printf("%s %4d %7d %s  %s\n",
+		rprintf("%s %4d %7d %s  %s\n",
 		    get_date_string(&C->rc_last_written),
 		    C->rc_no_of_members, C->rc_first_local_no +
 		    C->rc_no_of_texts - 1, (myuid == 0 ? " " :
@@ -51,7 +51,7 @@ list_conf(char *str)
 		if (myuid)
 			free(M);
 	}
-	printf("\n");
+	rprintf("\n");
 	free(rv);
 }
 
@@ -62,7 +62,7 @@ list_news(char *args)
 	int i, nconf, *confs;
 
 	if (myuid == 0) {
-		printf("Du måste logga in först.\n");
+		rprintf("Du måste logga in först.\n");
 		return;
 	}
 	/*
@@ -83,7 +83,7 @@ list_news(char *args)
 			rkc = rk_confinfo(confs[i]);
 
 			if (rkc->rc_retval) {
-				printf("%d sket sej med %d\n",
+				rprintf("%d sket sej med %d\n",
 				    confs[i], rkc->rc_retval);
 				free(rkc);
 				continue;
@@ -92,21 +92,21 @@ list_news(char *args)
 			m = rk_membership(myuid, confs[i]);
 
 			if (m->rm_retval) {
-				printf("%d,%d sket sej med %d\n",
+				rprintf("%d,%d sket sej med %d\n",
 				    confs[i], myuid, m->rm_retval);
 				free(rkc);
 				free(m);
 				continue;
 			}
 			nr = hln - m->rm_last_text_read;
-			printf("Du har %d oläst%s inlägg av %d i %s\n",
+			rprintf("Du har %d oläst%s inlägg av %d i %s\n",
 			    nr, nr == 1 ? "" : "a", hln, rkc->rc_name);
 			free(rkc);
 			free(m);
 		}
-		printf("\n");
+		rprintf("\n");
 	} else
-		printf("Du har inga olästa inlägg.\n");
+		rprintf("Du har inga olästa inlägg.\n");
 	free(conf);
 }
 
@@ -116,15 +116,15 @@ sanitycheck(char *str)
 	int text;
 
 	if (myuid == 0) {
-		printf("Du måste logga in först.\n");
+		rprintf("Du måste logga in först.\n");
 		return 0;
 	}
 	if (str == 0) {
 		text = lasttext;
 		if (text == 0)
-			printf("Det har ännu inte läst någon text.\n");
+			rprintf("Det har ännu inte läst någon text.\n");
 	} else if ((text = atoi(str)) == 0) {
-		printf("%s är ett dåligt inläggsnummer.\n", str);
+		rprintf("%s är ett dåligt inläggsnummer.\n", str);
 		return 0;
 	}
 	return text;
@@ -138,20 +138,20 @@ list_marked(char *str)
 	int i;
 
 	if (myuid == 0) {
-		printf("Du måste logga in först.\n");
+		rprintf("Du måste logga in först.\n");
 		return;
 	}
 	rmr = rk_getmarks(0);
 	rm = rmr->rmr_marks.rmr_marks_val;
 	if (rmr->rmr_retval) {
-		printf("Det sket sej: %s\n", error(rmr->rmr_retval));
+		rprintf("Det sket sej: %s\n", error(rmr->rmr_retval));
 	} else if (rmr->rmr_marks.rmr_marks_len == 0) {
-		printf("Du har inga markerade inlägg.\n");
+		rprintf("Du har inga markerade inlägg.\n");
 	} else {
-		printf("Inläggsnummer\tPrioritet\n");
+		rprintf("Inläggsnummer\tPrioritet\n");
 		for (i = 0; i < rmr->rmr_marks.rmr_marks_len; i++)
-			printf("%d\t\t%d\n", rm[i].rm_text, rm[i].rm_type);
-		printf("\n");
+			rprintf("%d\t\t%d\n", rm[i].rm_text, rm[i].rm_type);
+		rprintf("\n");
 	}
 	free(rmr);
 }
@@ -166,9 +166,9 @@ list_mark(char *str)
 
 	stat = rk_setmark(text, 100);
 	if (stat)
-		printf("Det sket sej: %s\n", error(stat));
+		rprintf("Det sket sej: %s\n", error(stat));
 	else
-		printf("Du har nu markerat inlägg %d.\n", text);
+		rprintf("Du har nu markerat inlägg %d.\n", text);
 }
 
 void
@@ -180,9 +180,9 @@ list_unmark(char *str)
 		return;
 	stat = rk_unmark(text);
 	if (stat)
-		printf("Det sket sej: %d\n", stat);
+		rprintf("Det sket sej: %d\n", stat);
 	else
-		printf("Du har nu avmarkerat inlägg %d.\n", text);
+		rprintf("Du har nu avmarkerat inlägg %d.\n", text);
 }
 
 void
@@ -195,11 +195,11 @@ list_subject()
 
 	conf = rk_confinfo(curconf);
 	if (conf->rc_retval) {
-		printf("rk_confinfo sket sej: %s\n", error(conf->rc_retval));
+		rprintf("rk_confinfo sket sej: %s\n", error(conf->rc_retval));
 		return;
 	}
-	printf("Lista ärenden\n");
-	printf("Inlägg\tDatum\t  Författare           Ärende\n");
+	rprintf("Lista ärenden\n");
+	rprintf("Inlägg\tDatum\t  Författare           Ärende\n");
 	high = conf->rc_no_of_texts + conf->rc_first_local_no - 1;
 	low = conf->rc_first_local_no;
 	free(conf);
@@ -211,10 +211,10 @@ list_subject()
 		ts = rk_textstat(nr);
 		text = rk_gettext(nr);
 		gubbe = vem(ts->rt_author);
-		printf("%d\t%d", nr, ts->rt_time.rt_year + 1900);
-		printf("%s%d", ts->rt_time.rt_month > 8 ? "" : "0",
+		rprintf("%d\t%d", nr, ts->rt_time.rt_year + 1900);
+		rprintf("%s%d", ts->rt_time.rt_month > 8 ? "" : "0",
 		    ts->rt_time.rt_month + 1);
-		printf("%s%d  ", ts->rt_time.rt_day > 9 ? "" : "0",
+		rprintf("%s%d  ", ts->rt_time.rt_day > 9 ? "" : "0",
 		    ts->rt_time.rt_day);
 		if (strlen(gubbe) > 20)
 			gubbe[20] = 0;
@@ -222,11 +222,11 @@ list_subject()
 			*c = 0;
 		if (strlen(text) > 40)
 			text[40] = 0;
-		printf("%-21s%s\n", gubbe, text);
+		rprintf("%-21s%s\n", gubbe, text);
 		free(ts);
 		free(text);
 		if (rows++ == wrows - 4) {
-			printf("(Tryck retur)");
+			rprintf("(Tryck retur)");
 			fflush(stdout);
 			if (getchar() == 'q') {
 				getchar();
@@ -248,15 +248,15 @@ list_unread()
 
 	conf = rk_confinfo(curconf);
 	if (conf->rc_retval) {
-		printf("rk_confinfo sket sej: %s\n", error(conf->rc_retval));
+		rprintf("rk_confinfo sket sej: %s\n", error(conf->rc_retval));
 		free(conf);
 		return;
 	}
-	printf("Lista olästa (ärenden)\n");
-	printf("Inlägg\tDatum\t  Författare           Ärende\n");
+	rprintf("Lista olästa (ärenden)\n");
+	rprintf("Inlägg\tDatum\t  Författare           Ärende\n");
 	rm = rk_membership(myuid, curconf);
 	if (rm->rm_retval) {
-		printf("rk_membership sket sej: %s\n", error(rm->rm_retval));
+		rprintf("rk_membership sket sej: %s\n", error(rm->rm_retval));
 		free(conf);
 		free(rm);
 		return;
@@ -273,10 +273,10 @@ list_unread()
 		ts = rk_textstat(nr);
 		text = rk_gettext(nr);
 		gubbe = vem(ts->rt_author);
-		printf("%d\t%d", nr, ts->rt_time.rt_year + 1900);
-		printf("%s%d", ts->rt_time.rt_month > 8 ? "" : "0",
+		rprintf("%d\t%d", nr, ts->rt_time.rt_year + 1900);
+		rprintf("%s%d", ts->rt_time.rt_month > 8 ? "" : "0",
 		    ts->rt_time.rt_month + 1);
-		printf("%s%d  ", ts->rt_time.rt_day > 9 ? "" : "0",
+		rprintf("%s%d  ", ts->rt_time.rt_day > 9 ? "" : "0",
 		    ts->rt_time.rt_day);
 		if (strlen(gubbe) > 20)
 			gubbe[20] = 0;
@@ -284,11 +284,11 @@ list_unread()
 			*c = 0;
 		if (strlen(text) > 40)
 			text[40] = 0;
-		printf("%-21s%s\n", gubbe, text);
+		rprintf("%-21s%s\n", gubbe, text);
 		free(ts);
 		free(text);
 		if (rows++ == wrows - 4) {
-			printf("(Tryck retur)");
+			rprintf("(Tryck retur)");
 			fflush(stdout);
 			if (getchar() == 'q') {
 				getchar();

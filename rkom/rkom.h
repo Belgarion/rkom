@@ -20,6 +20,7 @@ char *	get_input_string(int, int);
 void	cmd_parse(char *);
 void	cmd_only(char *);
 void	cmd_password(void);
+void	cmd_status(char *);
 
 /* error.c */
 char *	error(int);
@@ -34,11 +35,14 @@ char *vem(int);
 struct rk_confinfo_retval *match_complain(char *str, int type);
 int ismember(int conf);
 
+/* rprintf.c */
+void	rprintf(char const *fmt, ...);
+
 extern	int myuid;
 extern	int curconf;
 extern	char *prompt, *p_see_time, *p_next_conf, *p_next_text;
 extern	char *p_next_comment;
-extern	int wrows; /* Rows per screen */
+extern	int wrows, outlines, swascii; /* Rows per screen */
 
 #define	PROMPT_SEE_TIME	p_see_time
 #define	PROMPT_NEXT_CONF p_next_conf
