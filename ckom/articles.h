@@ -1,4 +1,4 @@
-/* $Id: articles.h,v 1.3 2000/10/15 19:33:34 jens Exp $ */
+/* $Id: articles.h,v 1.4 2000/10/15 23:30:42 jens Exp $ */
 #ifndef ARTICLES_H
 #define ARTICLES_H
 
@@ -14,6 +14,7 @@ struct article {
 	u_int32_t	art_flags;
 	u_int32_t	art_no_of_lines;
 	char		art_subj[80];
+	char		art_alt_subj[80];
 	char		art_real_subj[80];
 	char		art_from[80];
 	int			art_comm_depth;

@@ -1,4 +1,4 @@
-/* $Id: articles.c,v 1.3 2000/10/15 19:33:34 jens Exp $ */
+/* $Id: articles.c,v 1.4 2000/10/15 23:30:42 jens Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -198,16 +198,15 @@ out_find_parent:
 int
 art_format_subjects()
 {
-	artl_t	*al, *al_pos;
-	art_t	*art, *p_art, *oart;
+	artl_t	*al, *al_pos, *t_al_pos;
+	art_t	*art, *p_art, *t_art;
 	int		comm_depth, i;
 	size_t	subj_size;
 
 	
 	subj_size = sizeof(art->art_subj);
 	al = ct.ct_al;
-	oart = NULL;
-	for (al_pos = NULL; cl_art_walk(al, &al_pos, &art) == 0; oart = art) {
+	for (al_pos = NULL; cl_art_walk(al, &al_pos, &art) == 0; ) {
 
 		/* calculate how deep the thread of comments is*/
 		p_art = art->art_parent;
@@ -220,6 +219,7 @@ art_format_subjects()
 
 		if (comm_depth == 0) {
 			strlcpy(art->art_subj, art->art_real_subj, subj_size);
+			strlcpy(art->art_alt_subj, art->art_real_subj, subj_size);
 			continue;
 		}
 
@@ -227,9 +227,18 @@ art_format_subjects()
 			art->art_subj[i] = ' ';
 		art->art_subj[i] = '\0';
 		strlcat(art->art_subj, "`->", subj_size);
-		if (oart == NULL || art->art_parent != oart->art_parent)
-			continue;
-		oart->art_subj[i] = '|';
+		strlcpy(art->art_alt_subj, art->art_subj, subj_size);
+		strlcat(art->art_alt_subj, art->art_real_subj, subj_size);
+		if (strcmp(art->art_real_subj, art->art_parent->art_real_subj) != 0)
+			strlcat(art->art_subj, "art->art_real_subj", subj_size);
+		
+		for (t_al_pos = al_pos;; ) {
+			assert(cl_art_walk_back(al, &t_al_pos, &t_art) == 0);
+			if (t_art == art->art_parent)
+				break;
+			t_art->art_subj[i] = '|';
+			t_art->art_alt_subj[i] = '|';
+		}
 	}
 
 	return 0;

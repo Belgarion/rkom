@@ -1,4 +1,4 @@
-/* $Id: conf.c,v 1.6 2000/10/15 21:43:42 jens Exp $ */
+/* $Id: conf.c,v 1.7 2000/10/15 23:30:42 jens Exp $ */
 
 #include <sys/cdefs.h>
 #include <sys/param.h>
@@ -97,6 +97,7 @@ conference_menu(void)
 	wattrset(infowin, A_REVERSE);
 
 	keypad(stdscr, 1);
+	curs_set(0);
 
 	kb = keybind_init();
 	num_elem = sizeof(kd_tab) / sizeof(key_def_t);
@@ -108,10 +109,6 @@ conference_menu(void)
 
 	/* main loop if the conference menu */
 	for ( ;; ) {
-		/* hide cursor in something black */
-		wmove(infowin, getmaxx(infowin), getmaxy(infowin));
-		wrefresh(infowin);
-
 		key = getch();
 		werase(cmdwin);
 		wrefresh(cmdwin);
@@ -151,6 +148,7 @@ conference_menu(void)
 
 end_menu:
 	keybind_free(kb);
+	curs_set(1);
 	keypad(stdscr, 0);
 	delwin(thrdwin);
 	delwin(statwin);
@@ -244,7 +242,7 @@ void
 conf_thrd_refresh(void)
 {
 	art_t	*art;
-	char	timestr[10], buf[80];
+	char	timestr[10], buf[80], *subj;
 	int		i, last_msg;
 
 	werase(thrdwin);
@@ -259,8 +257,9 @@ conf_thrd_refresh(void)
 		} else
 			wprintw(thrdwin, "  ");
 		strftime(timestr, sizeof(timestr), "%b %d", localtime(&art->art_time));
+		subj = i == top_msg ? art->art_alt_subj : art->art_subj;
 		snprintf(buf, sizeof(buf), "%4d %-6.6s %-20.20s (%4d) %s",
-			i, timestr, art->art_from, art->art_no_of_lines, art->art_subj);
+			i, timestr, art->art_from, art->art_no_of_lines, subj);
 		wprintw(thrdwin, "%-78.78s", buf);
 	}
 	wrefresh(thrdwin);
