@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.51 2002/09/04 20:56:49 ragge Exp $	*/
+/*	$Id: write.c,v 1.52 2002/11/14 18:36:16 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -235,7 +235,7 @@ check_receiver(void)
 		rc = rk_confinfo(mi[i].rmi_numeric);
 		if (rc->rc_retval)
 			continue; /* Handle later */
-		if (((rc->rc_type / 1000000) & 1) == 0)
+		if ((rc->rc_type & RK_CONF_TYPE_ORIGINAL) == 0)
 			continue; /* Not original conference */
 		if (rc->rc_super_conf)
 			mi[i].rmi_numeric = rc->rc_super_conf;

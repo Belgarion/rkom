@@ -79,7 +79,8 @@ rk_matchconf_server(char *name, u_int8_t flags)
 		for (i = 0; i < antal; i++) {
 			struct rk_confinfo *rc = &retval->rcr_ci.rcr_ci_val[i];
 			rc->rc_name = get_string();
-			rc->rc_type = get_int();
+			rc->rc_type = get_bitfield();
+			rc->rc_type <<= 4; /* Careful: Extended-Conf-Type */
 			rc->rc_conf_no = get_int();
 		}
 		get_accept('}');
@@ -675,7 +676,7 @@ rk_set_presentation_server(u_int32_t conf, struct rk_text_info *rti)
 	send_reply(buf);
 	get_int();
 	presconf = get_int();
-	if (c->rc_type & (RK_CONF_TYPE_LETTERBOX << 4)) /* XXX */
+	if (c->rc_type & RK_CONF_TYPE_LETTERBOX)
 		presconf = get_int();
 	else
 		get_int();

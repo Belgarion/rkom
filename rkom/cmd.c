@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.63 2002/09/23 13:35:06 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.64 2002/11/14 18:36:16 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -18,6 +18,7 @@
 #include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "rkom.h"
+#include "backend.h"	/* XXX */
 #include "next.h"
 #include "list.h"
 #include "write.h"
@@ -491,6 +492,7 @@ confstat(int mid)
 {
 	struct rk_conference *rcp;
 	struct rk_aux_item *rai;
+	char *str;
 	int i, nrai;
 
 	rcp = rk_confinfo(mid);
@@ -506,7 +508,8 @@ confstat(int mid)
 		rcp->rc_no_of_members);
 	rprintf("Livslängd:             %d dagar\n",
 		rcp->rc_expire);
-	rprintf("Mötestyp:              %d\n", rcp->rc_type);
+	str = bitfield2str(rcp->rc_type);
+	rprintf("Mötestyp:              %s\n", str+24);
 	rprintf("Supervisor:            %s\n", vem(rcp->rc_supervisor));
 	rprintf("Supermöte:             %s\n", vem(rcp->rc_super_conf));
 

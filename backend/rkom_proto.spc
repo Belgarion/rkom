@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.33 2002/09/01 13:36:40 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.34 2002/11/14 18:36:10 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -164,10 +164,12 @@ struct rk_person {
  * Bitfield in conference type.
  */
 %hfile
-#define	RK_CONF_TYPE_RD_PROT	1000
-#define RK_CONF_TYPE_ORIGINAL	100
-#define RK_CONF_TYPE_SECRET	10
-#define RK_CONF_TYPE_LETTERBOX	1
+#define	RK_CONF_TYPE_RD_PROT	0x80
+#define RK_CONF_TYPE_ORIGINAL	0x40
+#define RK_CONF_TYPE_SECRET	0x20
+#define RK_CONF_TYPE_LETTERBOX	0x10
+#define RK_CONF_TYPE_ALLOW_ANON	0x08
+#define RK_CONF_TYPE_NO_SECRET	0x04
 %end
 struct rk_confinfo {
 	string		rc_name;

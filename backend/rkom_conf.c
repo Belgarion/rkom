@@ -148,7 +148,7 @@ read_lgtable(struct get_conf_stat_store *g)
 	 * so the below code seems to do more harm than good. /oj
 	 */
 	if (g->number != myuid && 
-	    g->confer.rc_type & (RK_CONF_TYPE_LETTERBOX << 4)) 
+	    g->confer.rc_type & RK_CONF_TYPE_LETTERBOX) 
 		return; /* Do not try to read someones letterbox. */
 #endif
 	/*
@@ -211,7 +211,7 @@ readin_conf_stat(struct rk_conference *c)
 	int i, len;
 
 	c->rc_name = get_string();
-	c->rc_type = get_int();
+	c->rc_type = get_bitfield();
 	read_in_time(&c->rc_creation_time);
 	read_in_time(&c->rc_last_written);
 	c->rc_creator = get_int();
@@ -825,20 +825,13 @@ rk_sync_server(void)
 int32_t
 rk_create_conf_server(char *name, u_int32_t btype)
 {
-	char *buf, type[5];
+	char *buf, *type;
 	int i;
 
-	strcpy(type, "0000");
 	buf = alloca(strlen(name) + 100);
-	if (btype & RK_CONF_TYPE_RD_PROT)
-		type[3] = 1;
-	if (btype & RK_CONF_TYPE_ORIGINAL)
-		type[2] = 1;
-	if (btype & RK_CONF_TYPE_SECRET)
-		type[1] = 1;
-	if (btype & RK_CONF_TYPE_LETTERBOX)
-		type[0] = 1;
-	sprintf(buf, "88 %ldH%s %s 0 { }\n", (long)strlen(name), name, type);
+	type = bitfield2str(btype);
+	sprintf(buf, "88 %ldH%s %s 0 { }\n",
+	    (long)strlen(name), name, &type[28]);
 	if (send_reply(buf)) {
 		i = get_int();
 		get_eat('\n');

@@ -236,6 +236,28 @@ get_int()
 	return ret;
 }
 
+/*
+ * Get a bitfield from the input stream.
+ */
+int
+get_bitfield()
+{
+	int bf = 0, val = get_int();
+
+	if (val >= 100000000)
+		errx(1, "bitfield too large: %d", val);
+
+	bf |= (val/10000000); val -= (10000000 * (bf & 1));
+	bf <<= 1; bf |= (val/1000000); val -= (1000000 * (bf & 1));
+	bf <<= 1; bf |= (val/100000); val -= (100000 * (bf & 1));
+	bf <<= 1; bf |= (val/10000); val -= (10000 * (bf & 1));
+	bf <<= 1; bf |= (val/1000); val -= (1000 * (bf & 1));
+	bf <<= 1; bf |= (val/100); val -= (100 * (bf & 1));
+	bf <<= 1; bf |= (val/10); val -= (10 * (bf & 1));
+	bf <<= 1; bf |= val;
+	return bf;
+}
+
 void
 get_eat(char c)
 {

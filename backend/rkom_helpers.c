@@ -32,3 +32,18 @@ read_in_aux_item(struct rk_aux_item *a)
 	a->inherit_limit = get_int();
 	a->rai_data = get_string();
 }
+
+/*
+ * Return a buffer with a bitfield written as binary ascii in it.
+ */
+char *
+bitfield2str(int bf)
+{
+	static char buf[34];
+	int i;
+
+	for (i = 0; i < 32; i++)
+		buf[31-i] = (bf & (1 << i)) ? '1' : '0';
+	buf[32] = 0;
+	return buf;
+}

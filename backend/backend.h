@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.12 2002/09/04 12:38:02 ragge Exp $	*/
+/*	$Id: backend.h,v 1.13 2002/11/14 18:36:10 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -20,6 +20,7 @@ void	put_string(char *str);
 void	get_accept(char ch);
 char	*get_string(void);
 void	send_callback(char *msg, int arg, void(*)(int, int));
+int	get_bitfield(void);
 
 /* Main loop, in rkom_subr.c */
 int	rkom_loop(void);
@@ -48,6 +49,7 @@ void	invalidate_local(struct rk_text_stat *ts);
 /* Helper functions, in rkom_helpers.c */
 void	read_in_time(struct rk_time *t);
 void	read_in_aux_item(struct rk_aux_item *a);
+char *	bitfield2str(int bf);
 
 /* Async functions, in rkom_async.c */
 void	async(int);
