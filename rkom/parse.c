@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.23 2001/01/15 05:23:41 offe Exp $ */
+/* $Id: parse.c,v 1.24 2001/01/18 14:18:01 jens Exp $ */
 
 #include <sys/param.h>
 
@@ -175,7 +175,7 @@ DROW("mottagare:",				0,PE_STR_ARG,text_add_rcpt)
 DROW("kommentar till:",			0,PE_NUM_ARG,text_add_cmt_to)
 DROW("glöm",					0,PE_NO_ARG,text_forget)
 DROW("hela",					0,PE_NO_ARG,text_show)
-DROW("redigera",				0,PE_NO_ARG,text_edit)
+DROW("redigera",				1,PE_NO_ARG,text_edit)
 DROW("markera",					0,PE_NUM_ARG,text_mark)
 DROW("avmarkera",				0,PE_NUM_ARG,text_unmark)
 DROW("lista markerade",			0,PE_NO_ARG,text_list_marked)
