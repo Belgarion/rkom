@@ -49,27 +49,22 @@ rk_whatido(char *args)
 }
 
 
-struct rk_confinfo_retval *
+struct rk_confinfo *
 rk_matchconf(char *name, u_int8_t flags)
 {
 	static struct rk_confinfo *rkc;
-	static struct rk_confinfo_retval retval;
 	int antal, i, p, k;
 
 	if (rkc != NULL)
 		free(rkc);
+	rkc = NULL;
 
 	k = (flags & MATCHCONF_CONF) == MATCHCONF_CONF;
 	p = (flags & MATCHCONF_PERSON) == MATCHCONF_PERSON;
 	send_reply("76 %ldH%s %d %d\n", (long)strlen(name), name, p, k);
 
-	antal = get_int();
-	rkc = calloc(sizeof(struct rk_confinfo), antal);
-	if (antal == 0) {
-		get_eat('\n');
-	} else {
-		retval.rcr_ci.rcr_ci_val = rkc;
-		retval.rcr_ci.rcr_ci_len = antal;
+	if ((antal = get_int()) != 0) {
+		rkc = calloc(sizeof(struct rk_confinfo), antal+1);
 		get_accept('{');
 		for (i = 0; i < antal; i++) {
 			rkc[i].rc_name = get_string();
@@ -78,9 +73,9 @@ rk_matchconf(char *name, u_int8_t flags)
 			rkc[i].rc_conf_no = get_int();
 		}
 		get_accept('}');
-		get_accept('\n');
 	}
-	return &retval;
+	get_accept('\n');
+	return rkc;
 }
 
 int32_t

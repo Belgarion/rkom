@@ -26,18 +26,14 @@ list_comm(char *args)
 void
 list_conf_q(char *str)
 {
-	struct rk_confinfo_retval *rv;
 	struct rk_confinfo *ci;
-	int i, nconfs;
+	int i;
 
-	rv = rk_matchconf("", MATCHCONF_CONF);
-	nconfs = rv->rcr_ci.rcr_ci_len;
-	if (nconfs == 0)
+	if ((ci = rk_matchconf("", MATCHCONF_CONF)) == NULL)
 		return;
-	ci = rv->rcr_ci.rcr_ci_val;
 
 	rprintf("\nTyp       Mötesnamn\n");
-	for (i = 0; i < nconfs; i++) {
+	for (i = 0; ci[i].rc_name; i++) {
 		struct rk_uconference *UC;
 
 		if ((UC = rk_uconfinfo(ci[i].rc_conf_no)) == NULL)
@@ -51,18 +47,14 @@ list_conf_q(char *str)
 void
 list_conf(char *str)
 {
-	struct rk_confinfo_retval *rv;
 	struct rk_confinfo *ci;
-	int i, nconfs;
+	int i;
 
-	rv = rk_matchconf("", MATCHCONF_CONF);
-	nconfs = rv->rcr_ci.rcr_ci_len;
-	if (nconfs == 0)
+	if ((ci = rk_matchconf("", MATCHCONF_CONF)) == NULL)
 		return;
-	ci = rv->rcr_ci.rcr_ci_val;
 
 	rprintf("\nSenaste inlägg   Medl. Tot Inl   Namn (typ)\n");
-	for (i = 0; i < nconfs; i++) {
+	for (i = 0; ci[i].rc_name; i++) {
 		struct rk_conference *C;
 		struct rk_membership *M = NULL; /* GCC braino */
 

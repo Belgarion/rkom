@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.22 2003/09/25 15:40:56 ragge Exp $	*/
+/*	$Id: backend.h,v 1.23 2003/09/25 18:38:17 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -62,7 +62,14 @@ struct	rk_conference *rk_confinfo(u_int32_t);
  * Return the person struct for the given uid, or NULL if it fails.
  */
 struct	rk_person *rk_persinfo(u_int32_t);
-struct	rk_confinfo_retval *rk_matchconf(char *name, u_int8_t flags);
+
+/*
+ * Try to match name based on the flags given.
+ * Return NULL if no match, otherwise an array of rk_confinfo
+ * terminated by a NULL name at the end.
+ * Note: It is legal to write to this struct!
+ */
+struct	rk_confinfo *rk_matchconf(char *name, u_int8_t flags);
 int32_t rk_login(u_int32_t userid, char *passwd);
 int32_t rk_whatido(char *args);
 struct	rk_unreadconfval *rk_unreadconf(u_int32_t uid);
@@ -142,8 +149,6 @@ struct rk_uarea *rk_get_uarea(char *str);
 int32_t rk_set_uarea(char *str, struct rk_uarea *u);
 
 /* variables */
-extern	int readfd;	/* Get messages from frontend */
-extern	int writefd;	/* Write to frontend */
 extern	int myuid;	/* Current active uid */
 extern	int komerr;	/* "errno" for rkom */
 
@@ -296,16 +301,9 @@ struct rk_person {
 };
 
 struct rk_confinfo {
-	char *	rc_name;
+	char		*rc_name;
 	u_int32_t	rc_type;
 	u_int32_t	rc_conf_no;
-};
-
-struct rk_confinfo_retval {
-	struct {
-		u_int32_t	rcr_ci_len;
-		struct rk_confinfo	*rcr_ci_val;
-	} rcr_ci;
 };
 
 struct rk_dynamic_session_info {

@@ -45,7 +45,7 @@ char *vem(int);
 void show_superhoppa(char *);
 
 /* In file helpers.c */
-struct rk_confinfo_retval *match_complain(char *str, int type);
+struct rk_confinfo *match_complain(char *str, int type);
 int ismember(int conf);
 
 /* rprintf.c */

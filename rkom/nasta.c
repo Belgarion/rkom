@@ -458,15 +458,13 @@ next_hoppa(char *str)
 void
 next_resee_presentation(char *name)
 {
-	struct rk_confinfo_retval *rv;
+	struct rk_confinfo *rv;
 	struct rk_conference *rc;
 
-	rv = match_complain(name, MATCHCONF_PERSON|MATCHCONF_CONF);
-	if (rv == 0)
+	if ((rv = match_complain(name, MATCHCONF_PERSON|MATCHCONF_CONF)) == 0)
 		return;
-	rprintf("Återse presentation (för) %s.\n",
-	    rv->rcr_ci.rcr_ci_val[0].rc_name);
-	if ((rc = rk_confinfo(rv->rcr_ci.rcr_ci_val[0].rc_conf_no)) == NULL) {
+	rprintf("Återse presentation (för) %s.\n", rv[0].rc_name);
+	if ((rc = rk_confinfo(rv[0].rc_conf_no)) == NULL) {
 		rprintf("Kunde inte läsa presentationen: %s\n", error(komerr));
 		return;
 	}
@@ -481,16 +479,15 @@ next_resee_presentation(char *name)
 void
 next_resee_faq(char *name)
 {
-	struct rk_confinfo_retval *rv;
+	struct rk_confinfo *rv;
 	struct rk_conference *rc;
 	struct rk_aux_item *rai;
 	int naux, i;
 
-	rv = match_complain(name, MATCHCONF_CONF);
-	if (rv == 0)
+	if ((rv = match_complain(name, MATCHCONF_CONF)) == NULL)
 		return;
-	rprintf("Återse FAQ (för) %s.\n", rv->rcr_ci.rcr_ci_val[0].rc_name);
-	if ((rc = rk_confinfo(rv->rcr_ci.rcr_ci_val[0].rc_conf_no)) == NULL) {
+	rprintf("Återse FAQ (för) %s.\n", rv[0].rc_name);
+	if ((rc = rk_confinfo(rv[0].rc_conf_no)) == NULL) {
 		rprintf("Kunde inte läsa FAQn: %s\n", error(komerr));
 		return;
 	}
@@ -501,8 +498,7 @@ next_resee_faq(char *name)
 			break;
 	}
 	if (naux == 0 || i == naux)
-		rprintf("Det finns ingen FAQ för %s.\n", 
-		    rv->rcr_ci.rcr_ci_val[0].rc_name);
+		rprintf("Det finns ingen FAQ för %s.\n", rv[0].rc_name);
 	else
 		show_text(atoi(rai[i].rai_data), 1);
 	lastlasttext = lasttext;

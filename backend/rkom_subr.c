@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.24 2003/09/25 15:13:06 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.25 2003/09/25 18:38:17 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -25,7 +25,6 @@
 #include "backend.h"
 
 FILE *sfd;
-int readfd=-1, writefd = -1, fepid = -1;
 int pfd;
 int komerr;
 

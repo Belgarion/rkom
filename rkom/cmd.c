@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.69 2003/09/25 11:45:05 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.70 2003/09/25 18:38:19 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -194,7 +194,7 @@ cmd_vilka(char *str)
 void
 cmd_login(char *str)
 {
-	struct rk_confinfo_retval *retval;
+	struct rk_confinfo *rv;
 	struct rk_unreadconfval *conf;
 	struct rk_conference *rc;
 	int nconf, userid;
@@ -204,18 +204,17 @@ cmd_login(char *str)
 		rprintf("Du måste ange vem du vill logga in som.\n");
 		return;
 	}
-	retval = match_complain(str, MATCHCONF_PERSON);
-	if (retval == NULL)
+	if ((rv = match_complain(str, MATCHCONF_PERSON)) == NULL)
 		return;
 
-	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
-	userid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	rprintf("%s\n", rv[0].rc_name);
+	userid = rv[0].rc_conf_no;
 	passwd = getpass(swascii ? "L|senord: " : "Lösenord: ");
 	if (rk_login(userid, passwd)) {
 		rprintf("Felaktigt lösenord.\n\n");
 		return;
 	}
-	myuid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	myuid = rv[0].rc_conf_no;
 
 	readvars();
 	/*
@@ -286,27 +285,24 @@ cmd_send(char *str)
 void 
 cmd_say(char *str)
 {
-	struct rk_confinfo_retval *retval;
+	struct rk_confinfo *rv;
 	char *buf;
 
 	if (str == 0) {
 		rprintf("Du måste ange vem du vill skicka meddelande till.\n");
 		return;
 	}
-	retval = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF);
-	if (retval == 0)
+	if ((rv = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF)) == 0)
 		return;
 
-	rprintf("Sänd meddelande till %s\n",
-	    retval->rcr_ci.rcr_ci_val[0].rc_name);
+	rprintf("Sänd meddelande till %s\n", rv[0].rc_name);
 
 	buf = getstr("Meddelande: ");
 	if (strlen(buf)) {
-		if (rk_send_msg(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, buf))
+		if (rk_send_msg(rv[0].rc_conf_no, buf))
 			rprintf("\nMeddelandet kunde inte skickas.\n");
 		else
-			rprintf("\nMeddelandet sänt till %s.\n", 
-			    retval->rcr_ci.rcr_ci_val[0].rc_name);
+			rprintf("\nMeddelandet sänt till %s.\n", rv[0].rc_name);
 	} else
 		rprintf("Nähej.");
 	free(buf);
@@ -335,24 +331,21 @@ cmd_goto(char *str)
 {
 	struct rk_conference *rkc;
 	struct rk_membership *m;
-	struct rk_confinfo_retval *retval;
+	struct rk_confinfo *rv;
 	int conf, ret;
 	char *ch, *name;
 
-	if (myuid == 0) {
-		rprintf("Logga in först.\n");
+	if (myuid == 0)
+		return rprintf("Logga in först.\n");
+
+	if (str == 0)
+		return rprintf("Du måste ge ett möte som argument.\n");
+
+	if ((rv = match_complain(str, MATCHCONF_CONF|MATCHCONF_PERSON)) == 0)
 		return;
-	}
-	if (str == 0) {
-		rprintf("Du måste ge ett möte som argument.\n");
-		return;
-	}
-	retval = match_complain(str, MATCHCONF_CONF|MATCHCONF_PERSON);
-	if (retval == NULL)
-		return;
-	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
-	name = alloca(strlen(retval->rcr_ci.rcr_ci_val[0].rc_name) + 2);
-	strcpy(name, retval->rcr_ci.rcr_ci_val[0].rc_name);
+
+	conf = rv[0].rc_conf_no;
+	name = rv[0].rc_name;
 	ret = rk_change_conference(conf);
 	if (ret == 0) {
 		curconf = conf;
@@ -420,13 +413,12 @@ cmd_only(char *str)
 void
 cmd_leave(char *str)
 {
-	struct rk_confinfo_retval *retval;
+	struct rk_confinfo *rv;
 	int ret;
 
-	retval = match_complain(str, MATCHCONF_CONF);
-	if (retval == NULL)
+	if ((rv = match_complain(str, MATCHCONF_CONF)) == NULL)
 		return;
-	ret = rk_sub_member(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, myuid);
+	ret = rk_sub_member(rv[0].rc_conf_no, myuid);
 	if (ret)
 		rprintf("Det sket sej: %s\n", error(ret));
 }
@@ -517,16 +509,15 @@ confstat(int mid)
 void
 cmd_status(char *name)
 {
-	struct rk_confinfo_retval *retval;
+	struct rk_confinfo *rv;
 
-	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
-	if (retval == NULL)
+	if ((rv = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON)) == 0)
 		return;
-	rprintf("Status (för) %s\n\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
-	if (retval->rcr_ci.rcr_ci_val[0].rc_type & RK_CONF_TYPE_LETTERBOX)
-		persstat(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
+	rprintf("Status (för) %s\n\n", rv[0].rc_name);
+	if (rv[0].rc_type & RK_CONF_TYPE_LETTERBOX)
+		persstat(rv[0].rc_conf_no);
 	else
-		confstat(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
+		confstat(rv[0].rc_conf_no);
 }
 
 void
@@ -563,8 +554,8 @@ cmd_info_extra(int text)
 void
 cmd_change_name()
 {
-	struct rk_confinfo_retval *retval;
-	int rv;
+	struct rk_confinfo *rv;
+	int r;
 	char *name;
 
 	rprintf("Ändra namn\n\n");
@@ -575,23 +566,21 @@ cmd_change_name()
 		free(name);
 		return;
 	}
-	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
-	free(name);
-	if (retval == NULL)
+	if ((rv = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON)) == 0)
 		return;
-	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	rprintf("%s\n", rv[0].rc_name);
 	name = getstr("Vad skall det ändras till? ");
-	rv = rk_change_name(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, name);
-	if (rv)
-		rprintf("Det gick inte: %s\n", error(rv));
+	r = rk_change_name(rv[0].rc_conf_no, name);
+	if (r)
+		rprintf("Det gick inte: %s\n", error(r));
 	free(name);
 }
 
 void
 cmd_add_member()
 {
-	struct rk_confinfo_retval *retval;
-	int rv, uid, mid;
+	struct rk_confinfo *rv;
+	int r, uid, mid;
 	char *name, *user;
 
 	rprintf("Addera medlem\n\n");
@@ -602,13 +591,13 @@ cmd_add_member()
 		free(name);
 		return;
 	}
-	retval = match_complain(name, MATCHCONF_PERSON);
+	rv = match_complain(name, MATCHCONF_PERSON);
 	free(name);
-	if (retval == NULL)
+	if (rv == NULL)
 		return;
-	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
-	user = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);
-	uid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	rprintf("%s\n", rv[0].rc_name);
+	user = strdup(rv[0].rc_name);
+	uid = rv[0].rc_conf_no;
 	name = getstr("Till vilket möte? ");
 	if (strlen(name) == 0) {
 		rprintf("Nähej.\n");
@@ -616,26 +605,26 @@ cmd_add_member()
 		free(user);
 		return;
 	}
-	retval = match_complain(name, MATCHCONF_CONF);
+	rv = match_complain(name, MATCHCONF_CONF);
 	free(name);
-	if (retval == NULL) {
+	if (rv == NULL) {
 		free(user);
 		return;
 	}
-	mid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
-	rv = rk_add_member(mid, uid, 100, 3, 0);
-	if (rv)
-		rprintf("Det gick inte: %s\n", error(rv));
+	mid = rv[0].rc_conf_no;
+	r = rk_add_member(mid, uid, 100, 3, 0);
+	if (r)
+		rprintf("Det gick inte: %s\n", error(r));
 	else
 		rprintf("Person %s adderad till möte %s.\n",
-		    user, retval->rcr_ci.rcr_ci_val[0].rc_name);
+		    user, rv[0].rc_name);
 	free(user);
 }
 
 void
 cmd_sub_member()
 {
-	struct rk_confinfo_retval *retval;
+	struct rk_confinfo *retval;
 	int rv, uid, mid;
 	char *name;
 
@@ -651,8 +640,8 @@ cmd_sub_member()
 	free(name);
 	if (retval == NULL)
 		return;
-	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
-	uid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	rprintf("%s\n", retval[0].rc_name);
+	uid = retval[0].rc_conf_no;
 	name = getstr("Från vilket möte? ");
 	if (strlen(name) == 0) {
 		rprintf("Nähej.\n");
@@ -663,7 +652,7 @@ cmd_sub_member()
 	free(name);
 	if (retval == NULL)
 		return;
-	mid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	mid = retval[0].rc_conf_no;
 	rv = rk_sub_member(mid, uid);
 	if (rv)
 		rprintf("Det gick inte: %s\n", error(rv));
@@ -672,7 +661,7 @@ cmd_sub_member()
 void
 cmd_add_rcpt()
 {
-	struct rk_confinfo_retval *retval;
+	struct rk_confinfo *retval;
 	int rv, conf, text;
 	char *name, buf[50];
 
@@ -688,8 +677,8 @@ cmd_add_rcpt()
 	free(name);
 	if (retval == NULL)
 		return;
-	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
-	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	rprintf("%s\n", retval[0].rc_name);
+	conf = retval[0].rc_conf_no;
 	if (lasttext)
 		sprintf(buf, "Till vilken text? (%d) ", lasttext);
 	else
@@ -713,13 +702,13 @@ cmd_add_rcpt()
 		rprintf("Det gick inte: %s\n", error(rv));
 	else
 		rprintf("Text %d adderad till möte %s.\n", text,
-		    retval->rcr_ci.rcr_ci_val[0].rc_name);
+		    retval[0].rc_name);
 }
 
 void
 cmd_move_text()
 {
-	struct rk_confinfo_retval *retval;
+	struct rk_confinfo *retval;
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mi;
 	char *text, buf[100];
@@ -764,8 +753,8 @@ cmd_move_text()
 	free(text);
 	if (retval == NULL)
 		return;
-	rprintf("Till %s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
-	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	rprintf("Till %s\n", retval[0].rc_name);
+	conf = retval[0].rc_conf_no;
 	rv = rk_add_rcpt(nr, conf, recpt);
 	if (rv) {
 		rprintf("Kunde ej flytta texten: %s\n", error(rv));
@@ -774,16 +763,15 @@ cmd_move_text()
 	rv = rk_sub_rcpt(nr, cm);
 	if (rv)
 		rprintf("Misslyckades ta bort texten från %s: %s\n",
-		    retval->rcr_ci.rcr_ci_val[0].rc_name, error(rv));
+		    retval[0].rc_name, error(rv));
 	else
-		rprintf("Texten nu flyttad till %s.\n",
-		    retval->rcr_ci.rcr_ci_val[0].rc_name);
+		rprintf("Texten nu flyttad till %s.\n", retval[0].rc_name);
 }
 
 void 
 cmd_sub_rcpt()
 {
-	struct rk_confinfo_retval *retval;
+	struct rk_confinfo *retval;
 	int rv, conf, text;
 	char *name, buf[50];
 
@@ -799,8 +787,8 @@ cmd_sub_rcpt()
 	free(name);
 	if (retval == NULL)
 		return;
-	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
-	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	rprintf("%s\n", retval[0].rc_name);
+	conf = retval[0].rc_conf_no;
 	if (lasttext)
 		sprintf(buf, "Från vilken text? (%d) ", lasttext);
 	else
@@ -824,7 +812,7 @@ cmd_sub_rcpt()
 		rprintf("Det gick inte: %s\n", error(rv));
 	else
 		rprintf("Text %d subtraherad från möte %s.\n", text,
-		    retval->rcr_ci.rcr_ci_val[0].rc_name);
+		    retval[0].rc_name);
 }
 
 void
@@ -876,21 +864,19 @@ cmd_create(void)
 void
 cmd_create_person(void)
 {
-	struct rk_confinfo_retval *r;
+	struct rk_confinfo *r;
 	char *name, *npass1, *npass2;
-	int i, num, rv;
+	int i, rv;
 
 	name = getstr("Vad skall personen heta? ");
 	if (*name == 0) {
 		rprintf("Nehej.\n");
 		return;
 	}
-	r = rk_matchconf(name, MATCHCONF_PERSON|MATCHCONF_PERSON);
-	num = r->rcr_ci.rcr_ci_len;
-	if (num) for (i = 0; i < num; i++)
-		if (strcasecmp(r->rcr_ci.rcr_ci_val[i].rc_name, name) == 0) {
-			rprintf("Personen finns redan: %s\n",
-			    r->rcr_ci.rcr_ci_val[i].rc_name);
+	r = rk_matchconf(name, MATCHCONF_PERSON);
+	if (r) for (i = 0; r[i].rc_name; i++)
+		if (strcasecmp(r[i].rc_name, name) == 0) {
+			rprintf("Personen finns redan: %s\n", r[i].rc_name);
 			free(name);
 			return;
 		}
@@ -920,15 +906,14 @@ cmd_create_person(void)
 void
 cmd_erase(char *name)
 {
-	struct rk_confinfo_retval *retval;
-	int rv;
+	struct rk_confinfo *rv;
+	int r;
 
-	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
-	if (retval == 0)
+	if ((rv = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON)) == 0)
 		return;
-	rv = rk_delete_conf(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
-	if (rv)
-		rprintf("Det sket sej: %s\n", error(rv));
+	r = rk_delete_conf(rv[0].rc_conf_no);
+	if (r)
+		rprintf("Det sket sej: %s\n", error(r));
 	else
 		rprintf("Raderat och klart!\n");
 }
@@ -936,7 +921,7 @@ cmd_erase(char *name)
 void
 cmd_copy()
 {
-	struct rk_confinfo_retval *retval;
+	struct rk_confinfo *retval;
 	int rv, conf, text;
 	char *name, buf[50];
 
@@ -952,8 +937,8 @@ cmd_copy()
 	free(name);
 	if (retval == NULL)
 		return;
-	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
-	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	rprintf("%s\n", retval[0].rc_name);
+	conf = retval[0].rc_conf_no;
 	if (lasttext)
 		sprintf(buf, "Vilken text skall ha en kopia? (%d) ", lasttext);
 	else
@@ -976,7 +961,6 @@ cmd_copy()
 	if (rv)
 		rprintf("Det gick inte: %s\n", error(rv));
 	else
-		rprintf("Text %d adderad till %s.\n", text,
-		    retval->rcr_ci.rcr_ci_val[0].rc_name);
+		rprintf("Text %d adderad till %s.\n", text, retval[0].rc_name);
 }
 
