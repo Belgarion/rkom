@@ -61,6 +61,7 @@ extern	char *prompt, *p_see_time, *p_next_conf, *p_next_text;
 extern	char *p_next_comment, *p_next_marked;
 extern	int wrows, wcols, outlines, swascii, discard; /* Rows per screen */
 extern	char *client_version;
+extern	int anonym, anonymisera;
 
 #define	PROMPT_SEE_TIME	p_see_time
 #define	PROMPT_NEXT_CONF p_next_conf

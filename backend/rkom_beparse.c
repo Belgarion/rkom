@@ -411,14 +411,14 @@ reread_text_stat_bg(int text)
  * Put a text into a conference.
  */
 u_int32_t
-rk_create_text(struct rk_text_info *rti)
+rk_create_text_new(struct rk_text_info *rti, int anon)
 {
 	struct rk_misc_info *mi;
 	struct rk_aux_item_input *raii;
 	u_int32_t textnr;
 	int i, nmi, nraii;
 
-	send_reply("86 %ldH", (long)strlen(rti->rti_text));
+	send_reply("%d %ldH", anon ? 87 : 86, (long)strlen(rti->rti_text));
 	fputs(rti->rti_text, sfd);
 	nmi = rti->rti_misc.rti_misc_len;
 	mi = rti->rti_misc.rti_misc_val;

@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.61 2003/10/01 18:30:38 ragge Exp $	*/
+/*	$Id: write.c,v 1.62 2003/10/02 08:19:49 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -37,6 +37,8 @@ static int nmi = 0, ispres = 0, islapp = 0, isfaq = 0;
 static char *ctext = 0;
 
 static char *input_string(char *);
+
+int anonym, anonymisera;
 
 static void
 doedit(char *s)
@@ -298,7 +300,12 @@ write_put(char *str)
 			rprintf("Lappen ditsatt.\n");
 		islapp = 0;
 	} else {
-		if ((textnr = rk_create_text(rti)) == 0)
+		if (anonym || anonymisera)
+			textnr = rk_create_text_anon(rti);
+		else
+			textnr = rk_create_text(rti);
+		anonymisera = 0;
+		if (textnr == 0)
 			rprintf("write_new: %s\n", error(komerr));
 		else
 			rprintf("Text %d har skapats.\n", textnr);
@@ -379,6 +386,7 @@ write_forget(char *str)
 		free(mi);
 	ctext = 0;
 	nmi = 0;
+	anonymisera = 0;
 }
 
 void

@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.49 2003/10/01 17:56:50 ragge Exp $ */
+/* $Id: parse.c,v 1.50 2003/10/02 08:19:49 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -106,6 +106,9 @@ DCMD(text_delete);
 DCMD(text_copy);
 DCMD(text_move);
 DCMD(text_from_swascii);
+DCMD(text_be_anonym);
+DCMD(text_be_unanonym);
+DCMD(text_anonymisera);
 
 /* Commands for online communication */
 DCMD(com_who);
@@ -207,6 +210,9 @@ DROW("radera möte",				0,PE_STR_ARG,conf_delete)
 
 /* Commands for texts */
 DROW("addera mottagare",			0,PE_NO_ARG,text_add_rcpt_late)
+DROW("anonymisera",			0,PE_NO_ARG,text_anonymisera)
+DROW("bli anonym",			0,PE_NO_ARG,text_be_anonym)
+DROW("bli oanonym",			0,PE_NO_ARG,text_be_unanonym)
 DROW("subtrahera mottagare",			0,PE_NO_ARG,text_sub_rcpt_late)
 DROW("lägga",					0,PE_NO_ARG,text_put)
 DROW("mottagare:",				0,PE_STR_ARG,text_add_rcpt)
@@ -1148,5 +1154,35 @@ exec_text_from_swascii(int argc, char *argv[])
 	OWA;
 	TT(argc != 0, "Konvertera tar inga argument.\n");
 	convert_from_swascii();
+	return 0;
+}
+
+static int
+exec_text_be_anonym(int argc, char *argv[])
+{
+	LF;
+	anonym = 1;
+	rprintf("Du är nu anonym.\n");
+	return 0;
+}
+
+static int
+exec_text_be_unanonym(int argc, char *argv[])
+{
+	LF;
+	TT(anonym != 1, "Du måste vara anonym för att köra detta kommando.\n");
+	rprintf("Du är inte anonym längre.\n");
+	anonym = 0;
+	return 0;
+}
+
+static int
+exec_text_anonymisera(int argc, char *argv[])
+{
+	LF;
+	OWA;
+	TT(argc != 0, "Anonymisera tar inga argument.\n");
+	rprintf("Texten får nu en osynlig skrivare.\n");
+	anonymisera = 1;
 	return 0;
 }

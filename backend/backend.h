@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.28 2003/10/01 20:13:18 ragge Exp $	*/
+/*	$Id: backend.h,v 1.29 2003/10/02 08:19:46 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -110,7 +110,9 @@ struct	rk_text_stat *rk_textstat(u_int32_t nr);
  * Create a text. Return the new global text number if succeeded, 
  * otherwise return 0 and set komerr to the error number.
  */
-u_int32_t rk_create_text(struct rk_text_info *rti);
+u_int32_t rk_create_text_new(struct rk_text_info *rti, int anon);
+#define	rk_create_text(foo) rk_create_text_new(foo, 0)
+#define	rk_create_text_anon(foo) rk_create_text_new(foo, 1)
 
 /*
  * Return a null-terminated array of marked texts.
