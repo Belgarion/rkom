@@ -267,10 +267,11 @@ next_resee(char *str)
 		mi = ts->rt_misc_info.rt_misc_info_val;
 		len = ts->rt_misc_info.rt_misc_info_len;
 		for (i = 0; i < len; i++)
-			if (mi[i].rmi_type == comm_to)
+			if (mi[i].rmi_type == comm_to ||
+			    mi[i].rmi_type == footn_to)
 				break;
 		if (i == len) {
-			printf("Föregående inlägg har inga kommentarer.\n");
+			printf("Inlägget är varken kommentar eller fotnot.\n");
 			free(ts);
 			return;
 		}
