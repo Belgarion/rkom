@@ -1,9 +1,36 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "rkom_proto.h"
 #include "rkom.h"
+
+static int
+directmatch(struct rk_confinfo_retval *r, char *n)
+{
+	int num = r->rcr_ci.rcr_ci_len;
+	int i, m, nr = 0;
+
+	for (i = 0; i < num; i++)
+		if (strcasecmp(r->rcr_ci.rcr_ci_val[i].rc_name, n) == 0) {
+			nr++;
+			m = i;
+		}
+
+	if (nr != 1)
+		return 0;
+	if (m != 0) {
+		r->rcr_ci.rcr_ci_val[0].rc_name =
+		    r->rcr_ci.rcr_ci_val[m].rc_name;
+		r->rcr_ci.rcr_ci_val[0].rc_type =
+		    r->rcr_ci.rcr_ci_val[m].rc_type;
+		r->rcr_ci.rcr_ci_val[0].rc_conf_no =
+		    r->rcr_ci.rcr_ci_val[m].rc_conf_no;
+	}
+	r->rcr_ci.rcr_ci_len = 1;
+	return 1;
+}
 
 struct rk_confinfo_retval *
 match_complain(char *str, int type)
@@ -19,6 +46,8 @@ match_complain(char *str, int type)
 		free(retval);
 		return 0;
 	} else if (num > 1) {
+		if (directmatch(retval, str))
+			return retval;
 		printf("Texten \"%s\" är flertydig. Du kan mena:\n", str);
 		for (i = 0; i < num; i++)
 			printf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
