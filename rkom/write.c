@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.36 2001/11/18 18:23:33 ragge Exp $	*/
+/*	$Id: write.c,v 1.37 2001/11/22 11:05:35 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -436,7 +436,7 @@ extedit(char *sub)
 	if (editor == NULL)
 		editor = _PATH_VI;
 
-	strcpy(fil, "/tmp/raggkom.XXXXX");
+	strcpy(fil, "/tmp/raggkom.XXXXXX");
 	f = mkstemp(fil);
 	if (f == -1) {
 		rprintf("Det gick inte: %s\n", strerror(errno));
