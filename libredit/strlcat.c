@@ -1,4 +1,4 @@
-/*	$Id: strlcat.c,v 1.4 2001/11/24 20:26:01 offe Exp $	*/
+/*	$Id: strlcat.c,v 1.5 2001/11/25 20:08:58 jens Exp $	*/
 /*	$NetBSD: strlcat.c,v 1.5 1999/09/20 04:39:47 lukem Exp $	*/
 /*	from OpenBSD: strlcat.c,v 1.2 1999/06/17 16:28:58 millert Exp 	*/
 
@@ -29,7 +29,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if defined(SUNOS4) || defined(LINUX) || defined(AIX)
+#if defined(SUNOS4) || defined(LINUX) || defined(AIX) || defined(__APPLE__)
 #include "sys.h"
 
 /*

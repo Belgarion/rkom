@@ -117,7 +117,7 @@ int     unvis(char *, int, int *, int);
 #include <memory.h>
 #endif
 
-#if defined(SUNOS4) || defined(LINUX) || defined(AIX)
+#if defined(SUNOS4) || defined(LINUX) || defined(AIX) || defined(__APPLE__)
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);
 #endif
