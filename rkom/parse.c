@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.24 2001/01/18 14:18:01 jens Exp $ */
+/* $Id: parse.c,v 1.25 2001/01/18 15:37:17 jens Exp $ */
 
 #include <sys/param.h>
 
@@ -364,6 +364,10 @@ static int
 exec_read_see_again_cmt_no(int argc, char *argv[])
 {
 	LF;
+	if (argc != 1) {
+		rprintf("Handhavande: återse <inläggsnummer>\n");
+		return 0;
+	}
 	next_resee_text(atoi(argv[0]));
 	return 0;
 }
