@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <err.h>
 
 #include "rkom_proto.h"
@@ -109,6 +110,7 @@ static struct rk_val rkomvars[] = {
 	{ "kom-mercial", "Kör raggeklienten!" },
 	{ "unread-long-format", "1" },
 	{ "short-time-format", "0" },
+	{ "ignore-ctrl-c", "0" },
 };
 static int nrkomvars = sizeof(rkomvars)/sizeof(rkomvars[0]);
 
@@ -241,6 +243,12 @@ set_setflag(char *name, char *val)
 	if (bcmp(name, "kom-mercial", strlen(name)) == 0)
 		if (rk_whatido(val))
 			rprintf("Byta kom-mercial sket sej.\n");
+	if (bcmp(name, "ignore-ctrl-c", strlen(name)) == 0) {
+		if (strcmp(val, "0") == 0)
+			signal(SIGINT, SIG_DFL);
+		else
+			signal(SIGINT, SIG_IGN);
+	}
 /* END HACK */
 }
 

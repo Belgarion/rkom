@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.49 2001/06/24 09:19:53 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.50 2001/07/30 19:04:48 ragge Exp $	*/
 
 #include <string.h>
 #include <stdio.h>
@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <pwd.h>
 #include <histedit.h>
+#include <signal.h>
 
 #include "rkom_proto.h"
 #include "rkom.h"
@@ -226,6 +227,10 @@ cmd_login(char *str)
 	/* Show where we have unread texts. */
 	if (iseql("print-number-of-unread-on-entrance", "1"))
 		list_news(0);
+
+	/* Check ctrl-c flag */
+	if (isneq("ignore-ctrl-c", "0"))
+		signal(SIGQUIT, SIG_IGN);
 
 	rc = rk_confinfo(myuid);
 	if (rc->rc_msg_of_day) {

@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.32 2001/04/24 08:51:35 ragge Exp $	*/
+/*	$Id: write.c,v 1.33 2001/07/30 19:04:48 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -21,7 +21,6 @@
 #include "next.h"
 
 static char *get_text(char *);
-static char *input_string(char *);
 static void parse_text(char *);
 static int extedit(char *);
 static char *show_format(void);
@@ -218,6 +217,16 @@ write_put(char *str)
 	ctext = 0;
 }
 
+static char *
+getstr2(char *hej)
+{
+	char *rv = getstr(hej);
+	if (*rv)
+		return rv;
+	free(rv);
+	return NULL;
+}
+
 char *
 get_text(char *sub)
 {
@@ -228,10 +237,10 @@ get_text(char *sub)
 		base = strdup(sub);
 		rprintf("Ärende: %s", base);
 	} else
-		base = input_string("Ärende: ");
+		base = getstr("Ärende: ");
 
 	for (;;) {
-		str = input_string("");
+		str = getstr2("");
 		if (str == NULL)
 			return base;
 		base = realloc(base, strlen(base) + strlen(str) + 1);
@@ -240,6 +249,7 @@ get_text(char *sub)
 	}
 }
 
+#if 0
 static char *msg;
 
 static char *
@@ -251,6 +261,7 @@ prompt_fun(EditLine *el)
 char *
 input_string(char *m)
 {
+	return getstr(m);
 	EditLine *el;
 	const char *get;
 	char *ret;
@@ -272,6 +283,7 @@ input_string(char *m)
 	el_end(el);
 	return ret;
 }
+#endif
 
 void
 write_forget(char *str)

@@ -14,6 +14,7 @@ struct cmnd {
 
 /* kbd.c */
 char *	getstr(char *);
+void	tcapinit(void);
 
 /* cmd.c */
 void	cmd_parse(char *);
