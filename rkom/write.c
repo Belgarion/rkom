@@ -39,9 +39,9 @@ doedit(char *s)
 {
 	char *txt;
 
-a:      if (use_editor) {
+a:      if (isneq("use-editor", "0")) {
 		if (extedit(s)) {
-			use_editor = 0;
+			set_setflag("use-editor", "0");
 			goto a;
 		}
 	} else {

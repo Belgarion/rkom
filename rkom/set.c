@@ -13,7 +13,7 @@
 
 
 char *user, *pass, *server;
-int use_editor, no_user_active;
+int no_user_active;
 
 #define	STRING	1
 #define	INT	2
@@ -26,7 +26,6 @@ struct setcmnds {
 	{"user", STRING, &user },
 	{"pass", STRING, &pass },
 	{"server", STRING, &server },
-	{"use_editor", INT, &use_editor },
 	{"no_user_active", INT, &no_user_active },
 };
 
