@@ -117,6 +117,7 @@ static struct rk_val rkomvars[] = {
 	{ "short-time-format", "0" },
 	{ "ignore-ctrl-c", "0" },
 	{ "editor-mode", "emacs" },
+	{ "write-convert-from-swascii", "0" },
 };
 static int nrkomvars = sizeof(rkomvars)/sizeof(rkomvars[0]);
 

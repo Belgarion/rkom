@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.46 2002/07/12 01:43:06 offe Exp $	*/
+/*	$Id: write.c,v 1.47 2002/07/13 00:45:24 offe Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -168,6 +168,9 @@ write_put(char *str)
 	struct rk_text_info *rti;
 	struct rk_text_retval *rtr;
 	struct rk_aux_item_input *rtii;
+
+	if (isneq("write-convert-from-swascii", "0"))
+		convert_from_swascii();
 
 	/* Remove extra '\n' after txt */
 	while (strlen(ctext) && ctext[strlen(ctext) - 1] == '\n')
@@ -655,4 +658,5 @@ write_remove_motd(char *str)
 void convert_from_swascii(void)
 {
 	chrconvert(ctext);
+	rprintf("Texten har konverterats från swascii till ISO 8859-1.\n");
 }
