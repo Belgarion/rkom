@@ -740,3 +740,37 @@ cmd_delete(int text)
 	else
 		printf("Text %d nu raderad.\n", text);
 }
+
+void
+cmd_create(void)
+{
+	char *name, *ch;
+	int type = 0, ret;
+
+	name = getstr("Vad skall mötet heta? ");
+	if (*name == 0) {
+		rprintf("Nehej.\n");
+		return;
+	}
+	do {
+		ch = getstr("Skall mötet vara öppet eller slutet? "
+		    "(öppet, slutet) - ");
+	} while (strcasecmp("öppet", ch) && strcasecmp("slutet", ch));
+	if (strcasecmp("slutet", ch) == 0)
+		type |= RK_CONF_TYPE_RD_PROT;
+	free(ch);
+	do {
+		ch = getstr("Skall mötet vara hemligt? (ja, nej) -");
+	} while (strcasecmp("ja", ch) && strcasecmp("nej", ch));
+	if (strcasecmp("ja", ch) == 0)
+		type |= RK_CONF_TYPE_SECRET;
+	free(ch);
+	ret = rk_create_conf(name, type);
+	if (ret < 0) {
+		rprintf("Det sket sej: %s\n", error(-ret));
+	} else {
+		rprintf("Mötet \"%s\" är nu skapat.\n", name);
+		rprintf("Glöm inte att skriva en presentation för mötet.\n");
+	}
+	free(name);
+}

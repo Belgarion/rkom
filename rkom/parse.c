@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.19 2001/01/12 18:04:01 ragge Exp $ */
+/* $Id: parse.c,v 1.20 2001/01/13 21:52:31 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -70,6 +70,7 @@ DCMD(conf_goto_next);
 DCMD(conf_list);
 DCMD(conf_leave);
 DCMD(conf_change_presentation);
+DCMD(conf_create);
 
 /* Commands for texts */
 DCMD(text_add_rcpt_late);
@@ -165,6 +166,7 @@ DROW("nästa möte",				0,PE_NO_ARG,conf_goto_next)
 DROW("lista möten",				0,PE_NO_ARG,conf_list)
 DROW("utträda",					0,PE_STR_ARG,conf_leave)
 DROW("ändra presentation",		0,PE_STR_ARG,conf_change_presentation)
+DROW("skapa möte",				0,PE_NO_ARG,conf_create)
 
 /* Commands for texts */
 DROW("addera mottagare",			0,PE_NO_ARG,text_add_rcpt_late)
@@ -894,5 +896,14 @@ exec_other_sync(int argc, char *argv[])
 {
 	TT(argc > 0, "Synkronisera tar inga argument.\n");
 	rk_sync();
+	return 0;
+}
+
+static int
+exec_conf_create(int argc, char *argv[])
+{
+	LF;
+	TT(argc > 0, "Skapa mötetar inga argument.\n");
+	cmd_create();
 	return 0;
 }
