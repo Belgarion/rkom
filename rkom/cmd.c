@@ -293,27 +293,17 @@ cmd_login(char *str)
 {
 	struct rk_confinfo_retval *retval;
 	struct rk_unreadconfval *conf;
-	int i, num, nconf, userid;
+	int nconf, userid;
 	char *passwd;
 
 	if (str == 0) {
 		printf("Du måste ange vem du vill logga in som.\n");
 		return;
 	}
-	retval = rk_matchconf(str, MATCHCONF_PERSON);
+	retval = match_complain(str, MATCHCONF_PERSON);
+	if (retval == NULL)
+		return;
 
-	num = retval->rcr_ci.rcr_ci_len;
-	if (num == 0) {
-		printf("Det finns ingen person som matchar \"%s\".\n", str);
-		return;
-	} else if (num > 1) {
-		printf("Namnet \"%s\" är flertydigt. Du kan mena:\n", str);
-		for (i = 0; i < num; i++)
-			printf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
-		printf("\n");
-		free(retval);
-		return;
-	}
 	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
 	userid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	passwd = getpass("Lösenord: ");
@@ -383,37 +373,28 @@ void
 cmd_say(char *str)
 {
 	struct rk_confinfo_retval *retval;
-	int num, i;
 	char *buf;
 
 	if (str == 0) {
 		printf("Du måste ange vem du vill skicka meddelande till.\n");
 		return;
 	}
-	retval = rk_matchconf(str, MATCHCONF_PERSON|MATCHCONF_CONF);
-	num = retval->rcr_ci.rcr_ci_len;
-	if (num == 0) {
-		printf("Det finns ingen person som matchar \"%s\".\n", str);
-	} else if (num > 1) {
-		printf("Namnet \"%s\" är flertydigt. Du kan mena:\n", str);
-		for (i = 0; i < num; i++)
-			printf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
-		printf("\n");
-	} else {
-		printf("Sänd meddelande till %s\nMeddelande: ",
+	retval = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF);
+	if (retval == 0)
+		return;
+
+	printf("Sänd meddelande till %s\nMeddelande: ",
+	    retval->rcr_ci.rcr_ci_val[0].rc_name);
+	fflush(stdout);
+	buf = get_input_string(0, 0); /* XXX */
+	if (strlen(buf) == 0)
+		printf("Nähej.");
+	else {
+		rk_send_msg(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, buf);
+		printf("\nMeddelandet sänt till %s.\n", 
 		    retval->rcr_ci.rcr_ci_val[0].rc_name);
-		fflush(stdout);
-		buf = get_input_string(0, 0); /* XXX */
-		if (strlen(buf) == 0)
-			printf("Nähej.");
-		else {
-			rk_send_msg(retval->rcr_ci.rcr_ci_val[0].rc_conf_no,
-			    buf);
-			printf("\nMeddelandet sänt till %s.\n", 
-			    retval->rcr_ci.rcr_ci_val[0].rc_name);
-		}
-		free(buf);
 	}
+	free(buf);
 	free(retval);
 }
 
@@ -439,7 +420,7 @@ cmd_goto(char *str)
 	struct rk_conference *rkc;
 	struct rk_membership *m;
 	struct rk_confinfo_retval *retval;
-	int conf, ret, num, i;
+	int conf, ret;
 	char *ch, *name;
 
 	if (myuid == 0) {
@@ -450,20 +431,9 @@ cmd_goto(char *str)
 		printf("Du måste ge ett möte som argument.\n");
 		return;
 	}
-	retval = rk_matchconf(str, MATCHCONF_CONF);
-	num = retval->rcr_ci.rcr_ci_len;
-	if (num == 0) {
-		printf("Det finns inget möte som matchar \"%s\".\n", str);
-		free(retval);
+	retval = match_complain(str, MATCHCONF_CONF);
+	if (retval == NULL)
 		return;
-	} else if (num > 1) {
-		printf("Namnet \"%s\" är flertydigt. Du kan mena:\n", str);
-		for (i = 0; i < num; i++)
-			printf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
-		printf("\n");
-		free(retval);
-		return;
-	}
 	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	name = alloca(strlen(retval->rcr_ci.rcr_ci_val[0].rc_name) + 2);
 	strcpy(name, retval->rcr_ci.rcr_ci_val[0].rc_name);
@@ -540,7 +510,7 @@ void
 cmd_leave(char *str)
 {
 	struct rk_confinfo_retval *retval;
-	int num, ret, i;
+	int ret;
 
 	if (myuid == 0) {
 		printf("Logga in först.\n");
@@ -550,20 +520,9 @@ cmd_leave(char *str)
 		printf("Du måste ge ett möte som argument.\n");
 		return;
 	}
-	retval = rk_matchconf(str, MATCHCONF_CONF);
-	num = retval->rcr_ci.rcr_ci_len;
-	if (num == 0) {
-		printf("Det finns inget möte som matchar \"%s\".\n", str);
-		free(retval);
+	retval = match_complain(str, MATCHCONF_CONF);
+	if (retval == NULL)
 		return;
-	} else if (num > 1) {
-		printf("Namnet \"%s\" är flertydigt. Du kan mena:\n", str);
-		for (i = 0; i < num; i++)
-			printf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
-		printf("\n");
-		free(retval);
-		return;
-	}
 	ret = rk_sub_member(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, myuid);
 	if (ret)
 		printf("Det sket sej: %s\n", error(ret));

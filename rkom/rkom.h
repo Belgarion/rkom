@@ -17,11 +17,6 @@ void	msg_input(int);
 void	cmd_parse(char *);
 int	send_reply(char *);
 int	handle(void);
-char	get_char(void);
-int	get_int(void);
-void	get_accept(char);
-void	get_eat(char);
-char *	get_string(void);
 char *	error(int);
 void	put_char(char);
 void	put_string(char *);
@@ -34,6 +29,9 @@ void	show_text(int);
 void	cmd_exec(char *, struct cmnd *);
 char *	get_input_string(int, int);
 char * get_date_string(struct rk_time *t);
+
+/* In file helpers.c */
+struct rk_confinfo_retval *match_complain(char *str, int type);
 
 extern	int myuid;
 extern	int curconf;

@@ -211,23 +211,12 @@ void
 write_rcpt(char *str)
 {
 	struct rk_confinfo_retval *cr;
-	int conf, i, num;
+	int conf, i;
 
 	TW;
-	cr = rk_matchconf(str, MATCHCONF_PERSON|MATCHCONF_CONF);
-	num = cr->rcr_ci.rcr_ci_len;
-	if (num == 0) {
-		printf("Ingen mottagare matchar \"%s\".\n", str);
-		free(cr);
+	cr = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF);
+	if (cr == NULL)
 		return;
-	} else if (num > 1) {
-		printf("Mottagarmötet var flertydigt. Du kan mena:\n");
-		for (i = 0; i < num; i++)
-			printf("%s\n", cr->rcr_ci.rcr_ci_val[i].rc_name);
-		printf("\n");
-		free(cr);
-		return;
-	}
 	conf = cr->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	free(cr);
 	for (i = 0; i < nmi; i++)
