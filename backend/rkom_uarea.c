@@ -259,7 +259,6 @@ rk_set_uarea_server(char *str, struct rk_uarea *u)
 	sprintf(utstr, "86 %ldH%s %s 0 { } 0 { }\n",
 	    (long)(strlen(udata) + strlen(hdr) + 1), hdr, udata);
 
-printf("utstr: !%s! len %d\n", utstr, strlen(utstr));
 	if (send_reply(utstr)) {
 		i = get_int();
 		get_eat('\n');
@@ -268,7 +267,6 @@ printf("utstr: !%s! len %d\n", utstr, strlen(utstr));
 	no = get_int();
 	get_accept('\n');
 	sprintf(utstr, "57 %d %d\n", myuid, no);
-printf("utstr: !%s! len %d\n", utstr, strlen(utstr));
 	if (send_reply(utstr)) {
 		i = get_int();
 		get_eat('\n');
