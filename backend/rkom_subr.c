@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.14 2001/11/18 18:05:30 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.15 2001/11/20 02:38:34 offe Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -25,7 +25,7 @@
 #include "rkom_proto.h"
 #include "backend.h"
 
-int sockfd, readfd, writefd, asyncfd, fepid;
+int sockfd, readfd=-1, writefd, asyncfd, fepid;
 static char *version = "ett.två.beta";
 static int childpid;
 /*
