@@ -173,14 +173,9 @@ cmd_vilka(char *str)
 {
 	struct rk_dynamic_session_info_retval *ppp;
 	struct rk_dynamic_session_info *pp;
-	struct rk_vilka_args *rva;
 	int i, antal;
 
-	rva = alloca(sizeof(struct rk_vilka_args));
-	rva->rva_secs = 0;
-	rva->rva_flags = WHO_VISIBLE;
-
-	ppp = rk_vilka(rva);
+	ppp = rk_vilka(0, WHO_VISIBLE);
 
 	antal = ppp->rdv_rds.rdv_rds_len;
 	pp = ppp->rdv_rds.rdv_rds_val;
@@ -229,22 +224,16 @@ cmd_vilka(char *str)
 void
 cmd_login(char *str)
 {
-	struct rk_matchconfargs *args;
-	struct rk_loginargs *loginargs;
 	struct rk_confinfo_retval *retval;
 	struct rk_unreadconfval *conf;
-	struct rk_whatidoargs *whatidoargs;
-
-	int i, num, *confs, nconf;
+	int i, num, *confs, nconf, userid;
+	char *passwd;
 
 	if (str == 0) {
 		printf("Du måste ange vem du vill logga in som.\n");
 		return;
 	}
-	args = malloc(sizeof(struct rk_matchconfargs));
-	args->rm_name = str;
-	args->rm_flags = MATCHCONF_PERSON;
-	retval = rk_matchconf(args);
+	retval = rk_matchconf(str, MATCHCONF_PERSON);
 
 	num = retval->rcr_ci.rcr_ci_len;
 	if (num == 0) {
@@ -259,10 +248,9 @@ cmd_login(char *str)
 		return;
 	}
 	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
-	loginargs = malloc(sizeof(struct rk_loginargs));
-	loginargs->rk_userid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
-	loginargs->rk_passwd = getpass("Lösenord: ");
-	if (rk_login(loginargs)) {
+	userid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	passwd = getpass("Lösenord: ");
+	if (rk_login(userid, passwd)) {
 		printf("Felaktigt lösenord.\n\n");
 		free(retval);
 		return;
@@ -273,9 +261,7 @@ cmd_login(char *str)
 	/*
 	 * Set some informative text.
 	 */
-	whatidoargs = malloc(sizeof(struct rk_whatidoargs));
-	whatidoargs->rw_whatido = "Kör raggeklienten (nu med login!)";
-	if (rk_whatido(whatidoargs))
+	if (rk_whatido("Kör raggeklienten (nu med login!)"))
 		printf("Set what-i-am-doing sket sej\n");
 
 	/*
