@@ -1,4 +1,4 @@
-#	$Id: Makefile.inc,v 1.3 2000/12/29 11:55:38 jens Exp $
+#	$Id: Makefile.inc,v 1.4 2001/01/28 16:40:36 ragge Exp $
 #
 
 LIBRKOM != cd ${.CURDIR}/../backend;\
@@ -8,4 +8,7 @@ CPPFLAGS+=-I${.CURDIR}/../backend -g
 DPADD+= ${LIBRKOM}/librkom.a
 LDADD+=	-L${LIBRKOM} -lrkom -static
 
+#NOGCCERROR=1
+#LDADD+=-L../../libedit
+#CPPFLAGS+=-I../../libedit
 #DEBUG=1
