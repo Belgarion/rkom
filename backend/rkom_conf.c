@@ -111,6 +111,22 @@ findconf(int conf)
 	return 0;
 }
 
+void
+newname(int uid)
+{
+	struct person_store *pp;
+	struct get_conf_stat_store *walker;
+
+	pp = findperson(uid);
+	if (pp == 0)
+		return;
+	walker = findconf(uid);
+	if (walker == 0)
+		return;
+	free(pp->person.rp_username);
+	pp->person.rp_username = strdup(walker->confer.rc_name);
+}
+
 static void
 readin_conf_stat(struct rk_conference *c)
 {

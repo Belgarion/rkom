@@ -43,7 +43,7 @@ void
 async(int level)
 {
 	struct mesg *m;
-	int narg, type;
+	int narg, type, tmp;
 
 	narg = get_int();
 	type = get_int();
@@ -79,11 +79,13 @@ async(int level)
 	case 5: /* async-new-name */
 		m = malloc(sizeof(struct mesg));
 		m->type = type;
-		m->pers = get_int();
+		tmp = m->pers = get_int();
 		m->msg = get_string();
 		m->msg2 = get_string();
 		get_eat('\n');
 		putinq(m);
+		reread_conf_stat_bg(tmp);
+		newname(tmp);
 		break;
 
 	case 16: /* async-new-recipient */

@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.8 2000/12/10 15:13:30 ragge Exp $	*/
+/*	$Id: backend.h,v 1.9 2000/12/19 16:23:52 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -41,6 +41,7 @@ int	get_pers_stat(int persno, struct rk_person **pers);
 int	get_membership(int uid, int conf, struct rk_membership **member);
 void	conf_set_high_local(int conf, int local);
 void	reread_conf_stat_bg(int conf);
+void	newname(int);
 
 /* Helper functions, in rkom_helpers.c */
 void	read_in_time(struct rk_time *t);
