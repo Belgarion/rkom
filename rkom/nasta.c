@@ -46,6 +46,15 @@ next_prompt()
 	else
 		prompt = PROMPT_SEE_TIME;
 }
+
+/*
+ * Check if the global text number globno is read in some conference.
+ */
+static int
+checkread(int globno)
+{
+}
+
 /*
  * Next action: decide what to do next is. Choose between:
  *	- Nästa kommentar
@@ -76,7 +85,7 @@ next_action(int nr)
 			r = ts2->rt_retval;
 			if (r)
 				continue;
-			if (rk_is_read(mi[i].rmi_numeric))
+			if (rk_is_read(mi[i].rmi_numeric, curconf))
 				continue;
 			break;
 		}
@@ -101,7 +110,7 @@ again:
 				r = ts2->rt_retval;
 				if (r)
 					continue;
-				if (rk_is_read(mi[i].rmi_numeric))
+				if (rk_is_read(mi[i].rmi_numeric, curconf))
 					continue;
 				break;  
 			}
@@ -243,7 +252,7 @@ try:	for (i = pole->listidx; i < len; i++)
 	if (i == len) {
 		goto back;
 	}
-	if (rk_is_read(mi[i].rmi_numeric))
+	if (rk_is_read(mi[i].rmi_numeric, curconf))
 		goto try;
 	global = mi[i].rmi_numeric;
 	rv = show_text(global, 1);

@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.15 2003/09/17 14:28:11 ragge Exp $	*/
+/*	$Id: backend.h,v 1.16 2003/09/24 19:34:26 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -82,7 +82,7 @@ void	reread_conf_stat_bg(int conf);
 void	newname(int);
 void	invalidate_local(struct rk_text_stat *ts);
 int32_t rk_change_conference(u_int32_t conf);
-int32_t rk_is_read(u_int32_t nr);
+int32_t rk_is_read(u_int32_t nr, u_int32_t conf);
 u_int32_t rk_next_unread(u_int32_t conf, u_int32_t uid);
 u_int32_t rk_local_to_global(u_int32_t conf, u_int32_t local);
 int32_t rk_mark_read(u_int32_t conf, u_int32_t local);

@@ -502,12 +502,15 @@ is_read(int conf, int text, int uid)
 	return 0;
 }
 
+/*
+ * Check if text nr is marked read in conference conf.
+ */
 int32_t
-rk_is_read(u_int32_t nr)
+rk_is_read(u_int32_t nr, u_int32_t conf)
 {
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mi;
-	int i, len, conf = 0;
+	int i, len;
 
 	ts = rk_textstat(nr);
 	if (ts->rt_retval)
@@ -517,15 +520,15 @@ rk_is_read(u_int32_t nr)
 	for (i = 0; i < len; i++) {
 		if (mi[i].rmi_type == recpt ||
 		    mi[i].rmi_type == cc_recpt ||
-		    mi[i].rmi_type == bcc_recpt)
-			conf = mi[i].rmi_numeric;
-		if (mi[i].rmi_type == loc_no)
-			break;
+		    mi[i].rmi_type == bcc_recpt) {
+			if (mi[i].rmi_numeric != conf)
+				continue;
+			if (mi[i+1].rmi_type != loc_no)
+				continue;
+			return is_read(conf, loc_no, myuid);
+		}
 	}
-	if (conf)
-		return is_read(conf, mi[i].rmi_numeric, myuid);
-	else
-		return 0;
+	return 0;
 }
 
 u_int32_t
