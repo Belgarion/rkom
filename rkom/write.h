@@ -15,6 +15,7 @@ void	write_whole(char *);
 void	write_brev(char *);
 void	write_private(int);
 void	write_change_presentation(char *);
+void	write_change_faq(char *);
 void	write_set_motd(char *str);
 void	write_remove_motd(char *str);
 void	write_fastcmnt(void);

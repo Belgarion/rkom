@@ -15,7 +15,7 @@
 #include "set.h"
 #include "next.h"
 
-static char *supstr;
+char *supstr;
 
 void
 show_superhoppa(char *arg)

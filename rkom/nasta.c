@@ -414,3 +414,39 @@ next_resee_presentation(char *name)
 	free(rv);
 	free(rc);
 }
+
+void
+next_resee_faq(char *name)
+{
+	struct rk_confinfo_retval *rv;
+	struct rk_conference *rc;
+	struct rk_aux_item *rai;
+	int naux, i;
+
+	rv = match_complain(name, MATCHCONF_CONF);
+	if (rv == 0)
+		return;
+	printf("Återse FAQ (för) %s.\n",
+	    rv->rcr_ci.rcr_ci_val[0].rc_name);
+	rc = rk_confinfo(rv->rcr_ci.rcr_ci_val[0].rc_conf_no);
+	if (rc->rc_retval) {
+		printf("Kunde inte läsa FAQn: %s\n",
+		    error(rc->rc_retval));
+		return;
+	}
+	naux = rc->rc_aux_item.rc_aux_item_len;
+	rai = rc->rc_aux_item.rc_aux_item_val;
+	for (i = 0; i < naux; i++) {
+		if (rai[i].rai_tag == RAI_TAG_FAQ_TEXT)
+			break;
+	}
+	if (naux == 0 || i == naux)
+		rprintf("Det finns ingen FAQ för %s.\n", 
+		    rv->rcr_ci.rcr_ci_val[0].rc_name);
+	else
+		show_text(atoi(rai[i].rai_data), 1);
+	lastlasttext = lasttext;
+	lasttext = rc->rc_presentation;
+	free(rv);
+	free(rc);
+}

@@ -4,6 +4,7 @@ void	next_conf(char *);
 void	next_resee_text(int);
 void	next_resee_text_unmodified(int);
 void	next_resee_comment(void);
+void	next_resee_faq(char *);
 void	next_text(char *);
 void	next_resee_presentation(char *);
 void	next_resee_root(int);

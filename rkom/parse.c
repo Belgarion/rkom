@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.40 2002/08/31 08:33:21 ragge Exp $ */
+/* $Id: parse.c,v 1.41 2002/08/31 12:59:21 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -44,6 +44,7 @@ static int CC_2(exec_,x) (int argc, char *argv[])
 DCMD(read_next_text);
 DCMD(read_next_cmt);
 DCMD(read_see_again_cmt);
+DCMD(read_see_again_faq);
 DCMD(read_see_again_cmt_no);
 DCMD(read_see_presentation);
 DCMD(read_see_unmodified);
@@ -53,6 +54,7 @@ DCMD(read_only);
 DCMD(read_again);
 DCMD(read_jump);
 DCMD(read_superjump);
+DCMD(read_unsuperjump);
 
 /* Commands for writing */
 DCMD(write_new);
@@ -75,6 +77,7 @@ DCMD(conf_goto_next);
 DCMD(conf_list);
 DCMD(conf_leave);
 DCMD(conf_change_presentation);
+DCMD(conf_change_faq);
 DCMD(conf_create);
 DCMD(conf_delete);
 
@@ -159,11 +162,13 @@ DROW("återse kommenterade",		1,PE_NO_ARG,read_see_again_cmt)
 DROW("återse oredigerat",		0,PE_NUM_ARG,read_see_unmodified)
 DROW("återse presentation",		0,PE_STR_ARG,read_see_presentation)
 DROW("återse urinlägg",			0,PE_NO_ARG,read_see_again_root)
+DROW("återse faq",			0,PE_STR_ARG,read_see_again_faq)
 DROW("lista nyheter",			0,PE_NO_ARG,read_list_news)
 DROW("endast",					1,PE_NUM_ARG,read_only)
 DROW("igen",					0,PE_NO_ARG,read_again)
 DROW("hoppa",					0,PE_NO_ARG,read_jump)
 DROW("superhoppa",				0,PE_NO_ARG,read_superjump)
+DROW("osuperhoppa",				0,PE_NO_ARG,read_unsuperjump)
 
 /* Commands for writing */
 DROW("inlägg",					0,PE_NO_ARG,write_new)
@@ -186,6 +191,7 @@ DROW("nästa möte",				0,PE_NO_ARG,conf_goto_next)
 DROW("lista möten",				0,PE_NO_ARG,conf_list)
 DROW("utträda",					0,PE_STR_ARG,conf_leave)
 DROW("ändra presentation",		0,PE_STR_ARG,conf_change_presentation)
+DROW("ändra faq",			0,PE_STR_ARG,conf_change_faq)
 DROW("skapa möte",				0,PE_NO_ARG,conf_create)
 DROW("radera möte",				0,PE_STR_ARG,conf_delete)
 
@@ -426,6 +432,16 @@ exec_read_see_unmodified(int argc, char *argv[])
 }
 
 static int
+exec_read_see_again_faq(int argc, char *argv[])
+{
+	LF;
+	TT((argc == 0),
+	    "Du måste tala om för vilket möte du vill se FAQn\n");
+	next_resee_faq(re_concat(argc, argv));
+	return 0;
+}
+
+static int
 exec_read_see_again_cmt(int argc, char *argv[])
 {
 	LF;
@@ -462,6 +478,18 @@ static int
 exec_read_again(int argc, char *argv[])
 {
 	next_again(NULL);
+	return 0;
+}
+
+static int
+exec_read_unsuperjump(int argc, char *argv[])
+{
+	extern char *supstr;
+	if (supstr == NULL)
+		rprintf("Du har inte superhoppat (ännu).\n");
+	else
+		rprintf("Du osuperhoppar nu ärende '%s'.\n", supstr);
+	supstr = NULL;
 	return 0;
 }
 
@@ -941,6 +969,16 @@ exec_text_sub_rcpt_late(int argc, char *argv[])
 	LF;
 	TT(argc != 0, "Du kan inte ange några argument.\n");
 	cmd_sub_rcpt();
+	return 0;
+}
+
+static int
+exec_conf_change_faq(int argc, char *argv[])
+{
+	LF;
+	NWA;
+	TT(argc == 0, "Du måste ange vad du vill ändra FAQn för.\n");
+	write_change_faq(re_concat(argc, argv));
 	return 0;
 }
 

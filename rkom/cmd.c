@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.60 2002/05/19 14:23:22 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.61 2002/08/31 12:59:21 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -488,9 +488,11 @@ static void
 confstat(int mid)
 {
 	struct rk_conference *rcp;
+	struct rk_aux_item *rai;
+	int i, nrai;
 
 	rcp = rk_confinfo(mid);
-	rprintf("Namn:                  %s\n", vem(mid));
+	rprintf("Namn:                  %s (%d)\n", vem(mid), mid);
 	rprintf("Antal texter:          %d\n", rcp->rc_no_of_texts);
 	rprintf("Skapat:                %s\n",
 		get_date_string(&rcp->rc_creation_time));
@@ -502,6 +504,14 @@ confstat(int mid)
 		rcp->rc_no_of_members);
 	rprintf("Livslängd:             %d dagar\n",
 		rcp->rc_expire);
+	rai = rcp->rc_aux_item.rc_aux_item_val;
+	nrai = rcp->rc_aux_item.rc_aux_item_len;
+	rprintf("\n");
+	for (i = 0; i < nrai; i++) {
+		if (rai[i].rai_tag == RAI_TAG_FAQ_TEXT)
+			rprintf("Mötet har en FAQ i text %s\n",
+			    rai[i].rai_data);
+	}
 }
 
 void

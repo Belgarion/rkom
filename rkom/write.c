@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.47 2002/07/13 00:45:24 offe Exp $	*/
+/*	$Id: write.c,v 1.48 2002/08/31 12:59:21 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,7 +33,7 @@ static char *show_format(void);
 static void wfotnot(char *str);
 
 static struct rk_misc_info *mi;
-static int nmi = 0, ispres = 0, islapp = 0;
+static int nmi = 0, ispres = 0, islapp = 0, isfaq = 0;
 static char *ctext = 0;
 
 static char *input_string(char *);
@@ -162,6 +162,54 @@ parse_text(char *txt)
 	}
 }
 
+static int
+change_faq(int confno, struct rk_text_info *rti)
+{
+	struct rk_text_retval *rv;
+	struct rk_modifyconfinfo *rkm;
+	struct rk_conference *rcp;
+	struct rk_aux_item *rai;
+	struct rk_aux_item_input *raii;
+	u_int32_t rmtext = 0;
+	char buf[20];
+	int i, nrai, top;
+
+	rv = rk_create_text(rti);
+	if (rv->rtr_status)
+		return rv->rtr_status;
+	rkm = alloca(sizeof(struct rk_modifyconfinfo));
+	rkm->rkm_conf = confno;
+	rkm->rkm_add.rkm_add_len = 0;
+	rcp = rk_confinfo(confno);
+	top = 0;
+	rai = rcp->rc_aux_item.rc_aux_item_val;
+	nrai = rcp->rc_aux_item.rc_aux_item_len;
+	
+	/*
+	 * XXX what if more than one FAQ?
+	 */
+	for (i = 0; i < nrai; i++) {
+		if (rai[i].rai_tag == RAI_TAG_FAQ_TEXT) {
+			rmtext = rai[i].rai_aux_no;
+		}
+	}
+
+	rkm->rkm_delete.rkm_delete_len = 0;
+	if (rmtext) {
+		rkm->rkm_delete.rkm_delete_len = 1;
+		rkm->rkm_delete.rkm_delete_val = &rmtext;
+	}
+	raii = alloca(sizeof(struct rk_aux_item_input));
+	rkm->rkm_add.rkm_add_len = 1;
+	rkm->rkm_add.rkm_add_val = raii;
+	raii->raii_tag = RAI_TAG_FAQ_TEXT;
+	raii->raii_flags = 0;
+	raii->inherit_limit = 0;
+	sprintf(buf, "%d", rv->rtr_textnr);
+	raii->raii_data = buf;
+	return rk_modify_conf_info(rkm);
+}
+
 void
 write_put(char *str)
 {
@@ -181,15 +229,33 @@ write_put(char *str)
 	rti->rti_misc.rti_misc_val = mi;
 	rti->rti_text = ctext;
 
-	rtii = alloca(sizeof(*rtii));
-	rtii->raii_tag = RAI_TAG_CREATING_SW;
-	rtii->inherit_limit = 0;
-	rtii->raii_data = alloca(strlen(client_version) + 10);
-	sprintf(rtii->raii_data, "raggkom %s", client_version);
-	rti->rti_input.rti_input_len = 1;
+	/*
+	 * Set misc info. This should be done more intelligent.
+	 */
+	/* Set creating software */
+	rtii = alloca(sizeof(*rtii) * 5);	/* XXX */
+	rtii[0].raii_tag = RAI_TAG_CREATING_SW;
+	rtii[0].inherit_limit = 0;
+	rtii[0].raii_data = alloca(strlen(client_version) + 10);
+	sprintf(rtii[0].raii_data, "raggkom %s", client_version);
+
+	/* Set content type */
+	rtii[1].raii_tag = RAI_TAG_CONTENT_TYPE;
+	rtii[1].inherit_limit = 1; /* ??? */
+#define	DEF_CONTENT_TYPE	"x-kom/text;charset=iso-8859-1"
+	rtii[1].raii_data = DEF_CONTENT_TYPE;
+
+	rti->rti_input.rti_input_len = 2;
 	rti->rti_input.rti_input_val = rtii;
 
-	if (ispres) {
+	if (isfaq) {
+		int i;
+		if ((i = change_faq(isfaq, rti)))
+			rprintf("Det gick inte: %s\n", error(i));
+		else
+			rprintf("FAQn ändrad.\n");
+		isfaq = 0;
+	} else if (ispres) {
 		if (rk_set_presentation(ispres, rti))
 			rprintf("Det gick inte.\n");
 		else
@@ -588,6 +654,37 @@ write_footnote_no(int num)
 {
 	rprintf("Fotnot (till inlägg %d)\n", num);
 	write_internal(num, footn_to);
+}
+
+void
+write_change_faq(char *str)
+{
+        struct rk_confinfo_retval *retval;
+	char *c = NULL;
+
+        if ((retval = match_complain(str, MATCHCONF_CONF)) == 0)
+                return;
+
+	isfaq = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	rprintf("Ändra FAQ (för) %s\n",
+	    retval->rcr_ci.rcr_ci_val[0].rc_name);
+	is_writing = 1;
+	mi = calloc(sizeof(struct rk_misc_info), 2);
+	nmi = 0;
+	write_rcpt(str, recpt);
+	if (isneq("use-editor", "0")) { /* Extern editor, edit old text */
+		struct rk_conference *rc;
+
+		rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
+		if (rc->rc_retval == 0 && rc->rc_presentation)
+			c = rk_gettext(rc->rc_presentation);
+		free(rc);
+	}
+	if (c == NULL)
+		c = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);
+	doedit(c);
+	free(c);
+	free(retval);
 }
 
 void
