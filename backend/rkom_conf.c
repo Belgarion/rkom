@@ -143,9 +143,14 @@ read_lgtable(struct get_conf_stat_store *g)
 	if (g->mapsz)
 		return; /* Done already */
 
+#if 0
+	/* It seems like some real conferences are marked as letterboxes.
+	 * so the below code seems to do more harm than good. /oj
+	 */
 	if (g->number != myuid && 
 	    g->confer.rc_type & (RK_CONF_TYPE_LETTERBOX << 4)) 
 		return; /* Do not try to read someones letterbox. */
+#endif
 	/*
 	 * First get the highest local text number.
 	 */
