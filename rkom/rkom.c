@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.21 2001/01/07 14:54:50 ragge Exp $ */
+/* $Id: rkom.c,v 1.22 2001/01/12 11:24:34 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -120,8 +120,12 @@ main(int argc, char *argv[])
 
 	setup_tty(1);
 	hist = history_init();
+#if !defined(__FreeBSD__)
 	history(hist, &ev, H_SETSIZE, 200);
 	el = el_init("rkom", stdin, stdout, stderr);
+#else
+	el = el_init("rkom", stdin, stdout);
+#endif
 	el_set(el, EL_EDITOR, "emacs");	/* emacs binding */
 	el_set(el, EL_PROMPT, prompt_fun);
 	el_set(el, EL_HIST, history, hist);
@@ -173,8 +177,10 @@ main(int argc, char *argv[])
 			str = buf;
 			exec_cmd(str);
 			discard = 0;
+#if !defined(__FreeBSD__)
 			if (len > 1)
 				history(hist, &ev, H_ENTER, buf);
+#endif
 
 			gettimeofday(&tp, 0);
 			if (tp.tv_sec - lasttime > 30) {
