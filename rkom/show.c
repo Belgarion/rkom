@@ -41,6 +41,11 @@ show_text(int nr)
 	char *c, *cc, *namn, buf[20];
 
 	ts = rk_textstat(nr);
+	if (ts->rt_retval) {
+		printf("För din del så finns inte text %d\n", nr);
+		free(ts);
+		return;
+	}
 
 	conf = rk_confinfo(ts->rt_author);
 	if (conf->rc_retval) {
