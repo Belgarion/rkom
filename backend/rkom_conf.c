@@ -380,11 +380,15 @@ rk_next_unread_server(u_int32_t conf, u_int32_t uid)
 	get_conf_stat(conf, &c);
 	highest = c->rc_first_local_no + c->rc_no_of_texts - 1;
 	get_membership(uid, conf, &m);
-	last = m->rm_last_text_read;
 
-back:	last = next_local(conf, last + 1);
-	if (last == 0)
+back:	last = m->rm_last_text_read;
+	if (highest <= last)
 		return 0;
+	last = next_local(conf, last + 1);
+	if (last == 0) {
+		rk_mark_read_server(conf, m->rm_last_text_read + 1);
+		goto back;
+	}
 	if (is_read(conf, last, uid)) {
 		m->rm_last_text_read = last;
 		goto back;
