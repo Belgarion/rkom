@@ -5,13 +5,8 @@
  * Public domain.
  */
 
-#include <sys/cdefs.h>
-#if defined(LIBC_RCS) && !defined(lint)
-__RCSID("$NetBSD: toupper_.c,v 1.8 1997/07/13 19:46:23 christos Exp $");
-#endif /* LIBC_RCS and not lint */
-
 #include <stdio.h>
-#include <ctype.h>
+#include "rtype.h"
 
 #if EOF != -1
 #error "EOF != -1"
