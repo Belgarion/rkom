@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.12 2000/12/03 15:57:28 jens Exp $ */
+/* $Id: parse.c,v 1.13 2000/12/10 15:49:11 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -95,6 +95,7 @@ DCMD(info_flags);
 DCMD(info_time);
 DCMD(info_saveflags);
 DCMD(info_status);
+DCMD(info_extra);
 
 /* Commands for aliases */
 DCMD(alias_add);
@@ -182,6 +183,7 @@ DROW("flaggor",					0,PE_NO_ARG,info_flags)
 DROW("tiden",					0,PE_NO_ARG,info_time)
 DROW("hjälp",					0,PE_NO_ARG,info_list_commands)
 DROW("status",					0,PE_STR_ARG,info_status)
+DROW("tillägsinformation",			0,PE_NUM_ARG,info_extra)
 
 /* Commands for aliases */
 DROW("alias",					0,PE_STR_ARG,alias_add)
@@ -786,5 +788,18 @@ exec_debug_show_args(int argc, char *argv[])
 	printf("argc = %d\n", argc);
 	for (i = 0; i < argc; i++)
 		printf("argv[%d] = '%s'\n", i, argv[i]);
+	return 0;
+}
+
+static int
+exec_info_extra(int argc, char *argv[])
+{
+	int text = lasttext;
+
+	LF;
+	TT(argc > 1, "Du kan max ange ett argument.\n");
+	if (argc)
+		text = atoi(argv[0]);
+	cmd_info_extra(text);
 	return 0;
 }

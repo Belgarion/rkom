@@ -450,3 +450,37 @@ cmd_status(char *name)
 		confstat(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
 	free(retval);
 }
+
+void
+cmd_info_extra(int text)
+{
+	struct rk_text_stat *rts;
+	struct rk_aux_item *rai;
+	int i, nrai;
+
+	printf("Tilläggsinformation (för text) %d.\n\n", text);
+
+	rts = rk_textstat(text);
+	if (rts->rt_retval) {
+		printf("Kunde inte läsa status för inlägg %d: %s.\n",
+		    text, error(rts->rt_retval));
+		free(rts);
+		return;
+	}
+	nrai = rts->rt_aux_item.rt_aux_item_len;
+	rai = rts->rt_aux_item.rt_aux_item_val;
+	if (nrai) {
+		for (i = 0; i < nrai; i++) {
+			printf("Nummer:\t\t%d\n", rai[i].rai_aux_no);
+			printf("Typ:\t\t%d\n", rai[i].rai_tag);
+			printf("Skapad av:\t%s\n", vem(rai[i].rai_creator));
+			printf("Skapad:\t\t%s\n",
+			    get_date_string(&rai[i].rai_created_at));
+			printf("Flaggor:\t\n");
+			printf("Arvsgräns:\t%d\n", rai[i].inherit_limit);
+			printf("Innehåll:\t\"%s\".\n", rai[i].rai_data);
+		}
+	} else
+		printf("Det finns ingen tilläggsinformation för denna text.\n");
+	free(rts);
+}
