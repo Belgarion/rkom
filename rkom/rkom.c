@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.60 2003/10/12 13:56:20 ragge Exp $ */
+/* $Id: rkom.c,v 1.61 2003/10/12 14:07:45 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -261,7 +261,6 @@ async_collect()
 
 		case 12: {
 			struct rk_conference *sender, *rcpt;
-			struct rk_time *tm;
 			char *name;
 
 			if (isneq("only-private-messages", "0") &&
@@ -284,8 +283,7 @@ rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 				rprintf("Meddelande till %s från %s",
 				    name, hej);
 			}
-			tm = rk_time();
-			rprintf(" (%s):\n\n", get_date_string(tm));
+			rprintf(" (%s):\n\n", get_date_string(&ra->ra_time));
 			rprintf("%s\n", ra->ra_message);
 rprintf("----------------------------------------------------------------\n");
 			if (isneq("beep-on-private-messages", "0"))

@@ -64,6 +64,12 @@ async(int handle)
 		m->ra.ra_pers = get_int();
 		m->ra.ra_message = get_string();
 		get_accept('\n');
+
+		/* Get time for message from server */
+		send_reply("35\n");
+		read_in_time(&m->ra.ra_time);
+		get_accept('\n');
+
 		putinq(m);
 		break;
 

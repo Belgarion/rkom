@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.31 2003/10/12 13:35:50 ragge Exp $	*/
+/*	$Id: backend.h,v 1.32 2003/10/12 14:07:42 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -416,6 +416,7 @@ struct rk_async {
 	u_int32_t	ra_conf;
 	u_int32_t	ra_pers;
 	u_int32_t	ra_text;
+	struct rk_time	ra_time;
 	char *	ra_message;
 	char *	ra_message2;
 };
