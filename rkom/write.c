@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.50 2002/09/01 11:16:03 ragge Exp $	*/
+/*	$Id: write.c,v 1.51 2002/09/04 20:56:49 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -365,7 +365,7 @@ input_string(char *m)
 	}
 
 	msg = m;
-	get = el_gets(el, &len);
+	get = el_gets(el, &len, 0);
 	if (get)
 		ret = strdup(get);
 	else

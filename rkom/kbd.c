@@ -42,7 +42,7 @@ getstr(char *m)
 	}
 	
 	msg = m;
-	tc = el_gets(el, &len);
+	tc = el_gets(el, &len, 0);
 	if (tc) {
 		ret = strdup(tc);
 		ret[len - 1] = 0; /* Forget \n */

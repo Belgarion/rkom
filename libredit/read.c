@@ -307,7 +307,7 @@ el_getc(EditLine *el, char *cp)
 
 
 public const char *
-el_gets(EditLine *el, int *nread)
+el_gets(EditLine *el, int *nread, int goout)
 {
 	int retval;
 	el_action_t cmdnum = 0;
@@ -487,7 +487,7 @@ el_gets(EditLine *el, int *nread)
 			term__flush();
 			break;
 		}
-		if (el->el_line.lastchar - el->el_line.buffer == 0) {
+		if (goout && (el->el_line.lastchar - el->el_line.buffer == 0)) {
 			num = 0;
 			break;
 		}

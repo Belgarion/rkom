@@ -87,7 +87,7 @@ void		 el_end(EditLine *);
 /*
  * Get a line, a character or push a string back in the input queue
  */
-const char	*el_gets(EditLine *, int *);
+const char	*el_gets(EditLine *, int *, int goout);
 int		 el_getc(EditLine *, char *);
 void		 el_push(EditLine *, const char *);
 

@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.47 2002/09/04 15:39:47 ragge Exp $ */
+/* $Id: rkom.c,v 1.48 2002/09/04 20:56:49 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -201,7 +201,7 @@ main(int argc, char *argv[])
 			 */
 			outlines = 0;
 			rprintf("%c", '\r');	
-			if (el_gets(main_el, &num) == NULL) {
+			if (el_gets(main_el, &num, 1) == NULL) {
 				noprompt++;
 				continue;
 			}
