@@ -109,7 +109,6 @@ show_formatted(char *cc)
 		if (*cc)
 			rprintf("%s", cc);
 	}
-	rprintf("\n");
 }
 
 void
@@ -213,6 +212,7 @@ show_text(int nr, int format)
 	if (*cc) {
 		if (format) {
 			show_formatted(cc);
+			rprintf("\n");
 		} else {
 			rprintf("%s", cc);
 			if (cc[strlen(cc) - 1] != '\n')
