@@ -39,14 +39,17 @@ next_prompt()
 	u_int32_t *c;
 	int hln, mr;
 
-	if ((rkc = rk_confinfo(curconf)) == NULL)
-		return rprintf("Get confinfo sket sej: %s\n", error(komerr));
-	hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
-	m = rk_membership(myuid, curconf);
-	mr = m->rm_last_text_read;
-	if (hln - mr > 0) {
-		prompt = PROMPT_NEXT_TEXT;
-		return;
+	if (curconf != 0) {
+		if ((rkc = rk_confinfo(curconf)) == NULL)
+			return rprintf("Get confinfo sket sej: %s\n",
+			    error(komerr));
+		hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
+		m = rk_membership(myuid, curconf);
+		mr = m->rm_last_text_read;
+		if (hln - mr > 0) {
+			prompt = PROMPT_NEXT_TEXT;
+			return;
+		}
 	}
 	c = rk_unreadconf(myuid);
 	if (c[0] != 0)
