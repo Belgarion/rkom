@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.16 2001/01/07 11:49:08 ragge Exp $ */
+/* $Id: parse.c,v 1.17 2001/01/07 14:11:50 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -85,6 +85,7 @@ DCMD(text_list_marked);
 DCMD(text_save);
 DCMD(text_list_subject);
 DCMD(text_list_unread);
+DCMD(text_delete);
 
 /* Commands for online communication */
 DCMD(com_who);
@@ -164,8 +165,8 @@ DROW("utträda",					0,PE_STR_ARG,conf_leave)
 DROW("ändra presentation",		0,PE_STR_ARG,conf_change_presentation)
 
 /* Commands for texts */
-DROW("addera mottagare",			0,PE_STR_ARG,text_add_rcpt_late)
-DROW("subtrahera mottagare",			0,PE_STR_ARG,text_sub_rcpt_late)
+DROW("addera mottagare",			0,PE_NO_ARG,text_add_rcpt_late)
+DROW("subtrahera mottagare",			0,PE_NO_ARG,text_sub_rcpt_late)
 DROW("lägga",					0,PE_NO_ARG,text_put)
 DROW("mottagare:",				0,PE_STR_ARG,text_add_rcpt)
 DROW("kommentar till:",			0,PE_NUM_ARG,text_add_cmt_to)
@@ -179,6 +180,7 @@ DROW("spara",					0,PE_STR_ARG,text_save)
 DROW("spara flaggor",				0,PE_NO_ARG,info_saveflags)
 DROW("lista ärenden",			0,PE_NO_ARG,text_list_subject)
 DROW("lista olästa",			0,PE_NO_ARG,text_list_unread)
+DROW("radera",					0,PE_NUM_ARG,text_delete)
 
 /* Commands for online communication */
 DROW("vilka",					0,PE_NO_ARG,com_who)
@@ -847,7 +849,8 @@ static int
 exec_text_add_rcpt_late(int argc, char *argv[])
 {
 	LF;
-	cmd_add_rcpt(re_concat(argc, argv));
+	TT(argc != 0, "Du kan inte ange några argument.\n");
+	cmd_add_rcpt();
 	return 0;
 }
 
@@ -855,7 +858,8 @@ static int
 exec_text_sub_rcpt_late(int argc, char *argv[])
 {
 	LF;
-	cmd_sub_rcpt(re_concat(argc, argv));
+	TT(argc != 0, "Du kan inte ange några argument.\n");
+	cmd_sub_rcpt();
 	return 0;
 }
 
@@ -869,3 +873,14 @@ exec_conf_change_presentation(int argc, char *argv[])
 	return 0;
 }
 
+static int
+exec_text_delete(int argc, char *argv[])
+{
+	LF;
+
+	TT(argc == 0, "Du måste ange vilket textnummer du vill radera.\n");
+	TT(argc > 1, "Radera tar bara ett textnummer som argument.\n");
+	TT(atoi(argv[0]) == 0, "Du måste ange ett riktigt textnummer.\n");
+	cmd_delete(atoi(argv[0]));
+	return 0;
+}

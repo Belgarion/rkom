@@ -516,7 +516,7 @@ cmd_add_member()
 {
 	struct rk_confinfo_retval *retval;
 	int rv, uid, mid;
-	char *name;
+	char *name, *user;
 
 	printf("Addera medlem\n\n");
 
@@ -531,23 +531,31 @@ cmd_add_member()
 	if (retval == NULL)
 		return;
 	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	user = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);
 	uid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	free(retval);
 	name = getstr("Till vilket möte? ");
 	if (strlen(name) == 0) {
 		printf("Nähej.\n");
 		free(name);
+		free(user);
 		return;
 	}
 	retval = match_complain(name, MATCHCONF_CONF);
 	free(name);
-	if (retval == NULL)
+	if (retval == NULL) {
+		free(user);
 		return;
+	}
 	mid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
-	free(retval);
 	rv = rk_add_member(mid, uid, 100, 3, 0);
 	if (rv)
 		printf("Det gick inte: %s\n", error(rv));
+	else
+		printf("Person %s adderad till möte %s.\n",
+		    user, retval->rcr_ci.rcr_ci_val[0].rc_name);
+	free(retval);
+	free(user);
 }
 
 void
@@ -590,14 +598,113 @@ cmd_sub_member()
 }
 
 void    
-cmd_add_rcpt(char *str)
+cmd_add_rcpt()
 {
 	struct rk_confinfo_retval *retval;
+	int rv, conf, text;
+	char *name, buf[50];
 
-	retval = match_complain(str, MATCHCONF_PERSON);
+	printf("Addera mottagare\n\n");
+
+	name = getstr("Vilket möte skall adderas? ");
+	if (strlen(name) == 0) {
+		printf("Nähej.\n"); 
+		free(name);
+		return;
+	}
+	retval = match_complain(name, MATCHCONF_CONF);
+	free(name);
+	if (retval == NULL)
+		return;
+	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	if (lasttext)
+		sprintf(buf, "Till vilken text? (%d) ", lasttext);
+	else
+		sprintf(buf, "Till vilken text? ");
+	name = getstr(buf);
+	if ((strlen(name) == 0) && lasttext) {
+		text = lasttext;
+	} else if (strlen(name) == 0) {
+		printf("Nähej.\n");
+		free(name);
+		free(retval);
+		return;
+	} else 
+		text = atoi(name);
+	free(name);
+	if (text == 0) {
+		printf("Det var ett dåligt textnummer.\n");
+		free(retval);
+		return;
+	}
+	rv = rk_add_rcpt(text, conf, recpt);
+	if (rv)
+		printf("Det gick inte: %s\n", error(rv));
+	else
+		printf("Text %d adderad till möte %s.\n", text,
+		    retval->rcr_ci.rcr_ci_val[0].rc_name);
+	free(retval);
 }
 
 void 
-cmd_sub_rcpt(char *str)
+cmd_sub_rcpt()
 {
+	struct rk_confinfo_retval *retval;
+	int rv, conf, text;
+	char *name, buf[50];
+
+	printf("Subtrahera mottagare \n\n");
+
+	name = getstr("Vilket möte skall subtraheras? ");
+	if (strlen(name) == 0) {
+		printf("Nähej.\n"); 
+		free(name);
+		return;
+	}
+	retval = match_complain(name, MATCHCONF_CONF);
+	free(name);
+	if (retval == NULL)
+		return;
+	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	if (lasttext)
+		sprintf(buf, "Från vilken text? (%d) ", lasttext);
+	else
+		sprintf(buf, "Från vilken text? ");
+	name = getstr(buf);
+	if ((strlen(name) == 0) && lasttext) {
+		text = lasttext;
+	} else if (strlen(name) == 0) {
+		printf("Nähej.\n");
+		free(name);
+		free(retval);
+		return;
+	} else
+		text = atoi(name);
+	free(name);
+	if (text == 0) {
+		printf("Det var ett dåligt textnummer.\n");
+		free(retval);
+		return;
+	}
+	rv = rk_sub_rcpt(text, conf);
+	if (rv)
+		printf("Det gick inte: %s\n", error(rv));
+	else
+		printf("Text %d subtraherad från möte %s.\n", text,
+		    retval->rcr_ci.rcr_ci_val[0].rc_name);
+	free(retval);
+}
+
+void
+cmd_delete(int text)
+{
+	int rv;
+
+	rv = rk_delete_text(text);
+	if (rv)
+		printf("Det gick inte: %s\n", error(rv));
+	else
+		printf("Text %d nu raderad.\n", text);
 }

@@ -24,8 +24,9 @@ void	cmd_info_extra(int);
 void	cmd_change_name(void);
 void	cmd_add_member(void);
 void	cmd_sub_member(void);
-void	cmd_add_rcpt(char *);
-void	cmd_sub_rcpt(char *);
+void	cmd_add_rcpt(void);
+void	cmd_sub_rcpt(void);
+void	cmd_delete(int);
 
 /* error.c */
 char *	error(int);
