@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.48 2001/03/03 11:04:14 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.49 2001/06/24 09:19:53 ragge Exp $	*/
 
 #include <string.h>
 #include <stdio.h>
@@ -294,13 +294,14 @@ cmd_say(char *str)
 	    retval->rcr_ci.rcr_ci_val[0].rc_name);
 
 	buf = getstr("Meddelande: ");
-	if (strlen(buf) == 0)
+	if (strlen(buf)) {
+		if (rk_send_msg(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, buf))
+			rprintf("\nMeddelandet kunde inte skickas.\n");
+		else
+			rprintf("\nMeddelandet sänt till %s.\n", 
+			    retval->rcr_ci.rcr_ci_val[0].rc_name);
+	} else
 		rprintf("Nähej.");
-	else {
-		rk_send_msg(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, buf);
-		rprintf("\nMeddelandet sänt till %s.\n", 
-		    retval->rcr_ci.rcr_ci_val[0].rc_name);
-	}
 	free(buf);
 	free(retval);
 }
