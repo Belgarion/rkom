@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.56 2001/11/25 21:09:43 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.57 2001/12/01 14:43:08 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -526,11 +526,11 @@ cmd_info_extra(int text)
 	struct rk_aux_item *rai;
 	int i, nrai;
 
-	printf("Tilläggsinformation (för text) %d.\n\n", text);
+	rprintf("Tilläggsinformation (för text) %d.\n\n", text);
 
 	rts = rk_textstat(text);
 	if (rts->rt_retval) {
-		printf("Kunde inte läsa status för inlägg %d: %s.\n",
+		rprintf("Kunde inte läsa status för inlägg %d: %s.\n",
 		    text, error(rts->rt_retval));
 		free(rts);
 		return;
@@ -539,17 +539,17 @@ cmd_info_extra(int text)
 	rai = rts->rt_aux_item.rt_aux_item_val;
 	if (nrai) {
 		for (i = 0; i < nrai; i++) {
-			printf("Nummer:\t\t%d\n", rai[i].rai_aux_no);
-			printf("Typ:\t\t%d\n", rai[i].rai_tag);
-			printf("Skapad av:\t%s\n", vem(rai[i].rai_creator));
-			printf("Skapad:\t\t%s\n",
+			rprintf("Nummer:\t\t%d\n", rai[i].rai_aux_no);
+			rprintf("Typ:\t\t%d\n", rai[i].rai_tag);
+			rprintf("Skapad av:\t%s\n", vem(rai[i].rai_creator));
+			rprintf("Skapad:\t\t%s\n",
 			    get_date_string(&rai[i].rai_created_at));
-			printf("Flaggor:\t\n");
-			printf("Arvsgräns:\t%d\n", rai[i].inherit_limit);
-			printf("Innehåll:\t\"%s\".\n", rai[i].rai_data);
+			rprintf("Flaggor:\t\n");
+			rprintf("Arvsgräns:\t%d\n", rai[i].inherit_limit);
+			rprintf("Innehåll:\t\"%s\".\n", rai[i].rai_data);
 		}
 	} else
-		printf("Det finns ingen tilläggsinformation för denna text.\n");
+		rprintf("Det finns ingen tilläggsinformation för denna text.\n");
 	free(rts);
 }
 
@@ -560,11 +560,11 @@ cmd_change_name()
 	int rv;
 	char *name;
 
-	printf("Ändra namn\n\n");
+	rprintf("Ändra namn\n\n");
 
 	name = getstr("Vilket namn skall ändras? ");
 	if (strlen(name) == 0) {
-		printf("Nähej.\n");
+		rprintf("Nähej.\n");
 		free(name);
 		return;
 	}
@@ -572,11 +572,11 @@ cmd_change_name()
 	free(name);
 	if (retval == NULL)
 		return;
-	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
 	name = getstr("Vad skall det ändras till? ");
 	rv = rk_change_name(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, name);
 	if (rv)
-		printf("Det gick inte: %s\n", error(rv));
+		rprintf("Det gick inte: %s\n", error(rv));
 	free(retval);
 	free(name);
 }
@@ -588,11 +588,11 @@ cmd_add_member()
 	int rv, uid, mid;
 	char *name, *user;
 
-	printf("Addera medlem\n\n");
+	rprintf("Addera medlem\n\n");
 
 	name = getstr("Vem skall adderas? ");
 	if (strlen(name) == 0) {
-		printf("Nähej.\n"); 
+		rprintf("Nähej.\n"); 
 		free(name);
 		return;
 	}
@@ -600,13 +600,13 @@ cmd_add_member()
 	free(name);
 	if (retval == NULL)
 		return;
-	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
 	user = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);
 	uid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	free(retval);
 	name = getstr("Till vilket möte? ");
 	if (strlen(name) == 0) {
-		printf("Nähej.\n");
+		rprintf("Nähej.\n");
 		free(name);
 		free(user);
 		return;
@@ -620,9 +620,9 @@ cmd_add_member()
 	mid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	rv = rk_add_member(mid, uid, 100, 3, 0);
 	if (rv)
-		printf("Det gick inte: %s\n", error(rv));
+		rprintf("Det gick inte: %s\n", error(rv));
 	else
-		printf("Person %s adderad till möte %s.\n",
+		rprintf("Person %s adderad till möte %s.\n",
 		    user, retval->rcr_ci.rcr_ci_val[0].rc_name);
 	free(retval);
 	free(user);
@@ -635,11 +635,11 @@ cmd_sub_member()
 	int rv, uid, mid;
 	char *name;
 
-	printf("Subtrahera medlem\n\n");
+	rprintf("Subtrahera medlem\n\n");
 
 	name = getstr("Vem skall subtraheras? ");
 	if (strlen(name) == 0) {
-		printf("Nähej.\n"); 
+		rprintf("Nähej.\n"); 
 		free(name);
 		return;
 	}
@@ -647,12 +647,12 @@ cmd_sub_member()
 	free(name);
 	if (retval == NULL)
 		return;
-	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
 	uid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	free(retval);
 	name = getstr("Från vilket möte? ");
 	if (strlen(name) == 0) {
-		printf("Nähej.\n");
+		rprintf("Nähej.\n");
 		free(name);
 		return;
 	}
@@ -664,7 +664,7 @@ cmd_sub_member()
 	free(retval);
 	rv = rk_sub_member(mid, uid);
 	if (rv)
-		printf("Det gick inte: %s\n", error(rv));
+		rprintf("Det gick inte: %s\n", error(rv));
 }
 
 void
@@ -674,11 +674,11 @@ cmd_add_rcpt()
 	int rv, conf, text;
 	char *name, buf[50];
 
-	printf("Addera mottagare\n\n");
+	rprintf("Addera mottagare\n\n");
 
 	name = getstr("Vilket möte skall adderas? ");
 	if (strlen(name) == 0) {
-		printf("Nähej.\n"); 
+		rprintf("Nähej.\n"); 
 		free(name);
 		return;
 	}
@@ -686,7 +686,7 @@ cmd_add_rcpt()
 	free(name);
 	if (retval == NULL)
 		return;
-	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
 	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	if (lasttext)
 		sprintf(buf, "Till vilken text? (%d) ", lasttext);
@@ -696,7 +696,7 @@ cmd_add_rcpt()
 	if ((strlen(name) == 0) && lasttext) {
 		text = lasttext;
 	} else if (strlen(name) == 0) {
-		printf("Nähej.\n");
+		rprintf("Nähej.\n");
 		free(name);
 		free(retval);
 		return;
@@ -704,15 +704,84 @@ cmd_add_rcpt()
 		text = atoi(name);
 	free(name);
 	if (text == 0) {
-		printf("Det var ett dåligt textnummer.\n");
+		rprintf("Det var ett dåligt textnummer.\n");
 		free(retval);
 		return;
 	}
 	rv = rk_add_rcpt(text, conf, recpt);
 	if (rv)
-		printf("Det gick inte: %s\n", error(rv));
+		rprintf("Det gick inte: %s\n", error(rv));
 	else
-		printf("Text %d adderad till möte %s.\n", text,
+		rprintf("Text %d adderad till möte %s.\n", text,
+		    retval->rcr_ci.rcr_ci_val[0].rc_name);
+	free(retval);
+}
+
+void
+cmd_move_text()
+{
+	struct rk_confinfo_retval *retval;
+	struct rk_text_stat *ts;
+	struct rk_misc_info *mi;
+	char *text, buf[100];
+	int i, nr, cm, nm, rv, conf;
+
+	rprintf("Flytta (text)\n\n");
+
+	sprintf(buf, "Vilken text skall flyttas (%d)? ", lasttext);
+	text = getstr(buf);
+	if (*text)
+		nr = atoi(text);
+	else
+		nr = lasttext;
+	free(text);
+	if (nr == 0) {
+		rprintf("Du måste ange ett giltigt textnummer.\n\n");
+		return;
+	}
+	ts = rk_textstat(nr);
+	if (ts->rt_retval) {
+		rprintf("Text %d är inte en giltig text.\n", nr);
+		free(ts);
+		return;
+	}
+	mi = ts->rt_misc_info.rt_misc_info_val;
+	for (cm = nm = i = 0; i < ts->rt_misc_info.rt_misc_info_len; i++) {
+		if (mi[i].rmi_type != recpt)
+			continue;
+		cm = mi[i].rmi_numeric;
+		nm++;
+	}
+	free(ts);
+	if (nm > 1) {
+		rprintf("Texten tillhör mer än ett möte.\n"
+		    "Subtrahera och addera texten manuellt.\n");
+		return;
+	}
+	text = getstr("Till vilket möte? ");
+	if (*text == 0) {
+		rprintf("Nähej.\n"); 
+		free(text);
+		return;
+	}
+	retval = match_complain(text, MATCHCONF_CONF|MATCHCONF_PERSON);
+	free(text);
+	if (retval == NULL)
+		return;
+	rprintf("Till %s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	rv = rk_add_rcpt(nr, conf, recpt);
+	if (rv) {
+		rprintf("Kunde ej flytta texten: %s\n", error(rv));
+		free(retval);
+		return;
+	}
+	rv = rk_sub_rcpt(nr, cm);
+	if (rv)
+		rprintf("Misslyckades ta bort texten från %s: %s\n",
+		    retval->rcr_ci.rcr_ci_val[0].rc_name, error(rv));
+	else
+		rprintf("Texten nu flyttad till %s.\n",
 		    retval->rcr_ci.rcr_ci_val[0].rc_name);
 	free(retval);
 }
@@ -724,11 +793,11 @@ cmd_sub_rcpt()
 	int rv, conf, text;
 	char *name, buf[50];
 
-	printf("Subtrahera mottagare \n\n");
+	rprintf("Subtrahera mottagare \n\n");
 
 	name = getstr("Vilket möte skall subtraheras? ");
 	if (strlen(name) == 0) {
-		printf("Nähej.\n"); 
+		rprintf("Nähej.\n"); 
 		free(name);
 		return;
 	}
@@ -736,7 +805,7 @@ cmd_sub_rcpt()
 	free(name);
 	if (retval == NULL)
 		return;
-	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
 	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	if (lasttext)
 		sprintf(buf, "Från vilken text? (%d) ", lasttext);
@@ -746,7 +815,7 @@ cmd_sub_rcpt()
 	if ((strlen(name) == 0) && lasttext) {
 		text = lasttext;
 	} else if (strlen(name) == 0) {
-		printf("Nähej.\n");
+		rprintf("Nähej.\n");
 		free(name);
 		free(retval);
 		return;
@@ -754,15 +823,15 @@ cmd_sub_rcpt()
 		text = atoi(name);
 	free(name);
 	if (text == 0) {
-		printf("Det var ett dåligt textnummer.\n");
+		rprintf("Det var ett dåligt textnummer.\n");
 		free(retval);
 		return;
 	}
 	rv = rk_sub_rcpt(text, conf);
 	if (rv)
-		printf("Det gick inte: %s\n", error(rv));
+		rprintf("Det gick inte: %s\n", error(rv));
 	else
-		printf("Text %d subtraherad från möte %s.\n", text,
+		rprintf("Text %d subtraherad från möte %s.\n", text,
 		    retval->rcr_ci.rcr_ci_val[0].rc_name);
 	free(retval);
 }
@@ -774,9 +843,9 @@ cmd_delete(int text)
 
 	rv = rk_delete_text(text);
 	if (rv)
-		printf("Det gick inte: %s\n", error(rv));
+		rprintf("Det gick inte: %s\n", error(rv));
 	else
-		printf("Text %d nu raderad.\n", text);
+		rprintf("Text %d nu raderad.\n", text);
 }
 
 void
@@ -883,11 +952,11 @@ cmd_copy()
 	int rv, conf, text;
 	char *name, buf[50];
 
-	printf("(Skicka) kopia\n\n");
+	rprintf("(Skicka) kopia\n\n");
 
 	name = getstr("Vart skall kopian skickas? ");
 	if (strlen(name) == 0) {
-		printf("Nähej.\n"); 
+		rprintf("Nähej.\n"); 
 		free(name);
 		return;
 	}
@@ -895,7 +964,7 @@ cmd_copy()
 	free(name);
 	if (retval == NULL)
 		return;
-	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
 	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	if (lasttext)
 		sprintf(buf, "Vilken text skall ha en kopia? (%d) ", lasttext);
@@ -905,7 +974,7 @@ cmd_copy()
 	if ((strlen(name) == 0) && lasttext) {
 		text = lasttext;
 	} else if (strlen(name) == 0) {
-		printf("Nähej.\n");
+		rprintf("Nähej.\n");
 		free(name);
 		free(retval);
 		return;
@@ -913,15 +982,15 @@ cmd_copy()
 		text = atoi(name);
 	free(name);
 	if (text == 0) {
-		printf("Det var ett dåligt textnummer.\n");
+		rprintf("Det var ett dåligt textnummer.\n");
 		free(retval);
 		return;
 	}
 	rv = rk_add_rcpt(text, conf, cc_recpt);
 	if (rv)
-		printf("Det gick inte: %s\n", error(rv));
+		rprintf("Det gick inte: %s\n", error(rv));
 	else
-		printf("Text %d adderad till %s.\n", text,
+		rprintf("Text %d adderad till %s.\n", text,
 		    retval->rcr_ci.rcr_ci_val[0].rc_name);
 	free(retval);
 }

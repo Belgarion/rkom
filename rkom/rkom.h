@@ -32,6 +32,7 @@ void	cmd_erase(char *);
 void	cmd_create(void);
 void	cmd_create_person(void);
 void	cmd_copy(void);
+void	cmd_move_text(void);
 
 /* error.c */
 char *	error(int);

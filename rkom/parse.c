@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.35 2001/11/25 21:09:43 ragge Exp $ */
+/* $Id: parse.c,v 1.36 2001/12/01 14:43:08 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -93,6 +93,7 @@ DCMD(text_list_subject);
 DCMD(text_list_unread);
 DCMD(text_delete);
 DCMD(text_copy);
+DCMD(text_move);
 
 /* Commands for online communication */
 DCMD(com_who);
@@ -200,6 +201,7 @@ DROW("lista ärenden",			0,PE_NO_ARG,text_list_subject)
 DROW("lista olästa",			0,PE_NO_ARG,text_list_unread)
 DROW("radera",					0,PE_NUM_ARG,text_delete)
 DROW("kopia",					0,PE_NO_ARG,text_copy)
+DROW("flytta",					0,PE_NO_ARG,text_move)
 
 /* Commands for online communication */
 DROW("vilka",					0,PE_STR_ARG,com_who)
@@ -1001,6 +1003,16 @@ exec_info_remove_motd(int argc, char *argv[])
 	NWA;
 	TT(argc == 0, "Du måste ange vem du vill sätta lapp för.\n");
 	write_remove_motd(re_concat(argc, argv));
+	return 0;
+}
+
+static int
+exec_text_move(int argc, char *argv[])
+{
+	LF;
+	NWA;
+	TT(argc != 0, "Flytta tar inga argument.\n");
+	cmd_move_text();
 	return 0;
 }
 
