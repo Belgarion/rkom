@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.27 2003/10/01 18:52:16 ragge Exp $	*/
+/*	$Id: backend.h,v 1.28 2003/10/01 20:13:18 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -35,13 +35,6 @@ struct	rk_server *rkom_connect(char *, char *, char *, char *);
 int	rkom_loop(void);
 void	rkom_command(void);
 void	rkom_logout(void);
-
-/* Communication fe/be, in rkom_be.c */
-int	fgrw(int cmd, void *arg, int arglen, void **reply, int *replylen);
-void	bgreceive(void);
-void	bgsend(int retval, int len, void *reply);
-struct iovec;
-void	bgsendv(int retval, int elem, struct iovec *iov);
 
 /* Parsing of messages, in rkom_beparse.c */
 void	rkom_beparse(int cmd, void *svar, int len);
