@@ -10,3 +10,4 @@ void	list_marked(char *);
 void	list_subject(void);
 void	list_unread(void);
 void	list_conf_members(char *);
+void	list_priorities(char *);

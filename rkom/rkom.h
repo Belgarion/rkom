@@ -29,6 +29,7 @@ void	cmd_add_rcpt(void);
 void	cmd_sub_rcpt(void);
 void	cmd_delete(int);
 void	cmd_erase(char *);
+void	cmd_change_priority(char *);
 void	cmd_create(void);
 void	cmd_create_person(void);
 void	cmd_copy(void);

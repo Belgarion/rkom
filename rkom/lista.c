@@ -35,7 +35,6 @@ list_conf_q(char *str)
 	rprintf("\nTyp       Mötesnamn\n");
 	for (i = 0; ci[i].rc_name; i++) {
 		struct rk_uconference *UC;
-
 		if ((UC = rk_uconfinfo(ci[i].rc_conf_no)) == NULL)
 			continue;
 
@@ -75,6 +74,32 @@ list_conf(char *str)
 
 		if (discard)
 			break;
+	}
+	rprintf("\n");
+}
+
+void
+list_priorities(char *foo)
+{
+	struct rk_memberconflist *rm;
+	u_int32_t *list;
+	int i;
+
+	if ((rm = rk_memberconf(myuid)) == NULL) {
+		rprintf("rk_memberconf: %s\n", error(komerr));
+		return;
+	}
+
+	rprintf("\nLista prioriteter (för möten jag är medlem i)\n");
+	rprintf("Prioritet\tMötesnamn\n");
+	list = rm->rm_confs.rm_confs_val;
+	for (i = 0; i < rm->rm_confs.rm_confs_len; i++) {
+		struct rk_membership *rkm;
+		struct rk_conference *rc;
+
+		rkm = rk_membership(myuid, list[i]);
+		rc = rk_confinfo(list[i]);
+		rprintf("%8d\t%s\n", rkm->rm_priority, rc->rc_name);
 	}
 	rprintf("\n");
 }

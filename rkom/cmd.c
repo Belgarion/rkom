@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.72 2003/10/01 16:23:36 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.73 2003/10/01 17:56:50 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -959,3 +959,38 @@ cmd_copy()
 		rprintf("Text %d adderad till %s.\n", text, retval[0].rc_name);
 }
 
+void
+cmd_change_priority(char *str)
+{
+	struct rk_confinfo *rv;
+	struct rk_membership *rm;
+	char *name;
+	int pri, i;
+
+	if ((rv = match_complain(str, MATCHCONF_CONF)) == 0)
+		return;
+	rprintf("Ändra prioritet på möte %s\n", rv->rc_name);
+	if ((rm = rk_membership(myuid, rv->rc_conf_no)) == NULL) {
+		printf("Det går inte: %s\n", error(komerr));
+		return;
+	}
+	rprintf("Tidigare prioritet: %d\n", rm->rm_priority);
+	name = getstr("Vilken ny prioritet skall mötet ha? ");
+	if (strlen(name) == 0) {
+		rprintf("Nähej.\n");
+		free(name);
+		return;
+	}
+	pri = atoi(name);
+	if (pri <= 0 || pri > 255) {
+		rprintf("'%s' är en otillåten prioritet.\n", name);
+		free(name);
+		return;
+	}
+	if ((i = rk_add_member(rv->rc_conf_no, myuid, pri, 
+	    rm->rm_position, rm->rm_type)) != 0)
+		rprintf("Det sket sej: %s\n", error(i));
+	else
+		rprintf("Prioriteten nu ändrad till %d.\n", pri);
+	free(name);
+}

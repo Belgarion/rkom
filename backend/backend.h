@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.25 2003/10/01 15:06:46 ragge Exp $	*/
+/*	$Id: backend.h,v 1.26 2003/10/01 17:56:46 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -187,6 +187,10 @@ int32_t rk_mark_read(u_int32_t conf, u_int32_t local);
 int32_t rk_set_last_read(u_int32_t conf, u_int32_t local);
 int32_t rk_add_member(u_int32_t, u_int32_t, u_int8_t, u_int16_t, u_int32_t);
 int32_t rk_sub_member(u_int32_t conf, u_int32_t uid);
+
+/*
+ * Get the conferences where the user is member.
+ */
 struct rk_memberconflist * rk_memberconf(u_int32_t uid);
 void rk_sync(void);
 int32_t rk_create_conf(char *name, u_int32_t btype);

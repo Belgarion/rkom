@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.48 2003/10/01 15:06:58 ragge Exp $ */
+/* $Id: parse.c,v 1.49 2003/10/01 17:56:50 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -77,9 +77,11 @@ DCMD(conf_goto);
 DCMD(conf_goto_next);
 DCMD(conf_list);
 DCMD(conf_list_members);
+DCMD(conf_list_priorities);
 DCMD(conf_list_q);
 DCMD(conf_leave);
 DCMD(conf_change_presentation);
+DCMD(conf_change_priority);
 DCMD(conf_change_faq);
 DCMD(conf_create);
 DCMD(conf_delete);
@@ -192,11 +194,13 @@ DROW("subtrahera medlem",			0,PE_NO_ARG,conf_sub_member)
 DROW("var",					0,PE_NO_ARG,conf_where)
 DROW("gå",					0,PE_STR_ARG,conf_goto)
 DROW("nästa möte",			1,PE_NO_ARG,conf_goto_next)
-DROW("lista medlemmar",				0,PE_STR_ARG,conf_list_members)
+DROW("lista medlemmar",			0,PE_STR_ARG,conf_list_members)
+DROW("lista prioriteter",		0,PE_NO_ARG,conf_list_priorities)
 DROW("lista möten",				0,PE_NO_ARG,conf_list)
 DROW("snabblista möten",			0,PE_NO_ARG,conf_list_q)
 DROW("utträda",					0,PE_STR_ARG,conf_leave)
 DROW("ändra presentation",		0,PE_STR_ARG,conf_change_presentation)
+DROW("ändra prioritet",			0,PE_STR_ARG,conf_change_priority)
 DROW("ändra faq",			0,PE_STR_ARG,conf_change_faq)
 DROW("skapa möte",				0,PE_NO_ARG,conf_create)
 DROW("radera möte",				0,PE_STR_ARG,conf_delete)
@@ -664,6 +668,15 @@ exec_conf_list_members(int argc, char *argv[])
 }
 
 static int
+exec_conf_list_priorities(int argc, char *argv[])
+{
+	LF;
+
+	list_priorities(NULL);
+	return 0;
+}
+
+static int
 exec_conf_list(int argc, char *argv[])
 {
 	list_conf(NULL);
@@ -1011,6 +1024,15 @@ exec_conf_change_faq(int argc, char *argv[])
 	NWA;
 	TT(argc == 0, "Du måste ange vad du vill ändra FAQn för.\n");
 	write_change_faq(re_concat(argc, argv));
+	return 0;
+}
+
+static int
+exec_conf_change_priority(int argc, char *argv[])
+{
+	LF;
+	TT(argc == 0, "Du måste ange vad du vill ändra prioriteten för.\n");
+	cmd_change_priority(re_concat(argc, argv));
 	return 0;
 }
 
