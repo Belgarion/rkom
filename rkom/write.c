@@ -451,6 +451,11 @@ write_internal(int text, int ktyp)
 		return;
 	}
 
+	if (ktyp == footn_to && ts->rt_author != myuid) {
+		printf("Du kan bara skriva fotnötter till dina egna inlägg.\n");
+		free(ts);
+		return;
+	}
 	mf = ts->rt_misc_info.rt_misc_info_val;
 	num = ts->rt_misc_info.rt_misc_info_len;
 	mi = calloc(sizeof(struct rk_misc_info), num + 1); /* Max size */
