@@ -119,6 +119,8 @@ static struct rk_val rkomvars[] = {
 	{ "editor-mode", "emacs" },
 	{ "write-convert-from-swascii", "0" },
 	{ "disable-beep-on-new-messages", "0" },
+	{ "only-private-messages", "0" },
+	{ "beep-on-private-messages", "0" },
 };
 static int nrkomvars = sizeof(rkomvars)/sizeof(rkomvars[0]);
 

@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.71 2003/10/01 13:31:06 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.72 2003/10/01 16:23:36 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <ctype.h>
 #include <pwd.h>
 #include <signal.h>
 
@@ -23,6 +22,7 @@
 #include "write.h"
 #include "set.h"
 #include "rhistedit.h"
+#include "rtype.h"
 
 void cmd_logout(char *);
 void cmd_login(char *);

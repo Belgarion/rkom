@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.56 2003/09/25 15:13:08 ragge Exp $ */
+/* $Id: rkom.c,v 1.57 2003/10/01 16:23:36 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -30,7 +30,6 @@
 #include <err.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <ctype.h>
 
 #include "rkomsupport.h"
 #include "rkom.h"
@@ -39,6 +38,7 @@
 #include "parse.h"
 #include "rhistedit.h"
 #include "backend.h"
+#include "rtype.h"
 
 #define MAX_LINE	1024
 
@@ -168,7 +168,7 @@ rkom_command()
 	const char *str;
 	struct timeval	tp;
 	const LineInfo  *lf;
-	char	buf[MAX_LINE];
+	unsigned char	buf[MAX_LINE];
 	int num;
 	size_t	len;
 
@@ -262,16 +262,19 @@ async_collect()
 			struct rk_time *tm;
 			char *name;
 
+			if (isneq("only-private-messages", "0") &&
+			    ra->ra_conf != myuid)
+				break;
 			if ((sender = rk_confinfo(ra->ra_pers)) == NULL)
 				hej = "John Doe";
 			else
 				hej = sender->rc_name;
 rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-			if (ra->ra_conf == 0)
+			if (ra->ra_conf == 0) {
 				rprintf("Allmänt meddelande från %s", hej);
-			else if (ra->ra_conf == myuid)
+			} else if (ra->ra_conf == myuid) {
 				rprintf("Personligt meddelande från %s", hej);
-			else {
+			} else {
 				if ((rcpt = rk_confinfo(ra->ra_conf)) == NULL)
 					name = "Jane Doe";
 				else
@@ -283,6 +286,8 @@ rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 			rprintf(" (%s):\n\n", get_date_string(tm));
 			rprintf("%s\n", ra->ra_message);
 rprintf("----------------------------------------------------------------\n");
+			if (isneq("beep-on-private-messages", "0"))
+				printf("%c", 7);
 			retval = 0;
 		}
 		break;
