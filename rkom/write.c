@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.23 2001/01/13 20:52:05 ragge Exp $	*/
+/*	$Id: write.c,v 1.24 2001/01/14 11:12:43 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -413,11 +413,14 @@ extedit(char *sub)
 {
 	struct stat sb;
 	extern char **environ;
-	char *editor = getenv("EDITOR");
+	char *editor;
 	char *txt, fil[30], *args[4], buf[10];
 	int f;
 
-	if (editor == 0)
+	editor = getenv("RKOM_EDITOR");
+	if (editor == NULL)
+		editor = getenv("EDITOR");
+	if (editor == NULL)
 		editor = _PATH_VI;
 
 	strcpy(fil, "/tmp/raggkom.XXXXX");
