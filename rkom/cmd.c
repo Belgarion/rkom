@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.61 2002/08/31 12:59:21 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.62 2002/08/31 14:17:22 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -504,6 +504,10 @@ confstat(int mid)
 		rcp->rc_no_of_members);
 	rprintf("Livslängd:             %d dagar\n",
 		rcp->rc_expire);
+	rprintf("Mötestyp:              %d\n", rcp->rc_type);
+	rprintf("Supervisor:            %s\n", vem(rcp->rc_supervisor));
+	rprintf("Supermöte:             %s\n", vem(rcp->rc_super_conf));
+
 	rai = rcp->rc_aux_item.rc_aux_item_val;
 	nrai = rcp->rc_aux_item.rc_aux_item_len;
 	rprintf("\n");
