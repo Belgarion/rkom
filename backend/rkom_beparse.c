@@ -323,6 +323,7 @@ static void
 readin_textstat(struct rk_text_stat *ts)
 {
 	struct rk_misc_info *pmi;
+	struct rk_aux_item *rai;
 	int len, i;
 
 	read_in_time(&ts->rt_time);
@@ -347,22 +348,20 @@ readin_textstat(struct rk_text_stat *ts)
 	} else
 		get_accept('*');
 
-	/* aux-info. Just throw it away for now */
-	len = get_int();
+	/* aux-info */
+	ts->rt_aux_item.rt_aux_item_len = len = get_int();
 	if (len) { 
-		struct rk_time t;
-		char *c;
+		rai = calloc(sizeof(struct rk_aux_item), len);
+		ts->rt_aux_item.rt_aux_item_val = rai;
 		get_accept('{');
 		for (i = 0; i < len; i++) {
-			get_int(); /* aux-no */
-			get_int(); /* tag */ 
-			get_int(); /* creator */
-			read_in_time(&t); /* created-at */
-			get_int(); /* flags */
-			get_int(); /* inherit-limit */
-			c = get_string(); /* data */
-			if (*c)
-				free(c);
+			rai[i].rai_aux_no = get_int(); /* aux-no */
+			rai[i].rai_tag = get_int(); /* tag */ 
+			rai[i].rai_creator = get_int(); /* creator */
+			read_in_time(&rai[i].rai_created_at); /* created-at */
+			rai[i].rai_flags = get_int(); /* flags */
+			rai[i].inherit_limit = get_int(); /* inherit-limit */
+			rai[i].rai_data = get_string(); /* data */
 		}
 		get_accept('}');
 	} else
@@ -441,6 +440,9 @@ reread_text_stat_bg(int text)
 	ts = tss->rts;
 	if (ts->rt_misc_info.rt_misc_info_len)
 		free(ts->rt_misc_info.rt_misc_info_val);
+	if (ts->rt_aux_item.rt_aux_item_len)
+		free(ts->rt_aux_item.rt_aux_item_val);
+	/* XXX loosing rai_data */
 	sprintf(buf, "90 %d\n", text);
 	send_callback(buf, text, reread_text_stat_bg_callback);
 }

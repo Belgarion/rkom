@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.19 2000/12/10 15:11:11 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.20 2000/12/10 15:48:22 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -41,7 +41,7 @@ struct rk_aux_item {
 	u_int32_t	rai_aux_no;
 	u_int32_t	rai_tag;
 	u_int32_t	rai_creator;
-	u_int32_t	rai_created_at;
+	struct rk_time	rai_created_at;
 	u_int32_t	rai_flags;
 	u_int32_t	inherit_limit;
 	string		rai_data;
