@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.10 2000/11/28 22:32:20 jens Exp $ */
+/* $Id: parse.c,v 1.11 2000/11/29 21:48:34 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -44,6 +44,7 @@ DCMD(read_next_text);
 DCMD(read_next_cmt);
 DCMD(read_see_again_cmt);
 DCMD(read_see_again_cmt_no);
+DCMD(read_see_presentation);
 DCMD(read_list_news);
 DCMD(read_only);
 DCMD(read_again);
@@ -124,6 +125,7 @@ DROW("nästa inlägg",			0,PE_NO_ARG,read_next_text)
 DROW("nästa kommentar",			0,PE_NO_ARG,read_next_cmt)
 DROW("återse",				0,PE_NUM_ARG,read_see_again_cmt_no)
 DROW("återse kommenterade",		1,PE_NO_ARG,read_see_again_cmt)
+DROW("återse presentation",		0,PE_STR_ARG,read_see_presentation)
 DROW("lista nyheter",			0,PE_NO_ARG,read_list_news)
 DROW("endast",					0,PE_NUM_ARG,read_only)
 DROW("igen",					0,PE_NO_ARG,read_again)
@@ -694,7 +696,7 @@ exec_info_status(int argc, char *argv[])
 static int
 exec_alias_add(int argc, char *argv[])
 {
-	TT(argc <= 1, "Handhavande:\nalias <alias> <commnad>\n");
+	TT(argc <= 1, "Handhavande:\nalias <alias> <command>\n");
 	parse_add_alias(cmds, argc, argv);
 	return 0;
 }
@@ -753,5 +755,15 @@ exec_other_password(int argc, char *argv[])
 {
 	LF;
 	cmd_password();
+	return 0;
+}
+
+static int
+exec_read_see_presentation(int argc, char *argv[])
+{
+	LF;
+	TT(argc == 0, "Du måste ange vem du vill se presentationen för.\n");
+
+	next_resee_presentation(re_concat(argc, argv));
 	return 0;
 }

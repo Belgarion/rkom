@@ -335,3 +335,28 @@ next_hoppa(char *str)
 		lasttext = global;
 	}
 }
+
+void
+next_resee_presentation(char *name)
+{
+	struct rk_confinfo_retval *rv;
+	struct rk_conference *rc;
+
+	rv = match_complain(name, MATCHCONF_PERSON|MATCHCONF_CONF);
+	if (rv == 0)
+		return;
+	printf("Återse presentation (för) %s.\n",
+	    rv->rcr_ci.rcr_ci_val[0].rc_name);
+	rc = rk_confinfo(rv->rcr_ci.rcr_ci_val[0].rc_conf_no);
+	if (rc->rc_retval) {
+		printf("Kunde inte läsa presentationen: %s\n",
+		    error(rc->rc_retval));
+		return;
+	}
+	if (rc->rc_presentation == 0)
+		printf("Det finns ingen presentation.\n");
+	else
+		show_text(rc->rc_presentation);
+	free(rv);
+	free(rc);
+}

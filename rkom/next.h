@@ -4,6 +4,7 @@ void	next_conf(char *);
 void	next_resee_text(int);
 void	next_resee_comment(void);
 void	next_text(char *);
+void	next_resee_presentation(char *);
 void	next_comment(char *);
 void	next_resetchain(void);
 void	next_prompt(void);
