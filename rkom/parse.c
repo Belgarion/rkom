@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.22 2001/01/14 14:19:36 ragge Exp $ */
+/* $Id: parse.c,v 1.23 2001/01/15 05:23:41 offe Exp $ */
 
 #include <sys/param.h>
 
@@ -46,6 +46,7 @@ DCMD(read_next_cmt);
 DCMD(read_see_again_cmt);
 DCMD(read_see_again_cmt_no);
 DCMD(read_see_presentation);
+DCMD(read_see_again_root);
 DCMD(read_list_news);
 DCMD(read_only);
 DCMD(read_again);
@@ -139,6 +140,7 @@ DROW("nästa kommentar",			0,PE_NO_ARG,read_next_cmt)
 DROW("återse",				0,PE_NUM_ARG,read_see_again_cmt_no)
 DROW("återse kommenterade",		1,PE_NO_ARG,read_see_again_cmt)
 DROW("återse presentation",		0,PE_STR_ARG,read_see_presentation)
+DROW("återse urinlägg",			1,PE_NO_ARG,read_see_again_root)
 DROW("lista nyheter",			0,PE_NO_ARG,read_list_news)
 DROW("endast",					0,PE_NUM_ARG,read_only)
 DROW("igen",					0,PE_NO_ARG,read_again)
@@ -371,6 +373,14 @@ exec_read_see_again_cmt(int argc, char *argv[])
 {
 	LF;
 	next_resee_comment();
+	return 0;
+}
+
+static int
+exec_read_see_again_root(int argc, char *argv[])
+{
+	LF;
+	next_resee_root(lasttext);
 	return 0;
 }
 

@@ -286,6 +286,44 @@ next_resee_comment()
 }
 
 void
+next_resee_root(int text)
+{
+	struct rk_text_stat *ts;
+	struct rk_misc_info *mi;
+	int i, len;
+	int count;
+
+restart:
+	ts = rk_textstat(text);
+	mi = ts->rt_misc_info.rt_misc_info_val;
+	len = ts->rt_misc_info.rt_misc_info_len;
+	count = 0;
+	for (i = 0; i < len; i++)
+		if (mi[i].rmi_type == comm_to ||
+		    mi[i].rmi_type == footn_to) {
+			switch(count) {
+			case 0:
+				text = mi[i].rmi_numeric;
+				free(ts);
+				goto restart;
+			case 1:
+				next_resee_root(text);
+			default:
+				next_resee_root(mi[i].rmi_numeric);
+				count++;
+			}
+		}
+
+	if(!count) {
+		show_text(text);
+		lastlasttext = lasttext;
+		lasttext = text;
+	}
+
+	free(ts);
+}
+
+void
 next_resee_text(int num)
 {
 	show_text(num);
