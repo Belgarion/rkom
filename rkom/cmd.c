@@ -330,9 +330,8 @@ cmd_goto(char *str)
 	ret = rk_change_conference(conf);
 	if (ret == 0) {
 		curconf = conf;
-		rprintf("Du gick nu till möte %s.\n", name);
-		next_resetchain();
-		return;
+		rprintf("Du är nu i möte %s.\n", name);
+		goto done;
 	}
 	/* XXX Check why change_conference failed; status of conf etc */
 	if (ret == 13) { /* XXX should be define */
@@ -359,6 +358,7 @@ cmd_goto(char *str)
 	}
 	curconf = conf;
 	rprintf("Du är nu medlem i %s.\n", name);
+done:
 	rkc = rk_confinfo(conf);
 	m = rk_membership(myuid, conf);
 	ret = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1 -
