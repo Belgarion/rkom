@@ -1,4 +1,4 @@
-/* $Id: articles.h,v 1.2 2000/10/15 19:14:50 jens Exp $ */
+/* $Id: articles.h,v 1.3 2000/10/15 19:33:34 jens Exp $ */
 #ifndef ARTICLES_H
 #define ARTICLES_H
 
@@ -20,6 +20,7 @@ struct article {
 	time_t		art_time;
 	art_t		*art_parent;
 	char		**art_header;
+	char		**art_footer;
 	char		**art_text;
 };
 

@@ -1,4 +1,4 @@
-/* $Id: articles.c,v 1.2 2000/10/15 19:14:50 jens Exp $ */
+/* $Id: articles.c,v 1.3 2000/10/15 19:33:34 jens Exp $ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,6 +31,7 @@ static int art_add(u_int32_t local_id);
 static int art_format_subjects(void);
 static char **art_get_text(char *);
 static char **art_get_header(struct rk_text_stat *rt);
+static char **art_get_footer(struct rk_text_stat *rt);
 static time_t art_get_time(struct rk_time *rt);
 static void art_free(art_t *);
 
@@ -134,6 +135,9 @@ art_add(u_int32_t local_id)
 
 	/* generate headers */
 	art->art_header = art_get_header(rt);
+
+	/* generate footers */
+	art->art_footer = art_get_footer(rt);
 
 	art->art_time = art_get_time(&rt->rt_time);
 
@@ -268,6 +272,9 @@ art_free(art_t *art)
 	for (i = 0; art->art_header[i] != NULL; i++)
 		free(art->art_header[i]);
 	free(art->art_header);
+	for (i = 0; art->art_footer[i] != NULL; i++)
+		free(art->art_footer[i]);
+	free(art->art_footer);
 	free(art);
 }
 
@@ -316,6 +323,7 @@ art_get_header(struct rk_text_stat *rt)
 	int			h_num, i;
 	u_int32_t	rmi_type, rmi_num;
 
+	/* XXX wasting a little bit of memory */
 	if ((h_text =
 		calloc(rt->rt_misc_info.rt_misc_info_len + 1, sizeof(char *))) == NULL)
 		err(1, "calloc");
@@ -368,6 +376,56 @@ art_get_header(struct rk_text_stat *rt)
 		h_num++;
 	}
 	return h_text;
+}
+
+static char **
+art_get_footer(struct rk_text_stat *rt)
+{
+	struct rk_conference *rc;
+	struct rk_text_stat *rt2;
+	char		**f_text;
+	char		name[70];
+	int			f_num, i;
+	u_int32_t	rmi_type, rmi_num;
+
+	/* XXX wasting a little bit of memory */
+	if ((f_text =
+		calloc(rt->rt_misc_info.rt_misc_info_len + 1, sizeof(char *))) == NULL)
+		err(1, "calloc");
+
+	f_num = 0;
+	for (i = 0; i < rt->rt_misc_info.rt_misc_info_len; i++) {
+		rmi_type = rt->rt_misc_info.rt_misc_info_val[i].rmi_type;
+		if (rmi_type != comm_in && rmi_type != footn_in)
+			continue;
+
+		if ((f_text[f_num] = calloc(81, sizeof(char))) == NULL)
+			err(1, "calloc");
+		rmi_num = rt->rt_misc_info.rt_misc_info_val[i].rmi_numeric;
+
+		rt2 = rk_textstat(rmi_num);
+		if (rt2->rt_retval == 0) {
+			rc = rk_confinfo(rt2->rt_author);
+			if (rc->rc_retval != 0)
+				snprintf(name, sizeof(name),
+					"av Person %d (hemlig)", rt2->rt_author);
+			else
+				snprintf(name, sizeof(name),
+					"av %s <%d>", rc->rc_name, rt2->rt_author);
+			free(rc);
+		} else
+			name[0] = '\0';
+		free(rt2);
+
+		if (rmi_type == footn_to)
+			snprintf(f_text[f_num], 81, "Fotnot i text %d %s",
+				rmi_num, name);
+		else
+			snprintf(f_text[f_num], 81, "Kommentar i text %d %s",
+				rmi_num, name);
+		f_num++;
+	}
+	return f_text;
 }
 
 time_t

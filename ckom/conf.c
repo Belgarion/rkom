@@ -1,4 +1,4 @@
-/* $Id: conf.c,v 1.3 2000/10/15 19:14:50 jens Exp $ */
+/* $Id: conf.c,v 1.4 2000/10/15 19:33:34 jens Exp $ */
 
 #include <sys/cdefs.h>
 #include <sys/param.h>
@@ -154,10 +154,13 @@ conf_text_refresh(void)
 	werase(textwin);
 
 	num_lines = 0;
+	for (i = 0; art->art_header[i] != NULL; i++)
+		num_lines++;
+	num_lines++;
 	for (i = 0; art->art_text[i] != NULL; i++)
 		num_lines++;
 	num_lines++;
-	for (i = 0; art->art_header[i] != NULL; i++)
+	for (i = 0; art->art_footer[i] != NULL; i++)
 		num_lines++;
 	num_lines++;
 
@@ -169,6 +172,9 @@ conf_text_refresh(void)
 	msg_lines[num_lines++] = "";
 	for (i = 0; art->art_text[i] != NULL; i++)
 		msg_lines[num_lines++] = art->art_text[i];
+	msg_lines[num_lines++] = "";
+	for (i = 0; art->art_footer[i] != NULL; i++)
+		msg_lines[num_lines++] = art->art_footer[i];
 	msg_lines[num_lines++] = NULL;
 
 	last_row = at_msg_top_row + textwin_height;
@@ -268,6 +274,8 @@ scroll_text(int num_rows)
 	for (i = 0; art->art_text[i] != NULL; i++)
 		num_lines++;
 	for (i = 0; art->art_header[i] != NULL; i++)
+		num_lines++;
+	for (i = 0; art->art_footer[i] != NULL; i++)
 		num_lines++;
 
 	if (row_num >= num_lines) {
