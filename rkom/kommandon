@@ -43,9 +43,11 @@ Ord inom parantes ska inte skrivas.
 
   Kommandon för information:
     Lista kommandon
+    (Lista) flaggor
     (Se) tiden
 
   Övriga kommandon:
+    Sätt (flagga)
     Login
     Logout
     Sluta
