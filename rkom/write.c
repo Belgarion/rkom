@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.57 2003/09/25 09:37:59 ragge Exp $	*/
+/*	$Id: write.c,v 1.58 2003/09/25 11:45:05 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -176,8 +176,9 @@ change_faq(int confno, struct rk_text_info *rti)
 	rkm = alloca(sizeof(struct rk_modifyconfinfo));
 	rkm->rkm_conf = confno;
 	rkm->rkm_add.rkm_add_len = 0;
-	rcp = rk_confinfo(confno);
 	top = 0;
+	if ((rcp = rk_confinfo(confno)) == NULL)
+		return komerr;
 	rai = rcp->rc_aux_item.rc_aux_item_val;
 	nrai = rcp->rc_aux_item.rc_aux_item_len;
 	
@@ -228,8 +229,7 @@ check_receiver(void)
 	for (i = 0; i < nmi; i++) {
 		if (mi[i].rmi_type != recpt)
 			continue;
-		rc = rk_confinfo(mi[i].rmi_numeric);
-		if (rc->rc_retval)
+		if ((rc = rk_confinfo(mi[i].rmi_numeric)) == NULL)
 			continue; /* Handle later */
 		if ((rc->rc_type & RK_CONF_TYPE_ORIGINAL) == 0)
 			continue; /* Not original conference */
@@ -473,7 +473,11 @@ show_format()
 		switch(mi[i].rmi_type) {
 		case cc_recpt:
 		case recpt:
-			conf = rk_confinfo(mi[i].rmi_numeric);
+			if ((conf = rk_confinfo(mi[i].rmi_numeric)) == NULL) {
+				rprintf("Möte %d är oläsbart: %s\n",
+				    mi[i].rmi_numeric, error(komerr));
+				break;
+			}
 			r = conf->rc_name;
 			ret = realloc(ret, strlen(ret) + strlen(r) + 30);
 			if (mi[i].rmi_type == cc_recpt)
@@ -700,8 +704,8 @@ write_change_faq(char *str)
 	if (isneq("use-editor", "0")) { /* Extern editor, edit old text */
 		struct rk_conference *rc;
 
-		rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
-		if (rc->rc_retval == 0 && rc->rc_presentation)
+		if ((rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no))
+		    && rc->rc_presentation)
 			c = strdup(rk_gettext(rc->rc_presentation));
 	}
 	if (c == NULL)
@@ -722,7 +726,10 @@ write_change_presentation(char *str)
 	ispres = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	rprintf("Ändra presentation (för) %s\n",
 	    retval->rcr_ci.rcr_ci_val[0].rc_name);
-	rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
+	if ((rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no)) 
+	    == NULL)
+		return rprintf("Får ej läsa confinfon för %d: %s\n",
+		    retval->rcr_ci.rcr_ci_val[0].rc_conf_no, error(komerr));
 	is_writing = 1;
 	mi = calloc(sizeof(struct rk_misc_info), 3);
 	nmi = 0;
@@ -733,10 +740,7 @@ write_change_presentation(char *str)
 	}
 
 	if (isneq("use-editor", "0")) { /* Extern editor, edit old text */
-		struct rk_conference *rc;
-
-		rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
-		if (rc->rc_retval == 0 && rc->rc_presentation)
+		if (rc->rc_presentation)
 			c = strdup(rk_gettext(rc->rc_presentation));
 	}
 	if (c == NULL)

@@ -67,7 +67,11 @@ list_conf(char *str)
 		struct rk_conference *C;
 		struct rk_membership *M = NULL; /* GCC braino */
 
-		C = rk_confinfo(ci[i].rc_conf_no);
+		if ((C = rk_confinfo(ci[i].rc_conf_no)) == NULL) {
+			rprintf("Kunde inte läsa confinfon för möte %d: %s\n",
+			    ci[i].rc_conf_no, error(komerr));
+			continue;
+		}
 		if (myuid)
 			M = rk_membership(myuid, ci[i].rc_conf_no);
 
@@ -115,11 +119,9 @@ list_news(char *args)
 			struct rk_membership *m;
 			int hln, nr;
 
-			rkc = rk_confinfo(confs[i]);
-
-			if (rkc->rc_retval) {
-				rprintf("%d sket sej med %d\n",
-				    confs[i], rkc->rc_retval);
+			if ((rkc = rk_confinfo(confs[i])) == NULL) {
+				rprintf("%d sket sej: %s\n",
+				    confs[i], error(komerr));
 				continue;
 			}
 			hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
@@ -229,11 +231,8 @@ list_subject()
 	int high, low, i, nr, rows;
 	char *gubbe, *text, *c;
 
-	conf = rk_confinfo(curconf);
-	if (conf->rc_retval) {
-		rprintf("rk_confinfo sket sej: %s\n", error(conf->rc_retval));
-		return;
-	}
+	if ((conf = rk_confinfo(curconf)) == NULL)
+		return rprintf("rk_confinfo sket sej: %s\n", error(komerr));
 	rprintf("Lista ärenden\n");
 	rprintf("Inlägg\tDatum\t  Författare           Ärende\n");
 	high = conf->rc_no_of_texts + conf->rc_first_local_no - 1;
@@ -273,11 +272,8 @@ list_unread()
 	int high, low, i, nr, rows;
 	char *gubbe, *text, *c;
 
-	conf = rk_confinfo(curconf);
-	if (conf->rc_retval) {
-		rprintf("rk_confinfo sket sej: %s\n", error(conf->rc_retval));
-		return;
-	}
+	if ((conf = rk_confinfo(curconf)) == NULL)
+		return rprintf("rk_confinfo sket sej: %s\n", error(komerr));
 	rprintf("Lista olästa (ärenden)\n");
 	rprintf("Inlägg\tDatum\t  Författare           Ärende\n");
 	rm = rk_membership(myuid, curconf);

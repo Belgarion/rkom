@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.17 2003/09/25 09:37:59 ragge Exp $	*/
+/*	$Id: backend.h,v 1.18 2003/09/25 11:45:03 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -46,6 +46,12 @@ void	readin_textstat(struct rk_text_stat *ts);
 struct	rk_time *rk_time(void);
 void	rk_alive(void);
 struct	rk_dynamic_session_info_retval *rk_vilka(u_int32_t, u_int32_t);
+
+/*
+ * Get the conference struct based on the conference number.
+ * If the conf struct could not be retreived, return NULL and set
+ * komerr to the error number.
+ */
 struct	rk_conference *rk_confinfo(u_int32_t);
 struct	rk_person *rk_persinfo(u_int32_t);
 struct	rk_confinfo_retval *rk_matchconf(char *name, u_int8_t flags);
@@ -79,7 +85,6 @@ int32_t rk_add_text_info(u_int32_t textno, struct rk_aux_item_input *raii);
 
 
 /* conference requests, in rkom_conf.c */
-int	get_conf_stat(int confno, struct rk_conference **confer);
 int	get_pers_stat(int persno, struct rk_person **pers);
 int	get_membership(int uid, int conf, struct rk_membership **member);
 void	conf_set_high_local(int conf, int local, int global);
@@ -222,23 +227,22 @@ struct rk_membership {
 };
 
 struct rk_conference {
-		int32_t	rc_retval;
-		char *	rc_name;
-		u_int32_t	rc_type;
-		struct rk_time	rc_creation_time;
-		struct rk_time	rc_last_written;
-		u_int32_t	rc_creator;
-		u_int32_t	rc_presentation;
-		u_int32_t	rc_supervisor;
-		u_int32_t	rc_permitted_submitters;
-		u_int32_t	rc_super_conf;
-		u_int32_t	rc_msg_of_day;
-		u_int32_t	rc_nice;
-		u_int32_t	rc_keep_commented;
-		u_int32_t	rc_no_of_members;
-		u_int32_t	rc_first_local_no;
-		u_int32_t	rc_no_of_texts;
-		u_int32_t	rc_expire;
+	char *	rc_name;
+	u_int32_t	rc_type;
+	struct rk_time	rc_creation_time;
+	struct rk_time	rc_last_written;
+	u_int32_t	rc_creator;
+	u_int32_t	rc_presentation;
+	u_int32_t	rc_supervisor;
+	u_int32_t	rc_permitted_submitters;
+	u_int32_t	rc_super_conf;
+	u_int32_t	rc_msg_of_day;
+	u_int32_t	rc_nice;
+	u_int32_t	rc_keep_commented;
+	u_int32_t	rc_no_of_members;
+	u_int32_t	rc_first_local_no;
+	u_int32_t	rc_no_of_texts;
+	u_int32_t	rc_expire;
 	struct {
 		u_int32_t	rc_aux_item_len;
 		struct rk_aux_item	*rc_aux_item_val;

@@ -46,8 +46,7 @@ vem(int num)
 		free(ret);
 	ret = 0;
 
-	conf = rk_confinfo(num);
-	if (conf->rc_retval) {
+	if ((conf = rk_confinfo(num)) == NULL) {
 		sprintf(buf, "person %d (hemlig)", num);
 		ret = buf;
 	} else
@@ -148,8 +147,7 @@ show_text(int nr, int format)
 		}
 	}
 
-	conf = rk_confinfo(ts->rt_author);
-	if (conf->rc_retval) {
+	if ((conf = rk_confinfo(ts->rt_author)) == NULL) {
 		namn = malloc(100);
 		sprintf(namn, "Person %d (hemlig)", ts->rt_author);
 	} else

@@ -269,24 +269,21 @@ reread_conf_stat_bg(int conf)
  * Returns the conference struct for a given conference.
  * If it's not in the cache; ask the server for it.
  */
-int
-get_conf_stat(int conf, struct rk_conference **confer)
+struct rk_conference *
+rk_confinfo(u_int32_t conf)
 {
 	struct get_conf_stat_store *walker;
 	struct rk_conference *c;
-	int i;
 
 	/* First, see if we have this conference in the cache */
-	if ((walker = findconf(conf))) {
-		*confer = &walker->confer;
-		return 0;
-	}
+	if ((walker = findconf(conf)))
+		return &walker->confer;
 
 	/* Nope, alloc a new struct and put it into the cache */
 	if (send_reply("91 %d\n", conf)) {
-		i = get_int();
+		komerr = get_int();
 		get_eat('\n');
-		return i;
+		return NULL;
 	}
 	walker = calloc(sizeof(struct get_conf_stat_store), 1);
 	walker->number = conf;
@@ -295,9 +292,7 @@ get_conf_stat(int conf, struct rk_conference **confer)
 
 	walker->next = gcs;
 	gcs = walker;
-	*confer = c;
-
-	return 0;
+	return c;
 }
 
 static struct membership_store *
@@ -442,12 +437,11 @@ rk_change_conference(u_int32_t conf)
 static int
 next_local(int conf, int local)
 {
-	struct rk_conference *c;
 	struct get_conf_stat_store *g;
 	int i;
 
 	if ((g = findconf(conf)) == NULL) {
-		get_conf_stat(conf, &c);
+		rk_confinfo(conf);
 		if ((g = findconf(conf)) == NULL)
 			return 0;
 	}
@@ -537,7 +531,8 @@ rk_next_unread(u_int32_t conf, u_int32_t uid)
 	struct rk_membership *m;
 	int highest, last;
 
-	get_conf_stat(conf, &c);
+	if ((c = rk_confinfo(conf)) == NULL)
+		return 0;
 	highest = c->rc_first_local_no + c->rc_no_of_texts - 1;
 	if (get_membership(uid, conf, &m))
 		return 0;
@@ -564,11 +559,10 @@ back:	last = m->rm_last_text_read;
 u_int32_t
 rk_local_to_global(u_int32_t conf, u_int32_t local)
 {
-	struct rk_conference *c;
 	struct get_conf_stat_store *g;
 
 	if ((g = findconf(conf)) == NULL) {
-		get_conf_stat(conf, &c);
+		rk_confinfo(conf);
 		if ((g = findconf(conf)) == NULL)
 			return 0;
 	}

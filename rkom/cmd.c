@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.68 2003/09/25 09:37:59 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.69 2003/09/25 11:45:05 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -149,17 +149,21 @@ cmd_vilka(char *str)
 	rprintf("-------------------------------------------------------\n");
 
 	for (i = 0; i < antal; i++) {
-		struct rk_conference *c1, *c2 = NULL; /* GCC braino */
+		struct rk_conference *c;
 		struct rk_person *p;
 		char *name, *conf, *var;
 
 		if (pp[i].rds_person == 0)
 			continue;
-		c1 = rk_confinfo(pp[i].rds_person);
-		name = c1->rc_name;
+		if ((c = rk_confinfo(pp[i].rds_person)) == NULL)
+			name = "Okänd";
+		else
+			name = c->rc_name;
 		if (pp[i].rds_conf) {
-			c2 = rk_confinfo(pp[i].rds_conf);
-			conf = c2->rc_name;
+			if ((c = rk_confinfo(pp[i].rds_conf)) == NULL)
+				conf = "Okänd";
+			else
+				conf = c->rc_name;
 		} else
 			conf = "Inte närvarande någonstans";
 		p = rk_persinfo(pp[i].rds_person);
@@ -318,8 +322,10 @@ cmd_where(char *str)
 	else if (curconf == 0)
 		rprintf("Du är inte närvarande någonstans");
 	else {
-		conf = rk_confinfo(curconf);
-		rprintf("Du är i möte %s", conf->rc_name);
+		if ((conf = rk_confinfo(curconf)) == NULL)
+			rprintf("Du är i voiden");
+		else
+			rprintf("Du är i möte %s", conf->rc_name);
 	}
 	rprintf(" på server %s.\n", server);
 }
@@ -379,7 +385,9 @@ cmd_goto(char *str)
 	curconf = conf;
 	rprintf("Du är nu medlem i %s.\n", name);
 done:
-	rkc = rk_confinfo(conf);
+	if ((rkc = rk_confinfo(conf)) == NULL) 
+		return rprintf("Kunde inte läsa confinfon för %s: %s\n",
+		    name, error(komerr));
 	m = rk_membership(myuid, conf);
 	ret = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1 -
 	    m->rm_last_text_read;
@@ -398,7 +406,9 @@ cmd_only(char *str)
 	int only, high;
 
 	only = atoi(str);
-	conf = rk_confinfo(curconf);
+	if ((conf = rk_confinfo(curconf)) == NULL)
+		return rprintf("Kunde inte läsa confinfon: %s\n",
+		    error(komerr));
 	high = conf->rc_first_local_no + conf->rc_no_of_texts - 1;
 	if (only > high)
 		only = high;
@@ -474,7 +484,9 @@ confstat(int mid)
 	char *str;
 	int i, nrai;
 
-	rcp = rk_confinfo(mid);
+	if ((rcp = rk_confinfo(mid)) == NULL)
+		return rprintf("Kunde inte läsa confinfon: %s\n",
+		    error(komerr));
 	rprintf("Namn:                  %s (%d)\n", vem(mid), mid);
 	rprintf("Antal texter:          %d\n", rcp->rc_no_of_texts);
 	rprintf("Skapat:                %s\n",

@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.54 2003/09/24 12:13:40 ragge Exp $ */
+/* $Id: rkom.c,v 1.55 2003/09/25 11:45:05 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -239,9 +239,11 @@ async_collect()
 			struct rk_conference *sender;
 
 			if (iseql("presence-messages", "1")) {
-				sender = rk_confinfo(ra->ra_pers);
-				rprintf("\n%s har just loggat %s.",
-				    sender->rc_name,
+				if ((sender = rk_confinfo(ra->ra_pers)) == NULL)
+					hej = "John Doe";
+				else
+					hej = sender->rc_name;
+				rprintf("\n%s har just loggat %s.", hej,
 				    (ra->ra_type == 13 ? "ut" : "in"));
 				retval = 0;
 			}
@@ -261,19 +263,22 @@ async_collect()
 			struct rk_time *tm;
 			char *name;
 
-			sender = rk_confinfo(ra->ra_pers);
+			if ((sender = rk_confinfo(ra->ra_pers)) == NULL)
+				hej = "John Doe";
+			else
+				hej = sender->rc_name;
 rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 			if (ra->ra_conf == 0)
-				rprintf("Allmänt meddelande från %s",
-				    sender->rc_name);
+				rprintf("Allmänt meddelande från %s", hej);
 			else if (ra->ra_conf == myuid)
-				rprintf("Personligt meddelande från %s",
-				    sender->rc_name);
+				rprintf("Personligt meddelande från %s", hej);
 			else {
-				name = sender->rc_name;
-				rcpt = rk_confinfo(ra->ra_conf);
+				if ((rcpt = rk_confinfo(ra->ra_conf)) == NULL)
+					name = "Jane Doe";
+				else
+					name = rcpt->rc_name;
 				rprintf("Meddelande till %s från %s",
-				    rcpt->rc_name, name);
+				    name, hej);
 			}
 			tm = rk_time();
 			rprintf(" (%s):\n\n", get_date_string(tm));

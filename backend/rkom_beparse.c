@@ -148,20 +148,6 @@ rk_uconfinfo(u_int32_t mid)
 	return &rku;
 }
 
-struct rk_conference *
-rk_confinfo(u_int32_t mid)
-{
-	static struct rk_conference rkc;
-	struct rk_conference *conf;
-
-	rkc.rc_name = "";
-	rkc.rc_retval = get_conf_stat(mid, &conf);
-	if (rkc.rc_retval)
-		return &rkc;
-	bcopy(conf, &rkc, sizeof(struct rk_conference));
-	return &rkc;
-}
-
 struct rk_person *
 rk_persinfo(u_int32_t uid)
 {
@@ -618,7 +604,7 @@ rk_set_presentation(u_int32_t conf, struct rk_text_info *rti)
 	void *old;
 
 	/* Get conference info (pers/conf) */
-	if (get_conf_stat(conf, &c))
+	if ((c = rk_confinfo(conf)) == NULL)
 		return 9;
 
 	/* Get presentation conference number */

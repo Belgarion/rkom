@@ -32,7 +32,8 @@ next_prompt()
 	struct rk_membership *m;
 	int hln, mr;
 
-	rkc = rk_confinfo(curconf);
+	if ((rkc = rk_confinfo(curconf)) == NULL)
+		return rprintf("Get confinfo sket sej: %s\n", error(komerr));
 	hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
 	m = rk_membership(myuid, curconf);
 	mr = m->rm_last_text_read;
@@ -178,7 +179,8 @@ next_conf(char *str)
 	else
 		curconf = unread[0];
 
-	conf = rk_confinfo(curconf);
+	if ((conf = rk_confinfo(curconf)) == NULL)
+		return rprintf("Get confinfo sket sej: %s\n", error(komerr));
 	member = rk_membership(myuid, curconf);
 	rk_change_conference(curconf);
 
@@ -445,16 +447,14 @@ next_resee_presentation(char *name)
 	rv = match_complain(name, MATCHCONF_PERSON|MATCHCONF_CONF);
 	if (rv == 0)
 		return;
-	printf("Återse presentation (för) %s.\n",
+	rprintf("Återse presentation (för) %s.\n",
 	    rv->rcr_ci.rcr_ci_val[0].rc_name);
-	rc = rk_confinfo(rv->rcr_ci.rcr_ci_val[0].rc_conf_no);
-	if (rc->rc_retval) {
-		printf("Kunde inte läsa presentationen: %s\n",
-		    error(rc->rc_retval));
+	if ((rc = rk_confinfo(rv->rcr_ci.rcr_ci_val[0].rc_conf_no)) == NULL) {
+		rprintf("Kunde inte läsa presentationen: %s\n", error(komerr));
 		return;
 	}
 	if (rc->rc_presentation == 0)
-		printf("Det finns ingen presentation.\n");
+		rprintf("Det finns ingen presentation.\n");
 	else
 		show_text(rc->rc_presentation, 1);
 	lastlasttext = lasttext;
@@ -472,12 +472,9 @@ next_resee_faq(char *name)
 	rv = match_complain(name, MATCHCONF_CONF);
 	if (rv == 0)
 		return;
-	printf("Återse FAQ (för) %s.\n",
-	    rv->rcr_ci.rcr_ci_val[0].rc_name);
-	rc = rk_confinfo(rv->rcr_ci.rcr_ci_val[0].rc_conf_no);
-	if (rc->rc_retval) {
-		printf("Kunde inte läsa FAQn: %s\n",
-		    error(rc->rc_retval));
+	rprintf("Återse FAQ (för) %s.\n", rv->rcr_ci.rcr_ci_val[0].rc_name);
+	if ((rc = rk_confinfo(rv->rcr_ci.rcr_ci_val[0].rc_conf_no)) == NULL) {
+		rprintf("Kunde inte läsa FAQn: %s\n", error(komerr));
 		return;
 	}
 	naux = rc->rc_aux_item.rc_aux_item_len;
