@@ -1,5 +1,5 @@
 "Lista kommandon
-Ord inom parantes ska inte skrivas.
+Ord inom parentes ska inte skrivas.
 
   Kommandon för läsning:
     (Läsa) nästa inlägg
@@ -69,6 +69,7 @@ Ord inom parantes ska inte skrivas.
 
   Övriga kommandon:
     Sätt (flagga)
+    Spara flaggor
     Login
     Logout
     Sluta
