@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.25 2001/01/12 17:33:31 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.26 2001/01/13 21:52:09 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -442,3 +442,10 @@ int32_t rk_delete_text(u_int32_t);
  * sync with the server. 
  */
 void rk_sync(void);
+
+/*
+ * Create a new conference.
+ * Args are (name, type) and returns the new conference number or a
+ * negative lyskom error number.
+ */
+int32_t rk_create_conf(string, u_int32_t);

@@ -712,3 +712,30 @@ rk_sync_server(void)
 		walker = walker->nextp;
 	}
 }
+
+int32_t
+rk_create_conf_server(char *name, u_int32_t btype)
+{
+	char *buf, type[5];
+	int i;
+
+	strcpy(type, "0000");
+	buf = alloca(strlen(name) + 100);
+	if (btype & RK_CONF_TYPE_RD_PROT)
+		type[3] = 1;
+	if (btype & RK_CONF_TYPE_ORIGINAL)
+		type[2] = 1;
+	if (btype & RK_CONF_TYPE_SECRET)
+		type[1] = 1;
+	if (btype & RK_CONF_TYPE_LETTERBOX)
+		type[0] = 1;
+	sprintf(buf, "88 %ldH%s %s 0 { }\n", (long)strlen(name), name, type);
+	if (send_reply(buf)) {
+		i = get_int();
+		get_eat('\n');
+		return -i;
+	}
+	i = get_int();
+	get_accept('\n');
+	return i;
+}
