@@ -1,4 +1,4 @@
-/* $Id: parse_eng.c,v 1.2 2000/11/22 11:58:25 ragge Exp $ */
+/* $Id: parse_eng.c,v 1.3 2000/11/22 21:26:34 jens Exp $ */
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
@@ -27,6 +27,8 @@ struct cmd_elm {
 	char	**ce_argv;
 	int		ce_prio;
 	int		ce_takes_arg;
+	int		ce_is_alias;
+	cmd_elm_t *ce_orig;
 	cmd_func_t ce_exec;
 };
 
@@ -38,7 +40,6 @@ static void ce_free(cmd_elm_t *);
  */
 /* declare type safe functions */
 CL_TYPE(ce, cmd_elm_t)
-
 
 
 static void
@@ -113,6 +114,58 @@ build_argc_argv(const char *str, int *argc, char ***argv)
 	*argv = p;
 }
 
+/*
+ * Concatenates two tuples of (argc,argv) and puts the result in a new
+ * (argc,argv) tuple.
+ */
+static int
+argv_concat(int *new_argc, char ***new_argv,
+		int argc1, char *argv1[], int argc2, char *argv2[])
+{
+	int		i, n_argc;
+	size_t	len;
+	char	*p, **n_argv;
+
+	len = 0;
+	for (i = 0; i < argc1; i++)
+		len += strlen(argv1[i]) + 1;
+	for (i = 0; i < argc2; i++)
+		len += strlen(argv2[i]) + 1;
+
+	n_argc = argc1 + argc2;
+	
+	if ((n_argv = malloc(sizeof(char *) * (n_argc)  + len)) == NULL)
+		return -1;
+	*new_argv = n_argv;
+	*new_argc = n_argc;
+
+	p = (char *)&n_argv[n_argc + 1];
+	for (i = 0; i < argc1; i++) {
+		n_argv[i] = p;
+		strcpy(p, argv1[i]);
+		p += strlen(p) + 1;
+	}
+	for (i = 0; i < argc2; i++) {
+		n_argv[i + argc1] = p;
+		strcpy(p, argv2[i]);
+		p += strlen(p) + 1;
+	}
+
+	return 0;
+}
+
+static void
+argv_print(int argc, char *argv[])
+{
+	int		i;
+
+	for (i = 0; i < argc; i++) {
+		if (i != 0)
+			rprintf(" ");
+		rprintf("%s", argv[i]);
+	}
+}
+
 cmd_lst_t *
 parse_new_cmd_lst(void)
 {
@@ -139,15 +192,137 @@ parse_add_cmd(cmd_lst_t *cl,
 {
 	cmd_elm_t	*ce;
 
-	if ((ce = malloc(sizeof(*ce))) == NULL)
+	if ((ce = calloc(1, sizeof(*ce))) == NULL)
 		err(1, "malloc");
 
 	build_argc_argv(str, &ce->ce_argc, &ce->ce_argv);
 	ce->ce_prio = prio;
 	ce->ce_exec = exec;
 	ce->ce_takes_arg = takes_arg;
+	ce->ce_is_alias = 0;
 	if (cl_ce_push(cl, ce) < 0)
 		exit(1);
+}
+
+void
+parse_add_alias(cmd_lst_t *cl, const char *alias, int argc, char *argv[])
+{
+	cmd_elm_t	*ce, *new_ce;
+	cmd_lst_t	*cl_pos;
+	int			i, num_matched;
+
+	num_matched = 0;
+	/* Loop over all available commands */
+	for (cl_pos = NULL; cl_ce_walk(cl, &cl_pos, &ce) == 0;) {
+
+		/*
+		 * Alias cannot match if it's argc isn't equal to the command
+		 * we compare with.
+		 */
+		if (argc != ce->ce_argc)
+			continue;
+
+		/* Check for matching strings in the command */
+		for (i = 0; i < argc; i++) {
+			if (strcmp(argv[i], ce->ce_argv[i]) != 0)
+				goto skip;
+		}
+
+		/*
+		 * The alias matches a present command, lets add the alias for
+		 * command.
+		 */
+		if ((new_ce = calloc(1, sizeof(*ce))) == NULL)
+			err(1, "malloc");
+		if (argv_concat(&new_ce->ce_argc, &new_ce->ce_argv,
+				1, (char **)&alias, argc - 1, &argv[1]) < 0)
+			err(1, "argv_clone");
+		new_ce->ce_prio = ce->ce_prio;
+		new_ce->ce_exec = ce->ce_exec;
+		new_ce->ce_takes_arg = ce->ce_takes_arg;
+		new_ce->ce_is_alias = 1;
+		new_ce->ce_orig = ce;
+		if (cl_ce_push(cl, new_ce) < 0)
+			exit(1);
+		num_matched++;
+		rprintf("Adderar alias '");
+		argv_print(new_ce->ce_argc, new_ce->ce_argv);
+		rprintf("' -> '");
+		argv_print(new_ce->ce_orig->ce_argc, new_ce->ce_orig->ce_argv);
+		rprintf("'\n");
+
+	/* An escape label for nested for-statements */
+skip:
+	}
+	if (num_matched == 0) {
+		rprintf("'");
+		argv_print(argc, argv);
+		rprintf("' matchar inget komando\n");
+	}
+}
+
+void
+parse_del_alias(cmd_lst_t *cl, const char *alias)
+{
+	cmd_elm_t	*ce;
+	cmd_lst_t	*cl_pos;
+	int			num_deleted;
+
+	num_deleted = 0;
+	/* Loop over all available commands */
+	for (cl_pos = NULL; cl_ce_walk(cl, &cl_pos, &ce) == 0;) {
+
+		if (ce->ce_is_alias == 0)
+			continue;
+
+		if (strcmp(ce->ce_argv[0], alias) != 0)
+			continue;
+
+		num_deleted++;
+		rprintf("Tar bort aliaset '");
+		argv_print(ce->ce_argc, ce->ce_argv);
+		rprintf("' -> '");
+		argv_print(ce->ce_orig->ce_argc, ce->ce_orig->ce_argv);
+		rprintf("'\n");
+		if (cl_ce_rem_pos(cl_pos) < 0) {
+			warn("cl_rem_pos");
+			continue;
+		}
+
+		ce_free(ce);
+	}
+
+	if (num_deleted == 0)
+		rprintf("'%s' matchar inget befintligt alias\n", alias);
+}
+
+void
+parse_list_alias(cmd_lst_t *cl)
+{
+	cmd_elm_t	*ce;
+	cmd_lst_t	*cl_pos;
+	int			alias_num;
+
+	alias_num = 0;
+	/* Loop over all available commands */
+	for (cl_pos = NULL; cl_ce_walk(cl, &cl_pos, &ce) == 0;) {
+
+		if (ce->ce_is_alias == 0)
+			continue;
+
+		if (alias_num == 0)
+			rprintf("Du har följande alias definierade:\n");
+
+		alias_num++;
+		argv_print(ce->ce_argc, ce->ce_argv);
+		rprintf(" -> ");
+		argv_print(ce->ce_orig->ce_argc, ce->ce_orig->ce_argv);
+		rprintf("\n");
+	}
+
+	if (alias_num == 0)
+		rprintf("Du har inga alias definierade\n");
+
 }
 
 int
@@ -163,7 +338,6 @@ parse_exec(cmd_lst_t *cl, const char *str)
 	if ((cl_matches = cl_ce_init()) == NULL)
 		exit(1);
 
-
 	build_argc_argv(str, &argc, &argv);
 
 	max_prio = arg_match = -1;
@@ -178,6 +352,7 @@ parse_exec(cmd_lst_t *cl, const char *str)
 		 */
 		min_argc = MIN(argc, ce->ce_argc);
 
+		/* Check the actual strings of the command */
 		for (i = 0; i < min_argc; i++) {
 			for (j = 0;
 				argv[i][j] == ce->ce_argv[i][j] && argv[i][j] != '\0';
@@ -262,6 +437,6 @@ skip:
 		cl_ce_free(cl_matches, NULL);
 		cl_matches = NULL;
 	}
+	free(argv);
 	return ret;
 }
-

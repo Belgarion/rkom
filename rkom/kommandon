@@ -50,6 +50,11 @@ Ord inom parantes ska inte skrivas.
     (Lista) flaggor
     (Se) tiden
 
+  Kommandon för alias:
+    Alias
+    Unalias
+    Lista alias
+
   Övriga kommandon:
     Sätt (flagga)
     Login

@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.7 2000/11/22 11:58:25 ragge Exp $ */
+/* $Id: parse.c,v 1.8 2000/11/22 21:26:34 jens Exp $ */
 
 #include <sys/param.h>
 
@@ -93,14 +93,20 @@ DCMD(info_list_commands);
 DCMD(info_flags);
 DCMD(info_time);
 DCMD(info_saveflags);
-DCMD(cmd_status);
+DCMD(info_status);
+
+/* Commands for aliases */
+DCMD(alias_add);
+DCMD(alias_delete);
+DCMD(alias_list);
+
 
 /* Other commands */
 DCMD(other_set);
 DCMD(other_login);
 DCMD(other_logout);
 DCMD(other_quit);
-DCMD(cmd_password);
+DCMD(other_password);
 
 struct command_list {
 	char	*cl_str;
@@ -168,14 +174,19 @@ DROW("lista kommandon",			0,PE_NO_ARG,info_list_commands)
 DROW("flaggor",					0,PE_NO_ARG,info_flags)
 DROW("tiden",					0,PE_NO_ARG,info_time)
 DROW("hjälp",					0,PE_NO_ARG,info_list_commands)
-DROW("status",					0,PE_STR_ARG,cmd_status)
+DROW("status",					0,PE_STR_ARG,info_status)
+
+/* Commands for aliases */
+DROW("alias",					0,PE_STR_ARG,alias_add)
+DROW("unalias",					0,PE_STR_ARG,alias_delete)
+DROW("lista alias",				0,PE_NO_ARG,alias_list)
 
 /* Other commands */
 DROW("sätt",					0,PE_STR_ARG,other_set)
 DROW("login",					0,PE_STR_ARG,other_login)
 DROW("logout",					0,PE_NO_ARG,other_logout)
 DROW("sluta",					0,PE_NO_ARG,other_quit)
-DROW("ändra",					0,PE_NO_ARG,cmd_password)
+DROW("ändra",					0,PE_NO_ARG,other_password)
 
 /* Terminate list */
 {NULL,0,0,NULL}
@@ -671,6 +682,38 @@ exec_info_time(int argc, char *argv[])
 	return 0;
 }
 
+static int
+exec_info_status(int argc, char *argv[])
+{
+	cmd_status(re_concat(argc, argv));
+	return 0;
+}
+
+/* Commands for aliases */
+
+static int
+exec_alias_add(int argc, char *argv[])
+{
+	TT(argc <= 1, "Handhavande:\nalias <alias> <commnad>\n");
+	parse_add_alias(cmds, argv[0], argc - 1, &argv[1]);
+	return 0;
+}
+
+static int
+exec_alias_delete(int argc, char *argv[])
+{
+	TT(argc != 1, "Handhavande:\nunalias <alias>\n");
+	parse_del_alias(cmds, argv[0]);
+	return 0;
+}
+
+static int
+exec_alias_list(int argc, char *argv[])
+{
+	parse_list_alias(cmds);
+	return 0;
+}
+
 
 /* Other commands */
 static int
@@ -706,16 +749,9 @@ exec_other_quit(int argc, char *argv[])
 }
 
 static int
-exec_cmd_password(int argc, char *argv[])
+exec_other_password(int argc, char *argv[])
 {
 	LF;
 	cmd_password();
-	return 0;
-}
-
-static int
-exec_cmd_status(int argc, char *argv[])
-{
-	cmd_status(re_concat(argc, argv));
 	return 0;
 }

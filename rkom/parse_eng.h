@@ -1,4 +1,4 @@
-/* $Id: parse_eng.h,v 1.1 2000/11/05 16:26:19 jens Exp $ */
+/* $Id: parse_eng.h,v 1.2 2000/11/22 21:26:34 jens Exp $ */
 #ifndef PARSE_ENG_H
 #define PARSE_ENG_H
 
@@ -15,6 +15,9 @@ cmd_lst_t *parse_new_cmd_lst(void);
 void parse_free_cmd_lst(cmd_lst_t *);
 void parse_add_cmd(cmd_lst_t *,
 	const char *name, int prio, int takes_arg, cmd_func_t exec);
+void parse_add_alias(cmd_lst_t *, const char *alias, int argc, char *argv[]);
+void parse_del_alias(cmd_lst_t *, const char *alias);
+void parse_list_alias(cmd_lst_t *);
 
 int parse_exec(cmd_lst_t *, const char *);
 
