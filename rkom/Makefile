@@ -1,8 +1,9 @@
-#	$Id: Makefile,v 1.15 2001/11/18 14:27:27 ragge Exp $
+#	$Id: Makefile,v 1.16 2001/11/18 18:09:21 ragge Exp $
 #
 #	makefile for the rkom frontend
 #
-CFLAGS= -O2 -g -Wall -Werror -Wstrict-prototypes -Wmissing-prototypes $(XFLAGS)
+CFLAGS= -O2 -g -Wall -Werror -Wstrict-prototypes -Wmissing-prototypes \
+	$(XFLAGS) -I../support
 LIBS=	-L../backend -lrkom -L../libredit -lredit
 INCS=	-I../backend -I../libredit
 

@@ -1,7 +1,7 @@
-#	$Id: Makefile.solaris,v 1.1 2001/11/18 18:06:08 ragge Exp $
+#	$Id: Makefile.solaris,v 1.2 2001/11/18 18:09:14 ragge Exp $
 #
 
-FLAGS="XFLAGS=-DSOLARIS -DREGEX -D_XPG4_2 -I../support" CC=gcc
+FLAGS="XFLAGS=-DSOLARIS -DREGEX -D_XPG4_2 CC=gcc
 LIBS="XLIBS=-ltermcap -lsocket -lnsl"
 
 all:
