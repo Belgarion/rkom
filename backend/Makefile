@@ -1,4 +1,4 @@
-#	$Id: Makefile,v 1.5 2000/10/09 08:33:51 ragge Exp $
+#	$Id: Makefile,v 1.6 2000/10/21 12:15:33 ragge Exp $
 #
 # Rkom backend library Makefile
 #
@@ -17,6 +17,6 @@ SPCGEN?= spcgen
 CLEANFILES+= rkom_proto.c rkom_proto.h rkom_proto_stubs.c
 
 rkom_proto.c rkom_proto.h rkom_proto_stubs.c: rkom_proto.spc
-	${SPCGEN} -chs -i rkom_proto.spc
+	${SPCGEN} -ch -i rkom_proto.spc
 
 .include <bsd.lib.mk>
