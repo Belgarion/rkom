@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.45 2002/05/18 21:32:09 offe Exp $	*/
+/*	$Id: write.c,v 1.46 2002/07/12 01:43:06 offe Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -302,7 +302,7 @@ write_rcpt(char *str, int type)
 	conf = cr->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	free(cr);
 	for (i = 0; i < nmi; i++)
-		if (mi[i].rmi_numeric == conf && mi[i].rmi_type == recpt)
+		if (mi[i].rmi_numeric == conf && mi[i].rmi_type == type)
 			return;
 	nmi++;
 	mi = realloc(mi, sizeof(struct rk_misc_info) * nmi);
@@ -447,6 +447,11 @@ extedit(char *sub)
 	read(f, txt, sb.st_size);
 	close(f);
 	unlink(fil);
+	if(mi) {
+		free(mi);
+		nmi = 0;
+		mi = NULL;
+	}
 	parse_text(txt);
 	free(txt);
 	return 0;
@@ -645,4 +650,9 @@ write_remove_motd(char *str)
 		rprintf("Det gick inte.\n");
 	else
 		rprintf("Lappen nu borttagen.\n");
+}
+
+void convert_from_swascii(void)
+{
+	chrconvert(ctext);
 }
