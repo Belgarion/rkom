@@ -148,30 +148,6 @@ rk_uconfinfo(u_int32_t mid)
 	return &rku;
 }
 
-struct rk_person *
-rk_persinfo(u_int32_t uid)
-{
-	static struct rk_person rkp;
-	struct rk_person *r2; 
-
-	rkp.rp_retval = get_pers_stat(uid, &r2);
-	if (rkp.rp_retval)
-		return &rkp;
-	return r2;
-}               
-
-struct rk_membership *
-rk_membership(u_int32_t uid, u_int32_t mid)
-{
-	static struct rk_membership rkm;
-	struct rk_membership *m;
-
-	rkm.rm_retval = get_membership(uid, mid, &m);
-	if (rkm.rm_retval)
-		return &rkm;
-	return m;
-}
-
 struct rk_dynamic_session_info_retval *
 rk_vilka(u_int32_t secs, u_int32_t flags)
 {

@@ -40,22 +40,19 @@ findperson(int uid)
 /*
  * Return the person struct.
  */
-int
-get_pers_stat(int uid, struct rk_person **person)
+struct rk_person *
+rk_persinfo(u_int32_t uid)
 {
 	struct person_store *pp;
 	struct rk_person *p;
-	int i;
 
-	if ((pp = findperson(uid))) {
-		*person = &pp->person;
-		return 0;
-	}
+	if ((pp = findperson(uid)))
+		return &pp->person;
 
 	if (send_reply("49 %d\n", uid)) {
-		i = get_int();
+		komerr = get_int();
 		get_eat('\n');
-		return i;
+		return NULL;
 	}
 
 	pp = calloc(sizeof(struct person_store), 1);
@@ -81,8 +78,7 @@ get_pers_stat(int uid, struct rk_person **person)
 	get_accept('\n');
 	pp->nextp = gps;
 	gps = pp;
-	*person = p;
-	return 0;
+	return p;
 }
 
 struct get_conf_stat_store {
@@ -306,33 +302,30 @@ findmember(int conf, struct membership_store *mb)
 	return 0;
 }
 
-int
-get_membership(int uid, int conf, struct rk_membership **member)
+struct rk_membership *
+rk_membership(u_int32_t uid, u_int32_t conf)
 {
 	struct membership_store *mb;
 	struct rk_membership *m;
 	struct person_store *pp;
-	struct rk_person *p;
-	int i, len;
+	int len;
 
 	/* First, force the user into the cache */
-	if (get_pers_stat(uid, &p))
-		return -1; /* The person do not exist, or something */
+	if (rk_persinfo(uid) == NULL)
+		return NULL; /* The person do not exist, or something */
 
 	pp = findperson(uid);
 	if (pp->next) {
 		mb = findmember(conf, pp->next);
-		if (mb) {
-			*member = &mb->member;
-			return 0;
-		}
+		if (mb)
+			return &mb->member;
 	}
 
 	/* No, we failed cache search. Fetch from server. */
 	if (send_reply("98 %d %d\n", uid, conf)) {
-		i = get_int();
+		komerr = get_int();
 		get_eat('\n');
-		return i;
+		return NULL;
 	}
 	mb = calloc(sizeof(struct membership_store), 1);
 	m = &mb->member;
@@ -361,8 +354,7 @@ get_membership(int uid, int conf, struct rk_membership **member)
 	mb->next = pp->next;
 	pp->next = mb;
 	get_accept('\n');
-	*member = m;
-	return 0;
+	return m;
 }
 
 static void
@@ -486,7 +478,7 @@ is_read(int conf, int text, int uid)
 	struct rk_membership *m;
 	int i, num, *txts;
 
-	if (get_membership(uid, conf, &m))
+	if ((m = rk_membership(uid, conf)) == NULL)
 		return 1; /* ??? */
 	num = m->rm_read_texts.rm_read_texts_len;
 	txts = m->rm_read_texts.rm_read_texts_val;
@@ -505,7 +497,7 @@ rk_local_is_read(u_int32_t conf, u_int32_t localno)
 	struct rk_membership *m;
 	int i, num, *txts;
 
-	if (get_membership(myuid, conf, &m))
+	if ((m = rk_membership(myuid, conf)) == NULL)
 		return 1; /* not member */
 
 	num = m->rm_read_texts.rm_read_texts_len;
@@ -526,7 +518,7 @@ rk_next_unread(u_int32_t conf, u_int32_t uid)
 	if ((c = rk_confinfo(conf)) == NULL)
 		return 0;
 	highest = c->rc_first_local_no + c->rc_no_of_texts - 1;
-	if (get_membership(uid, conf, &m))
+	if ((m = rk_membership(uid, conf)) == NULL)
 		return 0;
 
 back:	last = m->rm_last_text_read;
@@ -643,7 +635,7 @@ rk_mark_read(u_int32_t conf, u_int32_t local)
 
 	if (is_read(conf, local, myuid))
 		return 0;
-	if (get_membership(myuid, conf, &m) == 0) {
+	if ((m = rk_membership(myuid, conf)) != NULL) {
 		if (m->rm_last_text_read + 1 == local) {
 			m->rm_last_text_read = local;
 			cleanup_read(m);
@@ -725,12 +717,11 @@ rk_memberconf(u_int32_t uid)
 {
 	static struct rk_memberconflist rkm;
 	struct person_store *ps;
-	struct rk_person *person;
 	int i;
 
 	ps = findperson(uid);
 	if (ps == 0) {
-		if (get_pers_stat(uid, &person)) {
+		if (rk_persinfo(uid) == NULL) {
 			rkm.rm_retval = -1;
 			return &rkm;
 		}

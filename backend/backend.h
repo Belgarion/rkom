@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.19 2003/09/25 14:08:47 ragge Exp $	*/
+/*	$Id: backend.h,v 1.20 2003/09/25 15:01:47 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -53,12 +53,20 @@ struct	rk_dynamic_session_info_retval *rk_vilka(u_int32_t, u_int32_t);
  * komerr to the error number.
  */
 struct	rk_conference *rk_confinfo(u_int32_t);
+
+/*
+ * Return the person struct for the given uid, or NULL if it fails.
+ */
 struct	rk_person *rk_persinfo(u_int32_t);
 struct	rk_confinfo_retval *rk_matchconf(char *name, u_int8_t flags);
 int32_t rk_login(u_int32_t userid, char *passwd);
 int32_t rk_whatido(char *args);
 struct	rk_unreadconfval *rk_unreadconf(u_int32_t uid);
 struct	rk_uconference *rk_uconfinfo(u_int32_t mid);
+
+/*
+ * Get the membership struct for a given uid/conf combination, or return NULL.
+ */
 struct	rk_membership *rk_membership(u_int32_t uid, u_int32_t mid);
 char *	rk_client_name(u_int32_t vers);
 char *	rk_client_version(u_int32_t vers);
@@ -85,8 +93,6 @@ int32_t rk_add_text_info(u_int32_t textno, struct rk_aux_item_input *raii);
 
 
 /* conference requests, in rkom_conf.c */
-int	get_pers_stat(int persno, struct rk_person **pers);
-int	get_membership(int uid, int conf, struct rk_membership **member);
 void	conf_set_high_local(int conf, int local, int global);
 void	reread_conf_stat_bg(int conf);
 void	newname(int);
@@ -216,19 +222,18 @@ struct rk_text_stat {
 };
 
 struct rk_membership {
-		int32_t	rm_retval;
-		u_int32_t	rm_position;
-		struct rk_time	rm_last_time_read;
-		u_int32_t	rm_conference;
-		u_int32_t	rm_priority;
-		u_int32_t	rm_last_text_read;
+	u_int32_t	rm_position;
+	struct rk_time	rm_last_time_read;
+	u_int32_t	rm_conference;
+	u_int32_t	rm_priority;
+	u_int32_t	rm_last_text_read;
 	struct {
 		u_int32_t	rm_read_texts_len;
 		u_int32_t	*rm_read_texts_val;
 	} rm_read_texts;
-		u_int32_t	rm_added_by;
-		struct rk_time	rm_added_at;
-		u_int32_t	rm_type;
+	u_int32_t	rm_added_by;
+	struct rk_time	rm_added_at;
+	u_int32_t	rm_type;
 };
 
 struct rk_conference {
@@ -263,24 +268,23 @@ struct rk_uconference {
 };
 
 struct rk_person {
-		int32_t	rp_retval;
-		char *	rp_username;
-		u_int32_t	rp_privileges;
-		u_int32_t	rp_flags;
-		struct rk_time	rp_last_login;
-		u_int32_t	rp_user_area;
-		u_int32_t	rp_total_time_present;
-		u_int32_t	rp_sessions;
-		u_int32_t	rp_created_lines;
-		u_int32_t	rp_created_bytes;
-		u_int32_t	rp_read_texts;
-		u_int32_t	rp_no_of_text_fetches;
-		u_int32_t	rp_created_persons;
-		u_int32_t	rp_created_confs;
-		u_int32_t	rp_first_created_local_no;
-		u_int32_t	rp_no_of_created_texts;
-		u_int32_t	rp_no_of_marks;
-		u_int32_t	rp_no_of_confs;
+	char *	rp_username;
+	u_int32_t	rp_privileges;
+	u_int32_t	rp_flags;
+	struct rk_time	rp_last_login;
+	u_int32_t	rp_user_area;
+	u_int32_t	rp_total_time_present;
+	u_int32_t	rp_sessions;
+	u_int32_t	rp_created_lines;
+	u_int32_t	rp_created_bytes;
+	u_int32_t	rp_read_texts;
+	u_int32_t	rp_no_of_text_fetches;
+	u_int32_t	rp_created_persons;
+	u_int32_t	rp_created_confs;
+	u_int32_t	rp_first_created_local_no;
+	u_int32_t	rp_no_of_created_texts;
+	u_int32_t	rp_no_of_marks;
+	u_int32_t	rp_no_of_confs;
 };
 
 struct rk_confinfo {

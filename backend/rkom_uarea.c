@@ -127,7 +127,7 @@ get_uarea(int uid)
 
 	if (upole)
 		free(upole);
-	get_pers_stat(myuid, &p);
+	p = rk_persinfo(myuid);
 	if (p->rp_user_area == 0)
 		return NULL;
 	if (send_reply("25 %d 0 2000000\n", p->rp_user_area)) {
@@ -267,7 +267,7 @@ rk_set_uarea(char *str, struct rk_uarea *u)
 		get_eat('\n');
 		return i;
 	}
-	get_pers_stat(myuid, &p);
+	p = rk_persinfo(myuid);
 	p->rp_user_area = no;
 	get_accept('\n');
 	return 0;

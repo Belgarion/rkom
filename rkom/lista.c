@@ -80,7 +80,7 @@ list_conf(char *str)
 		    C->rc_no_of_members, C->rc_first_local_no +
 		    C->rc_no_of_texts - 1, (myuid == 0 ? " " :
 		    (C->rc_supervisor == myuid ? "O" :
-		    (M->rm_retval ? " " : "*" ))), ci[i].rc_name);
+		    (M ? " " : "*" ))), ci[i].rc_name);
 
 		if (discard)
 			break;
@@ -125,11 +125,9 @@ list_news(char *args)
 				continue;
 			}
 			hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
-			m = rk_membership(myuid, confs[i]);
-
-			if (m->rm_retval) {
-				rprintf("%d,%d sket sej med %d\n",
-				    confs[i], myuid, m->rm_retval);
+			if ((m = rk_membership(myuid, confs[i])) == NULL) {
+				rprintf("%d,%d sket sej: %s\n",
+				    confs[i], myuid, error(komerr));
 				continue;
 			}
 			nr = hln - m->rm_last_text_read;
@@ -276,9 +274,8 @@ list_unread()
 		return rprintf("rk_confinfo sket sej: %s\n", error(komerr));
 	rprintf("Lista olästa (ärenden)\n");
 	rprintf("Inlägg\tDatum\t  Författare           Ärende\n");
-	rm = rk_membership(myuid, curconf);
-	if (rm->rm_retval) {
-		rprintf("rk_membership sket sej: %s\n", error(rm->rm_retval));
+	if ((rm = rk_membership(myuid, curconf)) == NULL) {
+		rprintf("rk_membership sket sej: %s\n", error(komerr));
 		return;
 	}
 	high = conf->rc_no_of_texts + conf->rc_first_local_no - 1;
