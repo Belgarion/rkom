@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.17 2001/01/07 14:11:50 ragge Exp $ */
+/* $Id: parse.c,v 1.18 2001/01/12 17:01:17 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -25,6 +25,7 @@ void cmd_leave(char *);
 #include "list.h"
 #include "rkom.h"
 #include "set.h"
+#include "rkom_proto.h"
 
 
 #include "parse_eng.h"
@@ -116,6 +117,7 @@ DCMD(other_logout);
 DCMD(other_quit);
 DCMD(other_password);
 DCMD(other_name);
+DCMD(other_sync);
 
 #if 1
 /* Debug help */
@@ -210,6 +212,7 @@ DROW("logout",					0,PE_NO_ARG,other_logout)
 DROW("sluta",					0,PE_NO_ARG,other_quit)
 DROW("ändra lösenord",				0,PE_NO_ARG,other_password)
 DROW("ändra namn",				0,PE_NO_ARG,other_name)
+DROW("synkronisera",				0,PE_NO_ARG,other_sync)
 
 #if 1
 /* Debug help */
@@ -882,5 +885,13 @@ exec_text_delete(int argc, char *argv[])
 	TT(argc > 1, "Radera tar bara ett textnummer som argument.\n");
 	TT(atoi(argv[0]) == 0, "Du måste ange ett riktigt textnummer.\n");
 	cmd_delete(atoi(argv[0]));
+	return 0;
+}
+
+static int
+exec_other_sync(int argc, char *argv[])
+{
+	TT(argc > 0, "Synkronisera tar inga argument.\n");
+	rk_sync();
 	return 0;
 }
