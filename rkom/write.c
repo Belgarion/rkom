@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.56 2003/09/17 19:54:20 ragge Exp $	*/
+/*	$Id: write.c,v 1.57 2003/09/25 09:37:59 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -83,10 +83,9 @@ write_private(int textno)
 
 	rprintf("Personligt (svar till text %d)\n", textno);
 	is_writing = 1;
-	ts = rk_textstat(textno);
-	if (ts->rt_retval) {
+	if ((ts = rk_textstat(textno)) == NULL) {
 		rprintf("Kunde inte svara personligt på texten: %s\n",
-		    error(ts->rt_retval));
+		    error(komerr));
 		return;
 	}
 	mi = calloc(sizeof(struct rk_misc_info), 3);
@@ -564,8 +563,7 @@ write_internal(int text, int ktyp)
 	char *s, *t;
 	int i, num;
 
-	ts = rk_textstat(text);
-	if (ts->rt_retval) {
+	if ((ts = rk_textstat(text)) == NULL) {
 		rprintf("Text %d är inte läsbar, tyvärr...\n", text);
 		return;
 	}

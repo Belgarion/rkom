@@ -388,16 +388,18 @@ rk_textstat(u_int32_t nr)
 
 	if ((tss = findtxt(nr)) && (tss->rts))
 		return tss->rts;
-	ts = calloc(sizeof(struct rk_text_stat), 1);
 	if (send_reply("90 %d\n", nr)) {
-		ts->rt_retval = get_int();
+		komerr = get_int();
 		get_eat('\n');
-		return ts;
+		return NULL;
 	}
+	ts = calloc(sizeof(struct rk_text_stat), 1);
 	readin_textstat(ts);
 	if (tss == 0) {
-		tss = calloc(sizeof(*tss), 1);
+		tss = malloc(sizeof(*tss));
 		tss->nummer = nr;
+		tss->rts = NULL;
+		tss->text = NULL;
 		tss->next = pole;
 		pole = tss;
 	}

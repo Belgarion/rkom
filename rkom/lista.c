@@ -243,7 +243,10 @@ list_subject()
 		nr = rk_local_to_global(curconf, i);
 		if (nr == 0)
 			continue;
-		ts = rk_textstat(nr);
+		if ((ts = rk_textstat(nr)) == NULL) {
+			rprintf("Stat på text %d misslyckades.\n", nr);
+			continue;
+		}
 		text = strdup(rk_gettext(nr));
 		gubbe = vem(ts->rt_author);
 		rprintf("%d\t%d", nr, ts->rt_time.rt_year + 1900);
@@ -289,7 +292,10 @@ list_unread()
 		nr = rk_local_to_global(curconf, i);
 		if (nr == 0)
 			continue;
-		ts = rk_textstat(nr);
+		if ((ts = rk_textstat(nr)) == NULL) {
+			rprintf("Stat på text %d misslyckades.\n", nr);
+			continue;
+		}
 		text = strdup(rk_gettext(nr));
 		gubbe = vem(ts->rt_author);
 		rprintf("%d\t%d", nr, ts->rt_time.rt_year + 1900);

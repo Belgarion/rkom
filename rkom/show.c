@@ -68,8 +68,7 @@ printcmnt(struct rk_misc_info *mi, int len, int p)
 			rprintf("%s%s i text %d", p ? "(" : "",
 			    (mi[i].rmi_type == footn_in ?
 			    "Fotnot" : "Kommentar"), mi[i].rmi_numeric);
-			tt = rk_textstat(mi[i].rmi_numeric);
-			if (tt->rt_retval == 0)
+			if ((tt = rk_textstat(mi[i].rmi_numeric)) != NULL)
 				rprintf(" av %s", vem(tt->rt_author));
 			rprintf("%s\n", p ? ")" : "");
 		}
@@ -137,8 +136,7 @@ show_text(int nr, int format)
 	int i, len, p;
 	char *c, *cc, *namn, buf[100];
 
-	ts = rk_textstat(nr);
-	if (ts->rt_retval) {
+	if ((ts = rk_textstat(nr)) == NULL) {
 		rprintf("För din del så finns inte text %d\n", nr);
 		return 0;
 	}
@@ -198,16 +196,14 @@ show_text(int nr, int format)
 		case comm_to:
 			rprintf("\n");
 			rprintf("Kommentar till text %d", mi[i].rmi_numeric);
-			tt = rk_textstat(mi[i].rmi_numeric);
-			if (tt->rt_retval == 0)
+			if ((tt = rk_textstat(mi[i].rmi_numeric)) != NULL)
 				rprintf(" av %s", vem(tt->rt_author));
 			break;
 
 		case footn_to:
 			rprintf("\n");
 			rprintf("Fotnot till text %d", mi[i].rmi_numeric);
-			tt = rk_textstat(mi[i].rmi_numeric);
-			if (tt->rt_retval == 0)
+			if ((tt = rk_textstat(mi[i].rmi_numeric)) != NULL)
 				rprintf(" av %s", vem(tt->rt_author));
 			break;
 		default:

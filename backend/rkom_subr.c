@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.22 2003/09/17 15:37:03 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.23 2003/09/25 09:37:59 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -27,6 +27,7 @@
 FILE *sfd;
 int readfd=-1, writefd = -1, fepid = -1;
 int pfd;
+int komerr;
 
 /*
  * First connect to the server, then fork away the backend after informing

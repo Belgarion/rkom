@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.67 2003/09/17 18:33:03 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.68 2003/09/25 09:37:59 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -526,10 +526,9 @@ cmd_info_extra(int text)
 
 	rprintf("Tilläggsinformation (för text) %d.\n\n", text);
 
-	rts = rk_textstat(text);
-	if (rts->rt_retval) {
+	if ((rts = rk_textstat(text)) == NULL) {
 		rprintf("Kunde inte läsa status för inlägg %d: %s.\n",
-		    text, error(rts->rt_retval));
+		    text, error(komerr));
 		return;
 	}
 	nrai = rts->rt_aux_item.rt_aux_item_len;
@@ -727,8 +726,7 @@ cmd_move_text()
 		rprintf("Du måste ange ett giltigt textnummer.\n\n");
 		return;
 	}
-	ts = rk_textstat(nr);
-	if (ts->rt_retval) {
+	if ((ts = rk_textstat(nr)) == NULL) {
 		rprintf("Text %d är inte en giltig text.\n", nr);
 		return;
 	}

@@ -512,9 +512,8 @@ rk_is_read(u_int32_t nr, u_int32_t conf)
 	struct rk_misc_info *mi;
 	int i, len;
 
-	ts = rk_textstat(nr);
-	if (ts->rt_retval)
-		return 0;
+	if ((ts = rk_textstat(nr)) == NULL)
+		return 1; /* Not allowed to see, consider read */
 	len = ts->rt_misc_info.rt_misc_info_len;
 	mi = ts->rt_misc_info.rt_misc_info_val;
 	for (i = 0; i < len; i++) {

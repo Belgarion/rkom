@@ -47,6 +47,7 @@ next_prompt()
 		prompt = PROMPT_SEE_TIME;
 }
 
+#if 0
 /*
  * Check if the global text number globno is read in some conference.
  */
@@ -54,6 +55,7 @@ static int
 checkread(int globno)
 {
 }
+#endif
 
 /*
  * Next action: decide what to do next is. Choose between:
@@ -70,20 +72,20 @@ next_action(int nr)
 	struct rk_misc_info *mi;
 	int i, len;
 
-	ts = rk_textstat(nr);
-
+	if ((ts = rk_textstat(nr)) == NULL) {
+		len = 0;
+		mi = NULL;
+	} else {
+		len = ts->rt_misc_info.rt_misc_info_len;
+		mi = ts->rt_misc_info.rt_misc_info_val;
+	}
 	/* First: see if there is anything following this text */
-	len = ts->rt_misc_info.rt_misc_info_len;
-	mi = ts->rt_misc_info.rt_misc_info_val;
 	for (i = 0; i < len; i++)
 		if (mi[i].rmi_type == footn_in ||
 		    mi[i].rmi_type == comm_in) {
 			struct rk_text_stat *ts2;
-			int r;
 
-			ts2 = rk_textstat(mi[i].rmi_numeric);
-			r = ts2->rt_retval;
-			if (r)
+			if ((ts2 = rk_textstat(mi[i].rmi_numeric)) == NULL)
 				continue;
 			if (rk_is_read(mi[i].rmi_numeric, curconf))
 				continue;
@@ -96,19 +98,18 @@ again:
 			next_prompt();
 			return;
 		}
-		ts = rk_textstat(pole->textnr);
-		len = ts->rt_misc_info.rt_misc_info_len;
-		mi = ts->rt_misc_info.rt_misc_info_val;
-
+		if ((ts = rk_textstat(pole->textnr)) == NULL) {
+			len = 0;
+		} else {
+			len = ts->rt_misc_info.rt_misc_info_len;
+			mi = ts->rt_misc_info.rt_misc_info_val;
+		}
 		for (i = pole->listidx + 1; i < len; i++)
 			if (mi[i].rmi_type == footn_in ||
 			    mi[i].rmi_type == comm_in) {
 				struct rk_text_stat *ts2;
-				int r;
 
-				ts2 = rk_textstat(mi[i].rmi_numeric);
-				r = ts2->rt_retval;
-				if (r)
+				if ((ts2 = rk_textstat(mi[i].rmi_numeric)) == NULL)
 					continue;
 				if (rk_is_read(mi[i].rmi_numeric, curconf))
 					continue;
@@ -195,7 +196,8 @@ mark_read(int nr)
 	struct rk_misc_info *mi;
 	int i, len;
 
-	ts = rk_textstat(nr);
+	if ((ts = rk_textstat(nr)) == NULL)
+		return; /* Nothing to do */
 	len = ts->rt_misc_info.rt_misc_info_len;
 	mi = ts->rt_misc_info.rt_misc_info_val;
 	for (i = 0; i < len; i++) {
@@ -242,9 +244,13 @@ back:			rprintf("Det finns ingen nästa kommentar.\n");
 		prompt = PROMPT_NEXT_TEXT;
 		return;
 	}
-	ts = rk_textstat(pole->textnr);
-	len = ts->rt_misc_info.rt_misc_info_len;
-	mi = ts->rt_misc_info.rt_misc_info_val;
+	if ((ts = rk_textstat(pole->textnr)) == NULL) {
+		len = 0;
+		mi = NULL;
+	} else {
+		len = ts->rt_misc_info.rt_misc_info_len;
+		mi = ts->rt_misc_info.rt_misc_info_val;
+	}
 try:	for (i = pole->listidx; i < len; i++)
 		if (mi[i].rmi_type == footn_in ||
 		    mi[i].rmi_type == comm_in)
@@ -310,9 +316,13 @@ next_resee_comment()
 	struct rk_misc_info *mi;
 	int i, len;
 
-	ts = rk_textstat(lasttext);
-	mi = ts->rt_misc_info.rt_misc_info_val;
-	len = ts->rt_misc_info.rt_misc_info_len;
+	if ((ts = rk_textstat(lasttext)) == NULL) {
+		len = 0;
+		mi = NULL;
+	} else {
+		mi = ts->rt_misc_info.rt_misc_info_val;
+		len = ts->rt_misc_info.rt_misc_info_len;
+	}
 	for (i = 0; i < len; i++)
 		if (mi[i].rmi_type == comm_to ||
 		    mi[i].rmi_type == footn_to)
@@ -335,7 +345,11 @@ next_resee_root(int text)
 	int count;
 
 restart:
-	ts = rk_textstat(text);
+	if ((ts = rk_textstat(text)) == NULL) {
+		rprintf("Stat på text %d misslyckades: %s\n",
+		    text, error(komerr));
+		return;
+	}
 	mi = ts->rt_misc_info.rt_misc_info_val;
 	len = ts->rt_misc_info.rt_misc_info_len;
 	count = 0;
@@ -399,9 +413,13 @@ next_hoppa(char *str)
 				rprintf("Du hoppade över %d inlägg.\n", hoppade);
 			return;
 		}
-		ts = rk_textstat(pole->textnr);
-		len = ts->rt_misc_info.rt_misc_info_len;
-		mi = ts->rt_misc_info.rt_misc_info_val;
+		if ((ts = rk_textstat(pole->textnr)) == NULL) {
+			len = 0;
+			mi = NULL;
+		} else {
+			len = ts->rt_misc_info.rt_misc_info_len;
+			mi = ts->rt_misc_info.rt_misc_info_val;
+		}
 		for (i = pole->listidx; i < len; i++)
 			if (mi[i].rmi_type == footn_in ||
 			    mi[i].rmi_type == comm_in)

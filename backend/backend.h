@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.16 2003/09/24 19:34:26 ragge Exp $	*/
+/*	$Id: backend.h,v 1.17 2003/09/25 09:37:59 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -57,6 +57,11 @@ struct	rk_membership *rk_membership(u_int32_t uid, u_int32_t mid);
 char *	rk_client_name(u_int32_t vers);
 char *	rk_client_version(u_int32_t vers);
 char *	rk_gettext(u_int32_t nr);
+
+/* 
+ * Get the test stat for global text nr.
+ * Return NULL if something failed and set komerr to the error number.
+ */
 struct	rk_text_stat *rk_textstat(u_int32_t nr);
 struct	rk_text_retval *rk_create_text(struct rk_text_info *rti);
 struct	rk_mark_retval *rk_getmarks(void);
@@ -115,6 +120,7 @@ int32_t rk_set_uarea(char *str, struct rk_uarea *u);
 extern	int readfd;	/* Get messages from frontend */
 extern	int writefd;	/* Write to frontend */
 extern	int myuid;	/* Current active uid */
+extern	int komerr;	/* "errno" for rkom */
 
 enum Misc_Info_types {
 	recpt, cc_recpt, comm_to, comm_in, footn_to, footn_in,
@@ -184,12 +190,11 @@ struct rk_aux_item_input {
 };
 
 struct rk_text_stat {
-		int32_t	rt_retval;
-		struct rk_time	rt_time;
-		u_int32_t	rt_author;
-		u_int32_t	rt_no_of_lines;
-		u_int32_t	rt_no_of_chars;
-		u_int32_t	rt_no_of_marks;
+	struct rk_time	rt_time;
+	u_int32_t	rt_author;
+	u_int32_t	rt_no_of_lines;
+	u_int32_t	rt_no_of_chars;
+	u_int32_t	rt_no_of_marks;
 	struct {
 		u_int32_t	rt_misc_info_len;
 		struct rk_misc_info	*rt_misc_info_val;
