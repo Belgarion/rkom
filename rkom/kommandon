@@ -34,7 +34,7 @@ Ord inom parantes ska inte skrivas.
     Lista (alla) markerade
 
   Kommandon för onlinekommunikation:
-    Vilka (är inloggade)
+    Vilka (är inloggade) [ synliga | osynliga | klienter ]
     Sänd (alarmmeddelande till alla)
     Säg (något till)
 

@@ -175,19 +175,64 @@ cmd_tiden(char *str)
 	printf(" (enligt servern)\n");
 }
 
+static char *
+nxtcmd(char **str)
+{
+	char *h, *g;
+
+	g = *str;
+	if (g == 0)
+		return 0;
+	while (isspace(*g))
+		g++;
+	if (*g == 0)
+		return 0;
+	h = g;
+	while (isalpha(*h))
+		h++;
+	if (*h == 0) {
+		*str = 0;
+		return g;
+	}
+	*h++ = 0;
+	*str = h;
+	return g;
+}
+
 void
 cmd_vilka(char *str)
 {
 	struct rk_dynamic_session_info_retval *ppp;
 	struct rk_dynamic_session_info *pp;
-	int i, antal;
+	int i, antal, invisible, visible, clients, type;
+	char *s;
 
-	ppp = rk_vilka(0, WHO_VISIBLE);
+	invisible = visible = clients = 0;
+	if (str == 0)
+		visible++;
+	else
+		while ((s = nxtcmd(&str))) {
+			if (bcmp(s, "osynliga", strlen(s)) == 0)
+				invisible++;
+			if (bcmp(s, "synliga", strlen(s)) == 0)
+				visible++;
+			if (bcmp(s, "klienter", strlen(s)) == 0)
+				clients++;
+		}
+	type = 0;
+	if (visible)
+		type |= WHO_VISIBLE;
+	if (invisible)
+		type |= WHO_INVISIBLE;
+	if (type == 0)
+		type = WHO_VISIBLE;
+	ppp = rk_vilka(0, type);
 
 	antal = ppp->rdv_rds.rdv_rds_len;
 	pp = ppp->rdv_rds.rdv_rds_val;
 	if (antal == 0) {
 		printf("Det är inga påloggade alls.\n");
+		free(ppp);
 		return;
 	}
 
@@ -200,6 +245,8 @@ cmd_vilka(char *str)
 		struct rk_person *p;
 		char *name, *conf, *var;
 
+		if (pp[i].rds_person == 0)
+			continue;
 		c1 = rk_confinfo(pp[i].rds_person);
 		name = c1->rc_name;
 		if (pp[i].rds_conf) {
@@ -216,9 +263,20 @@ cmd_vilka(char *str)
 			printf("%5d %-33s %-40s\n",
 			    pp[i].rds_session, name, conf);
 		if (strlen(var) > 36)
-			printf("   %s\n%40s%s\n\n", var, "", pp[i].rds_doing);
+			printf("   %s\n%40s%s\n", var, "", pp[i].rds_doing);
 		else
-			printf("   %-37s%s\n\n", var, pp[i].rds_doing);
+			printf("   %-37s%s\n", var, pp[i].rds_doing);
+		if (clients) {
+			char *nn, *vv;
+
+			nn = rk_client_name(pp[i].rds_session);
+			vv = rk_client_version(pp[i].rds_session);
+			printf("   %-37s", (strlen(nn) == 0 ? "(Okänd)" : nn));
+			printf("%s\n", (strlen(vv) == 0 ? "(Okänt)" : vv));
+			free(nn);
+			free(vv);
+		}
+		printf("\n");
 		free(c1);
 		if (pp[i].rds_conf)
 			free(c2);
