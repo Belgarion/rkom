@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.43 2002/09/04 15:39:47 ragge Exp $ */
+/* $Id: parse.c,v 1.44 2002/10/21 10:17:29 jens Exp $ */
 
 #include <sys/param.h>
 
@@ -1093,7 +1093,7 @@ exec_info_remove_motd(int argc, char *argv[])
 {
 	LF;
 	NWA;
-	TT(argc == 0, "Du måste ange vem du vill sätta lapp för.\n");
+	TT(argc == 0, "Du måste ange vem du vill ta bort lapp för.\n");
 	write_remove_motd(re_concat(argc, argv));
 	return 0;
 }
