@@ -161,7 +161,8 @@ async_new_text(struct mesg *m)
 	m->ra.ra_text = get_int();
 	reread_text_stat_bg(m->ra.ra_text);
 	read_in_time(&time);
-	get_int();get_int();get_int();get_int();
+	m->ra.ra_pers = get_int();
+	get_int();get_int();get_int();
 	cnt = get_int();
 	get_accept('{');
 	for (i = 0; i < cnt; i++) {
