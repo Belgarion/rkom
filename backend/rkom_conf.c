@@ -296,8 +296,6 @@ get_conf_stat(int conf, struct rk_conference **confer)
 	c = &walker->confer;
 	readin_conf_stat(c);
 
-	read_lgtable(walker);
-
 	walker->next = gcs;
 	gcs = walker;
 	*confer = c;
@@ -460,6 +458,9 @@ next_local(int conf, int local)
 		if ((g = findconf(conf)) == NULL)
 			return 0;
 	}
+	if (g->map == NULL)
+		read_lgtable(g);
+
 	if (local >= g->mapsz)
 		return 0;
 	for (i = local; i < g->mapsz; i++)
@@ -576,6 +577,9 @@ rk_local_to_global_server(u_int32_t conf, u_int32_t local)
 		if ((g = findconf(conf)) == NULL)
 			return 0;
 	}
+	if (g->map == NULL)
+		read_lgtable(g);
+
 	if (local >= g->mapsz)
 		return 0;
 	return g->map[local];
@@ -596,6 +600,9 @@ conf_set_high_local(int conf, int local, int global)
 			tt = local - walker->confer.rc_first_local_no+1;
 			if (walker->confer.rc_no_of_texts < tt)
 				walker->confer.rc_no_of_texts = tt;
+			if (walker->map == NULL)
+				read_lgtable(walker);
+
 			if (walker->mapsz <= local) {
 				int *tpt = calloc(local+50, sizeof(int));
 				memcpy(tpt, walker->map, walker->mapsz *
