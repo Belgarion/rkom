@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.20 2000/12/10 15:48:22 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.21 2000/12/19 17:30:26 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -403,3 +403,10 @@ int32_t rk_set_uarea(string, struct rk_uarea);
  * Arguments are (uid, oldpass, newpass). Returns a normal Lyskom error code.
  */
 int32_t	rk_setpass(u_int32_t, string, string);
+
+/*
+ * Change name for an user or a conference.
+ * Arguments are (id, newname).
+ * Returns a normal Lyskom error code.
+ */
+int32_t rk_change_name(u_int32_t, string);

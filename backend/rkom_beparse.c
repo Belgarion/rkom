@@ -791,3 +791,20 @@ rk_setpass_server(u_int32_t uid, char *oldpass, char *newpass)
 	get_accept('\n');
 	return 0;
 }
+
+int32_t
+rk_change_name_server(u_int32_t uid, char *newname)
+{
+	int i;
+	char *buf;
+
+	buf = alloca(strlen(newname) + 40);
+	sprintf(buf, "3 %d %ldH%s\n", uid, (long)strlen(newname), newname);
+	if (send_reply(buf)) {
+		i = get_int();
+		get_eat('\n');
+		return i;
+	}
+	get_accept('\n');
+	return 0;
+}
