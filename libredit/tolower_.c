@@ -49,11 +49,3 @@ const short _C_tolower_[1 + 256] = {
 };
 
 const short *_tolower_tab_ = _C_tolower_;
-
-#undef tolower
-int
-tolower(c)
-	int c;
-{
-	return((_tolower_tab_ + 1)[c]);
-}

@@ -49,11 +49,3 @@ const short _C_toupper_[1 + 256] = {
 };
 
 const short *_toupper_tab_ = _C_toupper_;
-
-#undef toupper
-int
-toupper(c)
-	int c;
-{
-	return((_toupper_tab_ + 1)[c]);
-}

@@ -72,8 +72,6 @@ extern const short	*_toupper_tab_;
 
 #define	isascii(c)	((unsigned)(c) <= 0177)
 #define	toascii(c)	((c) & 0177)
-#define _tolower(c)	((c) - 'A' + 'a')
-#define _toupper(c)	((c) - 'a' + 'A')
 
 extern const unsigned char _C_ctype_[];
 extern const short _C_toupper_[];
