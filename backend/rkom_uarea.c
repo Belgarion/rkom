@@ -63,7 +63,7 @@ splitup(char *str, int *cnt, int n)
 	j = cnth(str);
 	mlen = strlen(str);
 	spole = calloc(sizeof(struct uarea), j + 1);
-	for (j = i = 0; str[i] && i < mlen; j++) {
+	for (j = i = 0; i < mlen && str[i]; j++) {
 		c = getstr(&str[i]);
 		if (c == NULL) {
 			free(spole);
