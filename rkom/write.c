@@ -124,7 +124,11 @@ parse_text(char *txt)
 		} else if (strncasecmp(cmd, "Kommentar", strlen(cmd)) == 0) {
 			if (strncasecmp(arg, "till:", 5) == 0)
 				cmd = strsep(&arg, " ");
-			write_comment(arg);
+			write_comment(arg, comm_to);
+		} else if (strncasecmp(cmd, "Fotnot", strlen(cmd)) == 0) {
+			if (strncasecmp(arg, "till:", 5) == 0)
+				cmd = strsep(&arg, " ");
+			write_comment(arg, footn_to);
 		} else
 			printf("%s förstods inte.\n", cmd);
 	}
@@ -259,7 +263,7 @@ write_rcpt(char *str)
 }
 
 void
-write_comment(char *str)
+write_comment(char *str, int typ)
 {
 	int nr, i;
 
@@ -270,12 +274,13 @@ write_comment(char *str)
 		return;
 	}
 	for (i = 0; i < nmi; i++)
-		if (mi[i].rmi_numeric == nr && mi[i].rmi_type == comm_to)
+		if (mi[i].rmi_numeric == nr && 
+		    (mi[i].rmi_type == comm_to || mi[i].rmi_type == footn_to))
 			return;
 
 	nmi++;
 	mi = realloc(mi, sizeof(struct rk_misc_info) * nmi);
-	mi[nmi-1].rmi_type = comm_to;
+	mi[nmi-1].rmi_type = typ;
 	mi[nmi-1].rmi_numeric = nr;
 }
 
@@ -312,6 +317,11 @@ show_format()
 		case comm_to:
 			ret = realloc(ret, strlen(ret) + 40);
 			sprintf(buf, "!Kommentar till: %d\n", mi[i].rmi_numeric);
+			strcat(ret, buf);
+			break;
+		case footn_to:
+			ret = realloc(ret, strlen(ret) + 40);
+			sprintf(buf, "!Fotnot till: %d\n", mi[i].rmi_numeric);
 			strcat(ret, buf);
 			break;
 		default:
