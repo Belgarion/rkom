@@ -1,7 +1,9 @@
-	$Id: FILES,v 1.1 2000/09/26 18:48:00 ragge Exp $
+	$Id: FILES,v 1.2 2000/10/01 14:10:41 ragge Exp $
 
 rkom_lyskom.c	Low-end communication subroutines to talk with Lyskom servers.
 rkom_subr.c	Subroutines called from the front-end, and also handles
 		the fe/be communication stuff.
+rkom_conf.c	Keeps track and caches conferences, and updates them
+		based on async messages.
 exported.h	Functions exported to frontend.
 backend.h	Definitions and prototypes applicable to backend only.

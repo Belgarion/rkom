@@ -15,7 +15,7 @@ static int reqnr;
 static int handling;	/* Handling front-end request right now */
 // static int lasttime;
 static int wait_for_reply_no;
-static int sockfd;
+int sockfd;
 static int unget;
 static int level;
 
@@ -33,7 +33,7 @@ rkom_loop()
 	/*
 	 * Set up the poll descriptors.
 	 */
-	pfd[0].fd = 0;
+	pfd[0].fd = readfd;
 	pfd[0].events = POLLIN|POLLPRI;
 	pfd[1].fd = sockfd;
 	pfd[1].events = POLLIN|POLLPRI;
@@ -58,7 +58,7 @@ rkom_loop()
 		if (pfd[0].revents) {
 			if (handling++)
 				warn("front-end unwanted talk");
-//			rkom_feparse();
+			bgreceive();
 			handling = 0;
 #if 0
 			gettimeofday(&tp, 0);
@@ -87,6 +87,7 @@ rkom_loop()
 					}
 					errx(56, "Hejdå!");
 				}
+				err = -1;
 				unget = c;
 				/* FALLTHROUGH */
 			case '=':
