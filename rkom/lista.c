@@ -24,6 +24,34 @@ list_comm(char *args)
 }
 
 void
+list_conf_q(char *str)
+{
+	struct rk_confinfo_retval *rv;
+	struct rk_confinfo *ci;
+	int i, nconfs;
+
+	rv = rk_matchconf("", MATCHCONF_CONF);
+	nconfs = rv->rcr_ci.rcr_ci_len;
+	if (nconfs == 0)
+		return;
+	ci = rv->rcr_ci.rcr_ci_val;
+
+	rprintf("\nTyp       Mötesnamn\n");
+	for (i = 0; i < nconfs; i++) {
+		struct rk_uconference *UC;
+
+		UC = rk_uconfinfo(ci[i].rc_conf_no);
+		if (UC->ru_retval)
+			continue;
+
+		rprintf("%08d  %s\n", UC->ru_type, UC->ru_name);
+		free(UC);
+	}
+	rprintf("\n");
+	free(rv);
+}
+
+void
 list_conf(char *str)
 {
 	struct rk_confinfo_retval *rv;

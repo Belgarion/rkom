@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.32 2002/08/31 12:32:25 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.33 2002/09/01 13:36:40 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -123,6 +123,17 @@ struct rk_conference {
 	u_int32_t	rc_no_of_texts;
 	u_int32_t	rc_expire;
 	struct rk_aux_item rc_aux_item<>;
+};
+
+/*      
+ * The uconf struct; not cached.
+ */ 
+struct rk_uconference {
+	int32_t		ru_retval;
+	string		ru_name;
+	u_int32_t	ru_type;
+	u_int32_t	ru_highest_local_no;
+	u_int32_t	ru_nice;
 };
 
 /*
@@ -281,6 +292,11 @@ struct rk_memberconflist rk_memberconf(u_int32_t);
 #define MATCHCONF_CONF		2
 %end
 struct rk_confinfo_retval rk_matchconf(string, u_int8_t);
+
+/*
+ * Get the uconference struct based on the conference number.
+ */
+struct rk_uconference	rk_uconfinfo(u_int32_t);
 
 /*
  * Get the conference struct based on the conference number.

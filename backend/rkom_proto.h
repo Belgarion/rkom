@@ -146,6 +146,14 @@ struct rk_conference {
 	} rc_aux_item;
 };
 
+struct rk_uconference {
+		int32_t	ru_retval;
+		char *	ru_name;
+		u_int32_t	ru_type;
+		u_int32_t	ru_highest_local_no;
+		u_int32_t	ru_nice;
+};
+
 struct rk_person {
 		int32_t	rp_retval;
 		char *	rp_username;
@@ -305,6 +313,7 @@ size_t get_size_encoded_rk_aux_item_input(struct rk_aux_item_input* var);
 size_t get_size_encoded_rk_text_stat(struct rk_text_stat* var);
 size_t get_size_encoded_rk_membership(struct rk_membership* var);
 size_t get_size_encoded_rk_conference(struct rk_conference* var);
+size_t get_size_encoded_rk_uconference(struct rk_uconference* var);
 size_t get_size_encoded_rk_person(struct rk_person* var);
 size_t get_size_encoded_rk_confinfo(struct rk_confinfo* var);
 size_t get_size_encoded_rk_confinfo_retval(struct rk_confinfo_retval* var);
@@ -361,6 +370,8 @@ size_t get_size_decoded_rk_membership(char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
 size_t get_size_decoded_rk_conference(char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
+size_t get_size_decoded_rk_uconference(char **enc_buf,
+			size_t *dyn_len, size_t *stat_len);
 size_t get_size_decoded_rk_person(char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
 size_t get_size_decoded_rk_confinfo(char **enc_buf,
@@ -415,6 +426,7 @@ size_t encode_rk_aux_item_input(struct rk_aux_item_input* var, char ** enc_buf);
 size_t encode_rk_text_stat(struct rk_text_stat* var, char ** enc_buf);
 size_t encode_rk_membership(struct rk_membership* var, char ** enc_buf);
 size_t encode_rk_conference(struct rk_conference* var, char ** enc_buf);
+size_t encode_rk_uconference(struct rk_uconference* var, char ** enc_buf);
 size_t encode_rk_person(struct rk_person* var, char ** enc_buf);
 size_t encode_rk_confinfo(struct rk_confinfo* var, char ** enc_buf);
 size_t encode_rk_confinfo_retval(struct rk_confinfo_retval* var, char ** enc_buf);
@@ -471,6 +483,8 @@ size_t decode_rk_membership(struct rk_membership * var, char **dyn_buf, char **e
 			size_t *dyn_len, size_t *stat_len);
 size_t decode_rk_conference(struct rk_conference * var, char **dyn_buf, char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
+size_t decode_rk_uconference(struct rk_uconference * var, char **dyn_buf, char **enc_buf,
+			size_t *dyn_len, size_t *stat_len);
 size_t decode_rk_person(struct rk_person * var, char **dyn_buf, char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
 size_t decode_rk_confinfo(struct rk_confinfo * var, char **dyn_buf, char **enc_buf,
@@ -519,6 +533,8 @@ struct rk_memberconflist * rk_memberconf(u_int32_t arg0);
 struct rk_memberconflist * rk_memberconf_server(u_int32_t arg0);
 struct rk_confinfo_retval * rk_matchconf(char * arg0, u_int8_t arg1);
 struct rk_confinfo_retval * rk_matchconf_server(char * arg0, u_int8_t arg1);
+struct rk_uconference * rk_uconfinfo(u_int32_t arg0);
+struct rk_uconference * rk_uconfinfo_server(u_int32_t arg0);
 struct rk_conference * rk_confinfo(u_int32_t arg0);
 struct rk_conference * rk_confinfo_server(u_int32_t arg0);
 struct rk_person * rk_persinfo(u_int32_t arg0);

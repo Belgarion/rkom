@@ -8,6 +8,7 @@ Ord inom parentes ska inte skrivas.\n\
     Återse presentation (för)\n\
     Återse urinlägg\n\
     Återse oredigerat\n\
+    Återse faq\n\
     Lista (alla) nyheter\n\
     Endast (läsa senaste)\n\
     (Se inlägget) igen\n\
@@ -40,10 +41,12 @@ Ord inom parentes ska inte skrivas.\n\
     Gå (till möte)\n\
     (Gå till) nästa möte\n\
     Lista möten\n\
+    Snabblista möten\n\
     Skapa möte\n\
     Radera möte\n\
     Utträda (ur möte)\n\
     Ändra presentation (för)\n\
+    Ändra faq (för)\n\
 \n\
   Kommandon för texter:\n\
     Addera mottagare (till inlägg)\n\

@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.41 2002/08/31 12:59:21 ragge Exp $ */
+/* $Id: parse.c,v 1.42 2002/09/01 13:36:42 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -75,6 +75,7 @@ DCMD(conf_where);
 DCMD(conf_goto);
 DCMD(conf_goto_next);
 DCMD(conf_list);
+DCMD(conf_list_q);
 DCMD(conf_leave);
 DCMD(conf_change_presentation);
 DCMD(conf_change_faq);
@@ -189,6 +190,7 @@ DROW("var",					0,PE_NO_ARG,conf_where)
 DROW("gå",					0,PE_STR_ARG,conf_goto)
 DROW("nästa möte",				0,PE_NO_ARG,conf_goto_next)
 DROW("lista möten",				0,PE_NO_ARG,conf_list)
+DROW("snabblista möten",			0,PE_NO_ARG,conf_list_q)
 DROW("utträda",					0,PE_STR_ARG,conf_leave)
 DROW("ändra presentation",		0,PE_STR_ARG,conf_change_presentation)
 DROW("ändra faq",			0,PE_STR_ARG,conf_change_faq)
@@ -628,6 +630,13 @@ static int
 exec_conf_goto_next(int argc, char *argv[])
 {
 	next_conf(NULL);
+	return 0;
+}
+
+static int
+exec_conf_list_q(int argc, char *argv[])
+{
+	list_conf_q(NULL);
 	return 0;
 }
 

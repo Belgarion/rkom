@@ -139,6 +139,28 @@ rk_unreadconf_server(u_int32_t uid)
 	return ure;
 }
 
+struct rk_uconference *
+rk_uconfinfo_server(u_int32_t mid) 
+{
+	struct rk_uconference *ru;
+	char buf[40];
+
+	ru = calloc(sizeof(struct rk_uconference), 1);
+	sprintf(buf, "78 %d\n", mid);
+	if (send_reply(buf)) {
+		ru->ru_name = "";
+		ru->ru_retval = get_int();
+		get_eat('\n');
+		return ru;
+	}
+	ru->ru_name = get_string();
+	ru->ru_type = get_int();
+	ru->ru_highest_local_no = get_int();
+	ru->ru_nice = get_int();
+	get_accept('\n');
+	return ru;
+}
+
 struct rk_conference *
 rk_confinfo_server(u_int32_t mid)
 {
