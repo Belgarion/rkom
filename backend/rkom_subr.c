@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.20 2003/09/17 10:51:34 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.21 2003/09/17 14:14:05 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -24,8 +24,10 @@
 #include "rkomsupport.h"
 #include "backend.h"
 
-int sockfd, readfd=-1, writefd = -1, fepid = -1;
-static int childpid;
+FILE *sfd;
+int readfd=-1, writefd = -1, fepid = -1;
+int pfd;
+
 /*
  * First connect to the server, then fork away the backend after informing
  * about our existance.
@@ -47,22 +49,27 @@ rkom_connect(char *server, char *frontend, char *os_username, char *fevers)
 		return rs;
 
 	/* Create a socket to play with */
-	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	if ((pfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		return rs;
 
 	/* Connect to the server we want to talk with */
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(4894); /* XXX should be configureable */
 	bcopy(hp->h_addr, &sin.sin_addr, hp->h_length);
-	if (connect(sockfd, (struct sockaddr *)&sin, sizeof(sin)) < 0)
+	if (connect(pfd, (struct sockaddr *)&sin, sizeof(sin)) < 0)
 		return rs;
+
+	if ((sfd = fdopen(pfd, "w")) == NULL)
+		return rs;
+	setvbuf(sfd, (char *)NULL, _IOLBF, 0);
 
 	put_char('A');
 	put_string(os_username);
 	put_char('\n');
 	buf2 = alloca(8);
 	bzero(buf2, 8);
-	read(sockfd, buf2, 7);
+
+	read(pfd, buf2, 7);
 	if (bcmp(buf2, "LysKOM\n", 7))
 		return rs;
 
@@ -94,43 +101,8 @@ rkom_connect(char *server, char *frontend, char *os_username, char *fevers)
 	return rs;
 }
 
-#if 0
-int
-rkom_fork()
-{
-	int toback[2], fromback[2];
-
-	if (pipe(toback) || pipe(fromback))
-		return -1;
-	fepid = getpid();
-
-	/* Ok, now fork the backend process */
-	if ((childpid = fork()) == 0) {
-		close(0);
-		close(toback[1]);
-		close(fromback[0]);
-		spc_set_write_fd(fromback[1]);
-		spc_set_read_fd(toback[0]);
-		writefd = fromback[1];
-		readfd = toback[0];
-		rkom_loop(); /* Backend main loop */
-	} else if (childpid < 1)
-		return -1;
-
-	spc_set_write_fd(toback[1]);
-	spc_set_read_fd(fromback[0]);
-
-	writefd = toback[1];
-	readfd = fromback[0];
-	close(toback[0]);
-	close(fromback[1]);
-	return 0;
-}
-#endif
-
 void
 rkom_logout()
 {
-	kill(childpid, SIGTERM);
 	exit(0);
 }

@@ -24,9 +24,10 @@
 
 static int reqnr;
 static int wait_for_reply_no;
-int sockfd;
 static int unget;
 static int level;
+extern FILE *sfd;
+extern int pfd;
 
 struct callback {
 	int msgid;
@@ -44,17 +45,17 @@ static struct callback *cpole;
 int
 rkom_loop()
 {
-	struct pollfd pfd[2];
+	struct pollfd pofd[2];
 	int erra = 0;
 
 	/*
 	 * Set up the poll descriptors.
 	 */
 	level++;
-	pfd[0].fd = 0;	/* stdin */
-	pfd[0].events = (level < 2 ? POLLIN|POLLPRI : 0);
-	pfd[1].fd = sockfd;
-	pfd[1].events = POLLIN|POLLPRI;
+	pofd[0].fd = 0;	/* stdin */
+	pofd[0].events = (level < 2 ? POLLIN|POLLPRI : 0);
+	pofd[1].fd = pfd;
+	pofd[1].events = POLLIN|POLLPRI;
 
 	/*
 	 * Ok, everything seems OK. Get into the poll loop and wait
@@ -66,8 +67,8 @@ rkom_loop()
 		if (level == 1)
 			async_collect();
 		/* Wait for something to happen */
-		pfd[0].revents = pfd[1].revents = 0;
-		rv = poll(pfd, 2, INFTIM);
+		pofd[0].revents = pofd[1].revents = 0;
+		rv = poll(pofd, 2, INFTIM);
 		if (rv == 0)
 			continue;
 		if (rv < 0) {
@@ -75,12 +76,13 @@ rkom_loop()
 				err(1, "poll: säg till ragge");
 			continue;
 		}
-		if (pfd[0].revents & (POLLIN|POLLPRI))
+		if (pofd[0].revents & (POLLIN|POLLPRI))
 			rkom_command();
-		if (pfd[1].revents & (POLLIN|POLLPRI)) {
-			int i, rv;
+		if (pofd[1].revents & (POLLIN|POLLPRI)) {
+			int i;
 			char c;
 
+#if 0
 			/* Check if there are anything available */
 			if (fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1)
 				err(1, "fcntl");
@@ -93,6 +95,7 @@ rkom_loop()
 			unget = c;
 			if (fcntl(sockfd, F_SETFL, 0) == -1)
 				err(1, "fcntl2");
+#endif
 
 			c = get_char();
 
@@ -171,9 +174,9 @@ send_reply(char *msg)
 	if (in_state == 0) {
 		wait_for_reply_no = reqnr;
 		sprintf(buf, "%d ", reqnr++);
-		write(sockfd, buf, strlen(buf));
+		fputs(buf, sfd);
 	}
-	write(sockfd, msg, strlen(msg));
+	fputs(msg, sfd);
 	in_state = (msg[strlen(msg) - 1] != '\n');
 	return (in_state ? 0 : rkom_loop());
 }
@@ -185,8 +188,8 @@ send_callback(char *msg, int arg, void (*func)(int, int))
 	char buf[12];
 
 	sprintf(buf, "%d ", reqnr);
-	write(sockfd, buf, strlen(buf));
-	write(sockfd, msg, strlen(msg));
+	fputs(buf, sfd);
+	fputs(msg, sfd);
 	c = malloc(sizeof(struct callback));
 	c->func = func;
 	c->arg = arg;
@@ -208,7 +211,7 @@ get_char()
 		c = unget;
 		unget = 0;
 	} else
-		read(sockfd, &c, 1);
+		read(pfd, &c, 1);
 	return c;
 }
 
@@ -273,7 +276,7 @@ get_eat(char c)
 void
 put_char(char c)
 {
-	write(sockfd, &c, 1);
+	fputc(c, sfd);
 }
 
 /*
@@ -292,7 +295,7 @@ put_string(char *str)
 #else
 	totlen = sprintf(buf, " %dH%s ", len, str);
 #endif
-	write(sockfd, buf, totlen);
+	fputs(buf, sfd);
 }
 
 static void

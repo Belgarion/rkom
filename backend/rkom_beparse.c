@@ -13,6 +13,7 @@
 #include "backend.h"
 
 extern int myuid;
+extern FILE *sfd;
 
 struct rk_time *
 rk_time(void)
@@ -487,13 +488,12 @@ rk_create_text(struct rk_text_info *rti)
 	struct rk_text_retval *rkr;
 	struct rk_misc_info *mi;
 	struct rk_aux_item_input *raii;
-	extern int sockfd;
 	char buf[30];
 	int i, nmi, nraii;
 
 	sprintf(buf, "86 %ldH", (long)strlen(rti->rti_text));
 	send_reply(buf);
-	write(sockfd, rti->rti_text, strlen(rti->rti_text));
+	fputs(rti->rti_text, sfd);
 	nmi = rti->rti_misc.rti_misc_len;
 	mi = rti->rti_misc.rti_misc_val;
 
@@ -817,7 +817,6 @@ rk_set_motd(u_int32_t conf, struct rk_text_info *rti)
 int32_t
 rk_add_text_info(u_int32_t textno, struct rk_aux_item_input *raii)
 {
-	extern int sockfd;
 	char buf[30];
 	int ret;
 
@@ -827,7 +826,7 @@ rk_add_text_info(u_int32_t textno, struct rk_aux_item_input *raii)
 	sprintf(buf, " 1 { %d 00000000 %d %ldH", raii->raii_tag,
 		raii->inherit_limit, (long)strlen(raii->raii_data));
 	send_reply(buf);
-	write(sockfd, raii->raii_data, strlen(raii->raii_data));
+	fputs(raii->raii_data, sfd);
 	sprintf(buf, " }\n");
 	send_reply(buf);
 
