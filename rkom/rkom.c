@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.18 2000/12/10 15:09:27 ragge Exp $ */
+/* $Id: rkom.c,v 1.19 2001/01/04 11:05:13 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -218,7 +218,7 @@ async_collect()
 			struct rk_conference *sender;
 
 			if (iseql("presence-messages", "1")) {
-				sender = rk_confinfo(ra->ra_sender);
+				sender = rk_confinfo(ra->ra_pers);
 				rprintf("\n%s har just loggat %s.",
 				    sender->rc_name,
 				    (ra->ra_type == 13 ? "ut" : "in"));
@@ -239,7 +239,7 @@ async_collect()
 		case 12: {
 			struct rk_conference *sender, *rcpt;
 
-			sender = rk_confinfo(ra->ra_sender);
+			sender = rk_confinfo(ra->ra_pers);
 rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 			if (ra->ra_conf == 0)
 				rprintf("Allmänt meddelande från %s\n\n",
@@ -265,6 +265,9 @@ rprintf("----------------------------------------------------------------\n");
 				next_prompt();
 			if (prompt != hej)
 				retval = 0;
+			break;
+
+		case 14:
 			break;
 
 		default:
