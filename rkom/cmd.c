@@ -191,7 +191,7 @@ nxtcmd(char **str)
 	if (*g == 0)
 		return 0;
 	h = g;
-	while (isalpha(*h))
+	while (isalpha(*h) || isdigit(*h))
 		h++;
 	if (*h == 0) {
 		*str = 0;
@@ -207,10 +207,10 @@ cmd_vilka(char *str)
 {
 	struct rk_dynamic_session_info_retval *ppp;
 	struct rk_dynamic_session_info *pp;
-	int i, antal, invisible, visible, clients, type;
+	int i, antal, invisible, visible, clients, type, idle;
 	char *s;
 
-	invisible = visible = clients = 0;
+	invisible = visible = clients = idle = 0;
 	if (str == 0)
 		visible++;
 	else
@@ -221,6 +221,8 @@ cmd_vilka(char *str)
 				visible++;
 			if (bcmp(s, "klienter", strlen(s)) == 0)
 				clients++;
+			if (atoi(s))
+				idle = atoi(s);
 		}
 	type = 0;
 	if (visible)
@@ -229,7 +231,7 @@ cmd_vilka(char *str)
 		type |= WHO_INVISIBLE;
 	if (type == 0)
 		type = WHO_VISIBLE;
-	ppp = rk_vilka(0, type);
+	ppp = rk_vilka(idle, type);
 
 	antal = ppp->rdv_rds.rdv_rds_len;
 	pp = ppp->rdv_rds.rdv_rds_val;
