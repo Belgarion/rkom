@@ -402,7 +402,7 @@ extedit(char *sub)
 	struct stat sb;
 	extern char **environ;
 	char *editor = getenv("EDITOR");
-	char *txt, fil[30], *args[4];
+	char *txt, fil[30], *args[4], buf[10];
 	int f;
 
 	if (editor == 0)
@@ -421,7 +421,8 @@ extedit(char *sub)
 	close(f);
 	free(txt);
 	args[0] = editor;
-	args[1] = "+2"; /* XXX */
+	sprintf(buf, "+%d", nmi + 1);
+	args[1] = buf;
 	args[2] = fil;
 	args[3] = 0;
 	if (fork() == 0) {
