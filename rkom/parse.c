@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.2 2000/11/18 10:36:04 ragge Exp $ */
+/* $Id: parse.c,v 1.3 2000/11/19 11:10:49 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -57,6 +57,7 @@ DCMD(write_cmt_last);
 DCMD(write_footnote);
 DCMD(write_footnote_no);
 DCMD(write_letter);
+DCMD(write_private);
 
 /* Commands for conferences */
 DCMD(conf_where);
@@ -126,6 +127,7 @@ DROW("kommentera föregånde",			0,PE_NO_ARG,write_cmt_last)
 DROW("fotnot",					0,PE_NUM_ARG,write_footnote_no)
 DROW("fotnot",					1,PE_NO_ARG,write_footnote)
 DROW("brev",					0,PE_STR_ARG,write_letter)
+DROW("personligt",				0,PE_STR_ARG,write_private)
 
 /* Commands for conferences */
 DROW("var",						0,PE_NO_ARG,conf_where)
@@ -391,6 +393,20 @@ exec_write_letter(int argc, char *argv[])
 	NWA;
 	TT(argc < 1, "Du måste ange mottagare.\n");
 	write_brev(re_concat(argc, argv));
+	return 0;
+}
+
+static int
+exec_write_private(int argc, char *argv[])
+{
+	LF;
+	NWA;
+	TT((argc == 0) && (lasttext == 0),
+	    "Det finns ingen text att svara personligt på.\n");
+	TT((argc == 1) && (atoi(argv[0]) == 0),
+	    "Du måste ange ett riktigt textnummer som argument.\n");
+	TT(argc > 1, "\"Personligt (svar)\" tar max ett argument.\n");
+	write_private(argc == 0 ? lasttext : atoi(argv[0]));
 	return 0;
 }
 

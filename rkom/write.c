@@ -34,11 +34,27 @@ static char *ctext = 0;
 #define	LF if (myuid == 0) {printf("Du måste logga in först.\n");return;}
 #define	NC if (curconf == 0) {printf("Du måste gå till ett möte först.\n");return;}
 
+static void
+doedit(char *s)
+{
+	char *txt;
+
+a:      if (use_editor) {
+		if (extedit(s)) {
+			use_editor = 0;
+			goto a;
+		}
+	} else {
+		txt = get_text(s);
+		parse_text(txt);
+		free(txt);
+	}
+}
+
 void
 write_brev(char *str)
 {
 	struct rk_confinfo_retval *retval;
-	char *txt;
 
 	IW;
 	LF;
@@ -58,23 +74,45 @@ write_brev(char *str)
 	mi[1].rmi_type = recpt;
 	mi[1].rmi_numeric = myuid;
 	nmi = 2;
-a:      if (use_editor) {
-		if (extedit(0)) {
-			use_editor = 0;
-			goto a;
-		}
-	} else {
-		txt = get_text(0);
-		parse_text(txt);
-		free(txt);
+	doedit(0);
+}
+
+void
+write_private(int textno)
+{
+	struct rk_text_stat *ts;
+	char *s, *t;
+
+	printf("Personligt (svar till text %d)\n", textno);
+	is_writing = 1;
+	ts = rk_textstat(textno);
+	if (ts->rt_retval) {
+		printf("Kunde inte svara personligt på texten: %s\n",
+		    error(ts->rt_retval));
+		free(ts);
+		return;
 	}
+	mi = calloc(sizeof(struct rk_misc_info), 2);
+	mi[0].rmi_type = recpt;
+	mi[0].rmi_numeric = ts->rt_author;
+	mi[1].rmi_type = recpt;
+	mi[1].rmi_numeric = myuid;
+	nmi = 2;
+	free(ts);
+
+	/* Get the subject line from commented text */
+	s = rk_gettext(textno);
+	t = index(s, '\n');
+	if (t)
+		t[1] = 0;
+
+	doedit(s);
+	free(s);
 }
 
 void
 write_new(char *str)
 {
-	char *txt;
-
 	IW;
 	LF;
 	NC;
@@ -84,16 +122,7 @@ write_new(char *str)
 	mi[0].rmi_type = recpt;
 	mi[0].rmi_numeric = curconf;
 	nmi = 1;
-a:	if (use_editor) {
-		if (extedit(0)) {
-			use_editor = 0;
-			goto a;
-		}
-	} else {
-		txt = get_text(0);
-		parse_text(txt);
-		free(txt);
-	}
+	doedit(0);
 }
 
 void
@@ -412,7 +441,7 @@ write_internal(int text, int ktyp)
 {
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mf;
-	char *txt, *s, *t;
+	char *s, *t;
 	int i, num;
 
 	ts = rk_textstat(text);
@@ -443,16 +472,7 @@ write_internal(int text, int ktyp)
 		t[1] = 0;
 
 	is_writing = 1;
-a:	if (use_editor) {
-		if (extedit(s)) {
-			use_editor = 0;
-			goto a;
-		}
-	} else {
-		txt = get_text(s);
-		parse_text(txt);
-		free(txt);
-	}
+	doedit(s);
 	free(s);
 }
 

@@ -13,5 +13,6 @@ void	write_cmnt_last(void);
 void	write_put(char *);
 void	write_whole(char *);
 void	write_brev(char *);
+void	write_private(int);
 
 int	is_writing; /* Is writing text right now */
