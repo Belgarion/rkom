@@ -118,11 +118,11 @@ sort_uarea(char *str)
 		
 }
 
-static char *upole;
 
 static struct uarea *
 get_uarea(int uid)
 {
+	static char *upole;
 	struct rk_person *p;
 
 	if (upole)
@@ -154,7 +154,6 @@ rk_get_uarea(char *str)
 	if (rv)
 		free(rv);
 	rv = NULL;
-	upole = NULL;
 	uarea = NULL;
 
 	if (myuid == 0) {
