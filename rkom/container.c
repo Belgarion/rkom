@@ -1,4 +1,4 @@
-/* $Id: container.c,v 1.4 2001/11/20 22:24:53 ragge Exp $ */
+/* $Id: container.c,v 1.5 2004/05/21 07:12:47 jens Exp $ */
 /*
  * Copyright (c) 1999, 2000
  *      Jens A. Nilsson, jnilsson@ludd.luth.se. All rights reserved.
@@ -24,10 +24,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#ifndef lint
-static char const cvsid[] = "$Id: container.c,v 1.4 2001/11/20 22:24:53 ragge Exp $";
-#endif
-
 #include <sys/errno.h>
 #include <errno.h>
 #include <stdlib.h>
