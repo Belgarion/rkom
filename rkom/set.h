@@ -16,5 +16,6 @@ void parsefile(char *);	/* Reads and parses config file */
 void readvars(void);
 int iseql(char *var, char *val);
 int isneq(char *var, char *val);
-void set_flags(char *);
-void set_setflag(char *);
+void set_flags(void);
+void set_setflag(char *, char *);
+void set_saveflags(void);

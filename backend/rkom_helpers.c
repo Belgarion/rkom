@@ -4,7 +4,6 @@
 #include <time.h>
 
 #include "rkom_proto.h"
-#include "exported.h"
 #include "backend.h"
 
 void

@@ -1,5 +1,10 @@
-/* $Id: rkom_proto.spc,v 1.14 2000/10/24 15:05:30 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.15 2000/11/18 10:35:58 ragge Exp $ */
 
+/* Exported prototypes */
+%hfile
+int rkom_connect(char *server, char *frontend, char *os_username);
+void rkom_logout(void);
+%end
 /*
  * Time as defined in the lyskom protocol. Variables are kept
  * in as small variables as possible.
@@ -18,11 +23,13 @@ struct rk_time {
 
 /*
  * Additional text information.
- *
- * Type is: recpt, cc_recpt, comm_to, comm_in, footn_to, footn_in, loc_no
- *	rec_time, sent_by, sentat, bcc_recpt
- * with increasing numbers. Definitions in external.h.
  */
+%hfile
+enum Misc_Info_types {
+	recpt, cc_recpt, comm_to, comm_in, footn_to, footn_in,
+	loc_no, rec_time, sent_by, sentat, bcc_recpt = 15
+};
+%end
 struct rk_misc_info {
 	u_int32_t	rmi_type;	/* Type of misc field */
 	u_int32_t	rmi_numeric;	/* Used if type is numeric */
@@ -141,7 +148,13 @@ struct rk_dynamic_session_info_retval {
 };
 
 struct rk_unreadconfval {
+	int32_t		ru_retval;
 	u_int32_t	ru_confs<>;
+};
+
+struct rk_memberconflist {
+	int32_t		rm_retval;
+	u_int32_t	rm_confs<>;
 };
 
 struct rk_text_retval {
@@ -200,9 +213,18 @@ int32_t rk_whatido(string);
 struct rk_unreadconfval rk_unreadconf(u_int32_t);
 
 /*
+ * Get the conferences where the user is member.
+ */
+struct rk_memberconflist rk_memberconf(u_int32_t);
+
+/*
  * Do a conference/user name match.
  * Return an array of matched confinfo structs.
  */
+%hfile
+#define MATCHCONF_PERSON	1
+#define MATCHCONF_CONF		2
+%end
 struct rk_confinfo_retval rk_matchconf(string, u_int8_t);
 
 /*
@@ -231,6 +253,10 @@ struct rk_membership rk_membership(u_int32_t, u_int32_t);
  * Return the users that are logged on to the system.
  * Args are (idlesecs, flags).
  */
+%hfile
+#define WHO_VISIBLE	1
+#define WHO_INVISIBLE	2
+%end
 struct rk_dynamic_session_info_retval rk_vilka(u_int32_t, u_int32_t);
 
 /*

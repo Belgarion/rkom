@@ -19,6 +19,15 @@ int sockfd;
 static int unget;
 static int level;
 
+struct callback {
+	int msgid;
+	int arg;
+	struct callback *next;
+	void (*func)(int, int);
+};
+
+static struct callback *cpole;
+
 /*
  * Main loop. Running normally on level 1, waiting for replies on 
  * level 2. Handles async requests only on level 1.
@@ -87,10 +96,31 @@ rkom_loop()
 					level--;
 					return err;
 				} else {
-					printf("Okänd reply ");
-					while (c != '\n') {
-						c = get_char();
-						putchar(c);
+					struct callback *nc, *cc = cpole;
+					while (cc) {
+						if (cc->msgid == i) {
+							(*cc->func)
+							    (err, cc->arg);
+							if (cc == cpole) {
+								cpole =
+								    cc->next;
+							} else {
+								nc->next =
+								    cc->next;
+							}
+							free(cc);
+							err = 0;
+							break;
+						}
+						nc = cc;
+						cc = cc->next;
+					}
+					if (cc == 0) {
+						printf("Okänd reply ");
+						while (c != '\n') {
+							c = get_char();
+							putchar(c);
+						}
 					}
 				}
 				break;
@@ -121,6 +151,24 @@ send_reply(char *msg)
 	write(sockfd, msg, strlen(msg));
 	in_state = (msg[strlen(msg) - 1] != '\n');
 	return (in_state ? 0 : rkom_loop());
+}
+
+void
+send_callback(char *msg, int arg, void (*func)(int, int))
+{
+	struct callback *c;
+	char buf[12];
+
+	sprintf(buf, "%d ", reqnr);
+	write(sockfd, buf, strlen(buf));
+	write(sockfd, msg, strlen(msg));
+	c = malloc(sizeof(struct callback));
+	c->func = func;
+	c->arg = arg;
+	c->msgid = reqnr;
+	c->next = cpole;
+	cpole = c;
+	reqnr++;
 }
 
 /*

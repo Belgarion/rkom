@@ -1,9 +1,11 @@
-/* $Id: parse.c,v 1.1 2000/11/05 16:26:19 jens Exp $ */
+/* $Id: parse.c,v 1.2 2000/11/18 10:36:04 ragge Exp $ */
 
 #include <sys/param.h>
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #include "next.h"
 #include "write.h"
@@ -41,6 +43,7 @@ static int CC_2(exec_,x) (int argc, char *argv[])
 DCMD(read_next_text);
 DCMD(read_next_cmt);
 DCMD(read_see_again_cmt);
+DCMD(read_see_again_cmt_no);
 DCMD(read_list_news);
 DCMD(read_only);
 DCMD(read_again);
@@ -49,8 +52,10 @@ DCMD(read_jump);
 /* Commands for writing */
 DCMD(write_new);
 DCMD(write_cmt);
+DCMD(write_cmt_no);
 DCMD(write_cmt_last);
 DCMD(write_footnote);
+DCMD(write_footnote_no);
 DCMD(write_letter);
 
 /* Commands for conferences */
@@ -84,6 +89,7 @@ DCMD(com_say);
 DCMD(info_list_commands);
 DCMD(info_flags);
 DCMD(info_time);
+DCMD(info_saveflags);
 
 /* Other commands */
 DCMD(other_set);
@@ -105,7 +111,8 @@ struct command_list commands[] = {
 /* Commands for reading */
 DROW("nästa inlägg",			0,PE_NO_ARG,read_next_text)
 DROW("nästa kommentar",			0,PE_NO_ARG,read_next_cmt)
-DROW("återse kommenterade",		0,PE_NO_ARG,read_see_again_cmt)
+DROW("återse",				0,PE_NUM_ARG,read_see_again_cmt_no)
+DROW("återse kommenterade",		1,PE_NO_ARG,read_see_again_cmt)
 DROW("lista nyheter",			0,PE_NO_ARG,read_list_news)
 DROW("endast",					0,PE_NUM_ARG,read_only)
 DROW("igen",					0,PE_NO_ARG,read_again)
@@ -113,9 +120,11 @@ DROW("hoppa",					0,PE_NO_ARG,read_jump)
 
 /* Commands for writing */
 DROW("inlägg",					0,PE_NO_ARG,write_new)
+DROW("kommentera",				0,PE_NUM_ARG,write_cmt_no)
 DROW("kommentera",				1,PE_NO_ARG,write_cmt)
-DROW("kommentera föregånde",	0,PE_NO_ARG,write_cmt_last)
-DROW("fotnot",					0,PE_NO_ARG,write_footnote)
+DROW("kommentera föregånde",			0,PE_NO_ARG,write_cmt_last)
+DROW("fotnot",					0,PE_NUM_ARG,write_footnote_no)
+DROW("fotnot",					1,PE_NO_ARG,write_footnote)
 DROW("brev",					0,PE_STR_ARG,write_letter)
 
 /* Commands for conferences */
@@ -136,6 +145,7 @@ DROW("markera",					0,PE_NUM_ARG,text_mark)
 DROW("avmarkera",				0,PE_NUM_ARG,text_unmark)
 DROW("lista markerade",			0,PE_NO_ARG,text_list_marked)
 DROW("spara",					0,PE_STR_ARG,text_save)
+DROW("spara flaggor",				0,PE_NO_ARG,info_saveflags)
 
 /* Commands for online communication */
 DROW("vilka",					0,PE_NO_ARG,com_who)
@@ -149,6 +159,7 @@ DROW("säg",						0,PE_STR_ARG,com_say)
 DROW("lista kommandon",			0,PE_NO_ARG,info_list_commands)
 DROW("flaggor",					0,PE_NO_ARG,info_flags)
 DROW("tiden",					0,PE_NO_ARG,info_time)
+DROW("hjälp",					0,PE_NO_ARG,info_list_commands)
 
 /* Other commands */
 DROW("sätt",					0,PE_STR_ARG,other_set)
@@ -191,13 +202,56 @@ exec_cmd(const char *str)
 	CHK_INIT;
 
 	if (strlen(str) == 0) {
-		/* Replace cmd_tiden with the default action at this moment */
-		printf("default action\n");
-		cmd_tiden(NULL);
+		if (prompt == PROMPT_SEE_TIME)
+			cmd_tiden(NULL);
+		else if (prompt == PROMPT_NEXT_TEXT)
+			next_text(NULL);
+		else if (prompt == PROMPT_NEXT_CONF)
+			next_conf(NULL);
+		else if (prompt == PROMPT_NEXT_COMMENT)
+			next_comment(NULL);
+		else
+			printf("Okänd prompt %s\n", prompt);
 		return 0;
 	}
 
 	return parse_exec(cmds, str);
+}
+
+/* Helpers */
+#define	XXTEST(name, test, text) \
+static int name(void) {if(test)printf(text);else return 0;return 1;}
+#define TT(cmp, str) if (cmp) {printf(str);return 0;}
+
+XXTEST(nwa, is_writing, "Du håller redan på att skriva en text.\n")
+#define	NWA if (nwa()) return 0
+XXTEST(owa, is_writing == 0, "Du skriver ingen text just nu.\n")
+#define OWA if (owa()) return 0
+XXTEST(lf, myuid == 0, "Du måste logga in först.\n")
+#define LF if (lf()) return 0
+XXTEST(mhc, curconf == 0, "Du måste gå till ett möte först.\n")
+#define MHC if (mhc()) return 0
+
+/* re-concat parameters again */
+static char *
+re_concat(int argc, char *argv[])
+{
+	int i, tot;
+	static char *ret;
+
+	if (ret)
+		free(ret);
+	for (i = tot = 0; i < argc; i++)
+		tot += strlen(argv[i]);
+	tot += argc + 10;
+	ret = calloc(tot, 1);
+	for (i = 0; i < argc; i++) {
+		strcat(ret, argv[i]);
+		strcat(ret, " ");
+	}
+	if (argc)
+		ret[strlen(ret) - 1] = 0;
+	return ret;
 }
 
 /** The actual implementation of the exec_XXX functions declared earlier **/
@@ -216,6 +270,7 @@ do { \
 static int
 exec_read_next_text(int argc, char *argv[])
 {
+	LF;
 	next_text(NULL);
 	return 0;
 }
@@ -223,38 +278,41 @@ exec_read_next_text(int argc, char *argv[])
 static int
 exec_read_next_cmt(int argc, char *argv[])
 {
+	LF;
 	next_comment(NULL);
+	return 0;
+}
+
+static int
+exec_read_see_again_cmt_no(int argc, char *argv[])
+{
+	LF;
+	next_resee_text(atoi(argv[0]));
 	return 0;
 }
 
 static int
 exec_read_see_again_cmt(int argc, char *argv[])
 {
-	if (argc < 1) {
-		printf("Du måste de ett arguemnt till \"återse\"\n");
-		return -1;
-	}
-	if (argc > 1) {
-		printf("\"återse\" tar endast ett argument\n");
-		return -1;
-	}
-	next_resee(argv[0]);
+	LF;
+	next_resee_comment();
 	return 0;
 }
 
 static int
 exec_read_list_news(int argc, char *argv[])
 {
-	P_CALL_INFO;
-
+	LF;
+	list_news(0);
 	return 0;
 }
 
 static int
 exec_read_only(int argc, char *argv[])
 {
-	P_CALL_INFO;
-
+	MHC;
+	TT(argc < 1, "Du måste ange hur många du endast vill se.\n");
+	cmd_only(argv[0]);
 	return 0;
 }
 
@@ -284,37 +342,55 @@ exec_write_new(int argc, char *argv[])
 static int
 exec_write_cmt(int argc, char *argv[])
 {
-	write_cmnt(NULL);
+	LF;
+	NWA;
+	write_cmnt();
+	return 0;
+}
+
+static int
+exec_write_cmt_no(int argc, char *argv[])
+{
+	LF;
+	NWA;
+	write_cmnt_no(atoi(argv[0]));
 	return 0;
 }
 
 static int
 exec_write_cmt_last(int argc, char *argv[])
 {
-	P_CALL_INFO;
+	LF;
+	NWA;
+	write_cmnt_last();
+	return 0;
+}
 
+static int
+exec_write_footnote_no(int argc, char *argv[])
+{
+	LF;
+	NWA;
+	write_footnote_no(atoi(argv[0]));
 	return 0;
 }
 
 static int
 exec_write_footnote(int argc, char *argv[])
 {
-	write_footnote(NULL);
+	LF;
+	NWA;
+	write_footnote();
 	return 0;
 }
 
 static int
 exec_write_letter(int argc, char *argv[])
 {
-	if (argc < 1) {
-		printf("Du måste ange mottagare.\n");
-		return -1;
-	}
-	if (argc > 1) {
-		printf("\"brev\" tar endast ett argument\n");
-		return -1;
-	}
-	write_brev(argv[0]);
+	LF;
+	NWA;
+	TT(argc < 1, "Du måste ange mottagare.\n");
+	write_brev(re_concat(argc, argv));
 	return 0;
 }
 
@@ -323,6 +399,7 @@ exec_write_letter(int argc, char *argv[])
 static int
 exec_conf_where(int argc, char *argv[])
 {
+	LF;
 	cmd_where(NULL);
 	return 0;
 }
@@ -330,11 +407,9 @@ exec_conf_where(int argc, char *argv[])
 static int
 exec_conf_goto(int argc, char *argv[])
 {
-	if (argc != 1) {
-		printf("Handhavande:\ngå <mötesnamn>\n");
-		return -1;
-	}
-	cmd_goto(argv[0]);
+	LF;
+	TT(argc == 0, "Handhavande:\ngå <mötesnamn>\n");
+	cmd_goto(re_concat(argc, argv));
 	return 0;
 }
 
@@ -355,10 +430,8 @@ exec_conf_list(int argc, char *argv[])
 static int
 exec_conf_leave(int argc, char *argv[])
 {
-	if (argc != 1) {
-		printf("Handhavande:\nutträda <mötesnamn>\n");
-		return -1;
-	}
+	LF;
+	TT(argc != 1, "Handhavande:\nutträda <mötesnamn>\n");
 	cmd_leave(argv[0]);
 	return 0;
 }
@@ -368,6 +441,7 @@ exec_conf_leave(int argc, char *argv[])
 static int
 exec_text_put(int argc, char *argv[])
 {
+	OWA;
 	write_put(NULL);
 	return 0;
 }
@@ -375,10 +449,8 @@ exec_text_put(int argc, char *argv[])
 static int
 exec_text_add_rcpt(int argc, char *argv[])
 {
-	if (argc != 1) {
-		printf("Handhavande:\nmottagare: <mottagarnamn>\n");
-		return -1;
-	}
+	OWA;
+	TT(argc != 1, "Handhavande:\nmottagare: <mottagarnamn>\n");
 	write_rcpt(argv[0]);
 	return 0;
 }
@@ -386,10 +458,8 @@ exec_text_add_rcpt(int argc, char *argv[])
 static int
 exec_text_add_cmt_to(int argc, char *argv[])
 {
-	if (argc != 1) {
-		printf("Handhavande:\nkommentar till: <ärendenummer>\n");
-		return -1;
-	}
+	OWA;
+	TT(argc != 1, "Handhavande:\nkommentar till: <ärendenummer>\n");
 	write_comment(argv[0]);
 	return 0;
 }
@@ -397,6 +467,7 @@ exec_text_add_cmt_to(int argc, char *argv[])
 static int
 exec_text_forget(int argc, char *argv[])
 {
+	OWA;
 	write_forget(NULL);
 	return 0;
 }
@@ -404,6 +475,7 @@ exec_text_forget(int argc, char *argv[])
 static int
 exec_text_show(int argc, char *argv[])
 {
+	OWA;
 	write_whole(NULL);
 	return 0;
 }
@@ -411,6 +483,7 @@ exec_text_show(int argc, char *argv[])
 static int
 exec_text_edit(int argc, char *argv[])
 {
+	OWA;
 	write_editor(NULL);
 	return 0;
 }
@@ -418,10 +491,8 @@ exec_text_edit(int argc, char *argv[])
 static int
 exec_text_mark(int argc, char *argv[])
 {
-	if (argc != 1) {
-		printf("Handhavande:\nmarkera <ärendenummer>\n");
-		return -1;
-	}
+	LF;
+	TT(argc != 1, "Handhavande:\nmarkera <ärendenummer>\n");
 	list_mark(argv[0]);
 	return 0;
 }
@@ -429,10 +500,8 @@ exec_text_mark(int argc, char *argv[])
 static int
 exec_text_unmark(int argc, char *argv[])
 {
-	if (argc != 1) {
-		printf("Handhavande:\navmarkera <ärendenummer>\n");
-		return -1;
-	}
+	LF;
+	TT(argc != 1, "Handhavande:\navmarkera <ärendenummer>\n");
 	list_unmark(argv[0]);
 	return 0;
 }
@@ -440,6 +509,7 @@ exec_text_unmark(int argc, char *argv[])
 static int
 exec_text_list_marked(int argc, char *argv[])
 {
+	LF;
 	list_marked(NULL);
 	return 0;
 }
@@ -447,10 +517,7 @@ exec_text_list_marked(int argc, char *argv[])
 static int
 exec_text_save(int argc, char *argv[])
 {
-	if (argc != 1) {
-		printf("Handhavande:\nspara <filnamn>\n");
-		return -1;
-	}
+	TT(argc != 1, "Handhavande:\nspara <filnamn>\n");
 	show_savetext(argv[0]);
 	return 0;
 }
@@ -488,6 +555,7 @@ exec_com_who_clients(int argc, char *argv[])
 static int
 exec_com_send(int argc, char *argv[])
 {
+	LF;
 	cmd_send(NULL);
 	return 0;
 }
@@ -495,11 +563,9 @@ exec_com_send(int argc, char *argv[])
 static int
 exec_com_say(int argc, char *argv[])
 {
-	if (argc != 1) {
-		printf("Handhavande:\nsäg <mottagare>\n");
-		return -1;
-	}
-	cmd_say(argv[0]);
+	LF;
+	TT(argc != 1, "Handhavande:\nsäg <mottagare>\n");
+	cmd_say(re_concat(argc, argv));
 	return 0;
 }
 
@@ -513,9 +579,18 @@ exec_info_list_commands(int argc, char *argv[])
 }
 
 static int
+exec_info_saveflags(int argc, char *argv[])
+{
+//	LF;
+	set_saveflags();
+	return 0;
+}
+
+static int
 exec_info_flags(int argc, char *argv[])
 {
-	set_flags(NULL);
+//	LF;
+	set_flags();
 	return 0;
 }
 
@@ -531,41 +606,24 @@ exec_info_time(int argc, char *argv[])
 static int
 exec_other_set(int argc, char *argv[])
 {
-	char	buf[100];
-
-	if (argc != 2) {
-		printf("Handhavande:\nsätt <flaggnamn> <värde>\n");
-		return -1;
-	}
-	strlcpy(buf, argv[0], sizeof(buf));
-	strlcat(buf, " ", sizeof(buf));
-	strlcat(buf, argv[1], sizeof(buf));
-	set_setflag(buf);
+//	LF;
+	TT(argc != 2, "Handhavande:\nsätt <flaggnamn> <värde>\n");
+	set_setflag(argv[0], argv[1]);
 	return 0;
 }
 
 static int
 exec_other_login(int argc, char *argv[])
 {
-	char	buf[100];
-	int		i;
-
-	if (argc == 0) {
-		printf("Handhavande:\nlogin <namn>\n");
-		return -1;
-	}
-	buf[0] = '\0';
-	for (i = 0; i < argc; i++) {
-		strlcat(buf, argv[i], sizeof(buf));
-		strlcat(buf, " ", sizeof(buf));
-	}
-	cmd_login(buf);
+	TT(argc == 0, "Handhavande:\nlogin <namn>\n");
+	cmd_login(re_concat(argc, argv));
 	return 0;
 }
 
 static int
 exec_other_logout(int argc, char *argv[])
 {
+	LF;
 	cmd_logout(NULL);
 	return 0;
 }

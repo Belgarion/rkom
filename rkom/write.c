@@ -12,7 +12,6 @@
 #include <fcntl.h>
 
 #include "rkom_proto.h"
-#include "exported.h"
 
 #include "rkom.h"
 #include "write.h"
@@ -409,49 +408,16 @@ extedit(char *sub)
 }
 
 static void
-write_internal(char *str, char *typ, int ktyp)
+write_internal(int text, int ktyp)
 {
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mf;
 	char *txt, *s, *t;
-	int text, i, num;
+	int i, num;
 
-	IW;
-	if (myuid == 0) {
-		printf("Du måste logga in först.\n");
-		return;
-	}
-
-	if (str == 0) {
-		text = lasttext;
-		printf("%s %d)\n", typ, text);
-	} else if (bcmp(str, "föregående", strlen(str)) == 0) {
-		struct rk_text_stat *ts;
-		struct rk_misc_info *mi;
-		int i, len;
-
-		ts = rk_textstat(lasttext);
-		mi = ts->rt_misc_info.rt_misc_info_val;
-		len = ts->rt_misc_info.rt_misc_info_len;
-		for (i = 0; i < len; i++)
-			if (mi[i].rmi_type == comm_in)
-				break;
-		if (i == len) {
-			printf("Senaste inlägget har ingen kommentar.\n");
-			free(ts);
-			return;
-		}
-		text = mi[i].rmi_numeric;
-		free(ts);
-		printf("Kommentera föregående (inlägg) (%d)\n", text);
-	} else if ((text = atoi(str)) == 0) {
-		printf("'%s' är ett jättedåligt textnummer.\n", str);
-		return;
-	} else
-		printf("%s inlägg %d)\n", typ, text);
 	ts = rk_textstat(text);
 	if (ts->rt_retval) {
-		printf("Text %d är inte läsbart, tyvärr...\n", text);
+		printf("Text %d är inte läsbar, tyvärr...\n", text);
 		free(ts);
 		return;
 	}
@@ -490,18 +456,49 @@ a:	if (use_editor) {
 	free(s);
 }
 
-
 void
-write_cmnt(char *str)
+write_cmnt_last()
 {
-	write_internal(str, "Kommentera (", comm_to);
+	if (lastlasttext == 0) {
+		printf("Det finns inget föregående läst inlägg.\n");
+		return;
+	}
+	printf("Kommentera föregående (inlägg) (%d)\n", lastlasttext);
+	write_internal(lastlasttext, comm_to);
 }
 
 void
-write_footnote(char *str)
+write_cmnt_no(nr)
 {
-	if (str && atoi(str) == 0) {
-		wfotnot(str);
-	} else
-		write_internal(str, "Fotnot (till ", footn_to);
+	printf("Kommentera (inlägg %d)\n", nr);
+	write_internal(nr, comm_to);
+}
+
+void
+write_cmnt()
+{
+	if (lasttext == 0) {
+		printf("Du har inte läst något inlägg.\n");
+		return;
+	}
+	printf("Kommentera (inlägg %d)\n", lasttext);
+	write_internal(lasttext, comm_to);
+}
+
+void
+write_footnote()
+{
+	if (lasttext == 0) {
+		printf("Du har inte läst något inlägg.\n");
+		return;
+	}
+	printf("Fotnot (till inlägg %d)\n", lasttext);
+	write_internal(lasttext, footn_to);
+}
+
+void
+write_footnote_no(int num)
+{
+	printf("Fotnot (till inlägg %d)\n", num);
+	write_internal(num, footn_to);
 }

@@ -7,7 +7,6 @@
 #include <err.h>
 
 #include "rkom_proto.h"
-#include "exported.h"
 
 #include "set.h"
 
@@ -91,12 +90,7 @@ parsefile(char *fname)
 	fclose(fd);
 }
 
-struct vars {
-	char *c_name;
-	char *c_val;
-};
-
-static struct vars commonvars[] = {
+static struct rk_val commonvars[] = {
 	{ "created-texts-are-read", "1" },
 	{ "dashed-lines", "1" },
 	{ "presence-messages", "1" },
@@ -105,24 +99,25 @@ static struct vars commonvars[] = {
 	{ "reading-puts-comments-in-pointers-last", "1" },
 	{ "confirm-multiple-recipients", "0" },
 	{ "default-mark", "100" },
-	{ 0, 0 }
 };
+static int ncommonvars = sizeof(commonvars)/sizeof(commonvars[0]);
+static int cmod, rmod;
 
-static struct vars rkomvars[] = {
+static struct rk_val rkomvars[] = {
 	{ "use-editor", "0" },
-	{ 0, 0 }
 };
+static int nrkomvars = sizeof(rkomvars)/sizeof(rkomvars[0]);
 
 static void
-put_in_vars(struct rk_uarea *ru, struct vars *w)
+put_in_vars(struct rk_uarea *ru, struct rk_val *w, int len)
 {
 	int i, j;
 
 	for (i = 0; i < ru->ru_val.ru_val_len; i++) {
-		for (j = 0; w[j].c_name; j++) {
+		for (j = 0; j < len; j++) {
 			if (strcmp(ru->ru_val.ru_val_val[i].rv_var, 
-			    w[j].c_name) == 0) {
-				w[j].c_val =
+			    w[j].rv_var) == 0) {
+				w[j].rv_val =
 				    strdup(ru->ru_val.ru_val_val[i].rv_val);
 				break;
 			}
@@ -137,12 +132,12 @@ readvars()
 
 	ru = rk_get_uarea("common");
 	if (ru->ru_retval == 0)
-		put_in_vars(ru, commonvars);
+		put_in_vars(ru, commonvars, ncommonvars);
 	free(ru);
 
 	ru = rk_get_uarea("rkom");
 	if (ru->ru_retval == 0)
-		put_in_vars(ru, rkomvars);
+		put_in_vars(ru, rkomvars, nrkomvars);
 	free(ru);
 }
 
@@ -151,13 +146,13 @@ iseql(char *var, char *val)
 {
 	int i;
 
-	for (i = 0; commonvars[i].c_name; i++)
-		if ((strcmp(commonvars[i].c_name, var) == 0) &&
-		    (strcmp(commonvars[i].c_val, val) == 0))
+	for (i = 0; i < ncommonvars; i++)
+		if ((strcmp(commonvars[i].rv_var, var) == 0) &&
+		    (strcmp(commonvars[i].rv_val, val) == 0))
 			return 1;
-	for (i = 0; rkomvars[i].c_name; i++)
-		if ((strcmp(rkomvars[i].c_name, var) == 0) &&
-		    (strcmp(rkomvars[i].c_val, val) == 0))
+	for (i = 0; i < nrkomvars; i++)
+		if ((strcmp(rkomvars[i].rv_var, var) == 0) &&
+		    (strcmp(rkomvars[i].rv_val, val) == 0))
 			return 1;
 	return 0;
 }
@@ -167,56 +162,45 @@ isneq(char *var, char *val)
 {
 	int i;
 
-	for (i = 0; commonvars[i].c_name; i++)
-		if ((strcmp(commonvars[i].c_name, var) == 0) &&
-		    (strcmp(commonvars[i].c_val, val) == 0))
+	for (i = 0; i < ncommonvars; i++)
+		if ((strcmp(commonvars[i].rv_var, var) == 0) &&
+		    (strcmp(commonvars[i].rv_val, val) == 0))
 			return 0;
-	for (i = 0; rkomvars[i].c_name; i++)
-		if ((strcmp(rkomvars[i].c_name, var) == 0) &&
-		    (strcmp(rkomvars[i].c_val, val) == 0))
+	for (i = 0; i < nrkomvars; i++)
+		if ((strcmp(rkomvars[i].rv_var, var) == 0) &&
+		    (strcmp(rkomvars[i].rv_val, val) == 0))
 			return 0;
 	return 1;
 }
 
 void
-set_flags(char *str)
+set_flags()
 {
 	int i;
 
 	printf("(Lista) flaggor\n");
-	for (i = 0; commonvars[i].c_name; i++)
-		printf("\t%s  %s\n", commonvars[i].c_name, commonvars[i].c_val);
-	for (i = 0; rkomvars[i].c_name; i++)
-		printf("\t%s  %s\n", rkomvars[i].c_name, rkomvars[i].c_val);
+	for (i = 0; i < ncommonvars; i++)
+		printf("\t%s  %s\n", commonvars[i].rv_var, commonvars[i].rv_val);
+	for (i = 0; i < nrkomvars; i++)
+		printf("\t%s  %s\n", rkomvars[i].rv_var, rkomvars[i].rv_val);
 	printf("\n");
 }
 
 void
-set_setflag(char *str)    
+set_setflag(char *name, char *val)    
 {
 	int inc, match, i, nc;
-	char *f, *c;
 
-	if (str == 0) {
-		printf("Du måste ange en flagga också.\n");
-		return;
-	}
-	f = str;
-	if ((c = index(str, ' ')) == 0 || (strlen(&c[1]) == 0)) {
-		printf("Du måste ange ett värde på flaggan också.\n");
-		return;
-	}
-	*c++ = 0;
 	match = 0;
-	for (i = 0; commonvars[i].c_name; i++) {
-		if (bcmp(commonvars[i].c_name, f, strlen(f)) == 0) {
+	for (i = 0; i < ncommonvars; i++) {
+		if (bcmp(commonvars[i].rv_var, name, strlen(name)) == 0) {
 			match++;
 			nc = i;
 		}
 	}
 	inc = match;
-	for (i = 0; rkomvars[i].c_name; i++) {
-		if (bcmp(rkomvars[i].c_name, f, strlen(f)) == 0) {
+	for (i = 0; i < nrkomvars; i++) {
+		if (bcmp(rkomvars[i].rv_var, name, strlen(name)) == 0) {
 			match++;
 			nc = i;
 		}
@@ -228,8 +212,31 @@ set_setflag(char *str)
 		printf("Flaggans namn är inte entydigt.\n");
 		return;
 	}
-	if (inc)
-		commonvars[nc].c_val = strdup(c);
-	else
-		rkomvars[nc].c_val = strdup(c);
+	if (inc) {
+		commonvars[nc].rv_val = strdup(val);
+		cmod++;
+	} else {
+		rkomvars[nc].rv_val = strdup(val);
+		rmod++;
+	}
+}
+
+void
+set_saveflags()
+{
+	struct rk_uarea ru;
+
+	if (cmod) {
+		ru.ru_val.ru_val_len = ncommonvars;
+		ru.ru_val.ru_val_val = commonvars;
+		if (rk_set_uarea("common", &ru))
+			printf("rk_set_uarea(common) sket sej\n");
+	}
+	if (rmod) {
+		ru.ru_val.ru_val_len = nrkomvars;
+		ru.ru_val.ru_val_val = rkomvars;
+		if (rk_set_uarea("rkom", &ru))
+			printf("rk_set_uarea(rkom) sket sej\n");
+	}
+	cmod = rmod = 0;
 }

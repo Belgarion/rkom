@@ -6,7 +6,6 @@
 #include <strings.h>
 
 #include "rkom_proto.h"
-#include "exported.h"
 
 #include "rkom.h"
 #include "next.h"
@@ -18,7 +17,7 @@ struct keeptrack {
 	int listidx;
 };
 
-int lasttext;
+int lasttext, lastlasttext;
 static struct keeptrack *pole;
 
 /*
@@ -202,7 +201,8 @@ mark_read(int nr)
 			continue;
 		if (mi[i+1].rmi_type != loc_no)
 			continue;
-		rk_mark_read(mi[i].rmi_numeric, mi[i+1].rmi_numeric);
+		if (ismember(mi[i].rmi_numeric))
+			rk_mark_read(mi[i].rmi_numeric, mi[i+1].rmi_numeric);
 	}
 	free(ts);
 }
@@ -222,6 +222,7 @@ next_text(char *str)
 	show_text(global);
 	mark_read(global);
 	next_action(global);
+	lastlasttext = lasttext;
 	lasttext = global;
 }
 
@@ -255,46 +256,40 @@ try:	for (i = pole->listidx; i < len; i++)
 	show_text(global);
 	mark_read(global);
 	next_action(global);
+	lastlasttext = lasttext;
 	lasttext = global;
 }
 
 void
-next_resee(char *str)
+next_resee_comment()
 {
-	int num;
+	struct rk_text_stat *ts;
+	struct rk_misc_info *mi;
+	int i, len;
 
-	if (str == 0) {
-		printf("Du måste get ett argument till \"återse\"\n");
-		return;
-	}
-	if (bcmp(str, "kommenterade", strlen(str)) == 0) {
-		struct rk_text_stat *ts;
-		struct rk_misc_info *mi;
-		int i, len;
-
-		ts = rk_textstat(lasttext);
-		mi = ts->rt_misc_info.rt_misc_info_val;
-		len = ts->rt_misc_info.rt_misc_info_len;
-		for (i = 0; i < len; i++)
-			if (mi[i].rmi_type == comm_to ||
-			    mi[i].rmi_type == footn_to)
-				break;
-		if (i == len) {
-			printf("Inlägget är varken kommentar eller fotnot.\n");
-			free(ts);
-			return;
-		}
-		show_text(mi[i].rmi_numeric);
-		lasttext = mi[i].rmi_numeric;
+	ts = rk_textstat(lasttext);
+	mi = ts->rt_misc_info.rt_misc_info_val;
+	len = ts->rt_misc_info.rt_misc_info_len;
+	for (i = 0; i < len; i++)
+		if (mi[i].rmi_type == comm_to ||
+		    mi[i].rmi_type == footn_to)
+			break;
+	if (i == len) {
+		printf("Inlägget är varken kommentar eller fotnot.\n");
 		free(ts);
 		return;
 	}
-	num = atoi(str);
-	if (num == 0) {
-		printf("\"%s\" är ett dåligt inläggsnunmmer.\n", str);
-		return;
-	}
+	show_text(mi[i].rmi_numeric);
+	lastlasttext = lasttext;
+	lasttext = mi[i].rmi_numeric;
+	free(ts);
+}
+
+void
+next_resee_text(int num)
+{
 	show_text(num);
+	lastlasttext = lasttext;
 	lasttext = num;
 }
 

@@ -18,6 +18,7 @@ char *	get_input_string(int, int);
 
 /* cmd.c */
 void	cmd_parse(char *);
+void	cmd_only(char *);
 
 /* error.c */
 char *	error(int);
@@ -30,6 +31,7 @@ char *vem(int);
 
 /* In file helpers.c */
 struct rk_confinfo_retval *match_complain(char *str, int type);
+int ismember(int conf);
 
 extern	int myuid;
 extern	int curconf;

@@ -10,7 +10,6 @@
 #include <errno.h>
 
 #include "rkom_proto.h"
-#include "exported.h"
 #include "rkom.h"
 #include "set.h"
 #include "next.h"

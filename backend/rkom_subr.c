@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.8 2000/10/25 17:32:12 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.9 2000/11/18 10:35:58 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -18,7 +18,6 @@
 #include <err.h>
 
 #include "rkom_proto.h"
-#include "exported.h"
 #include "backend.h"
 
 int sockfd, readfd, writefd, asyncfd, fepid;

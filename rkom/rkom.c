@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.13 2000/11/05 16:26:19 jens Exp $ */
+/* $Id: rkom.c,v 1.14 2000/11/18 10:36:04 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -21,7 +21,6 @@
 #include <ctype.h>
 
 #include "rkom_proto.h"
-#include "exported.h"
 #include "rkom.h"
 #include "next.h"
 #include "set.h"

@@ -10,7 +10,6 @@
 
 #include "rkom_proto.h"
 #include "backend.h"
-#include "exported.h"
 
 int myuid;
 
@@ -110,6 +109,7 @@ rk_unreadconf_server(u_int32_t uid)
 
 	sprintf(buf, "52 %d\n", uid);
 	if ((i = send_reply(buf))) {
+		i = get_int();
 		get_eat('\n');
 		ure = calloc(sizeof(struct rk_unreadconfval), 1);
 		return ure;
@@ -300,6 +300,25 @@ rk_gettext_server(u_int32_t nr)
 	return c;
 }
 
+static void
+gettext_callback(int err, int arg)
+{
+	struct text_stat_store *tss;
+	char *c;
+
+	if (err) {
+		get_eat('\n');
+		return;
+	}
+	c = get_string();
+	get_accept('\n');
+	if ((tss = findtxt(arg)) == 0) {
+		free(c); /* ??? What happened? */
+		return;
+	}
+	tss->text = c;
+}
+
 struct rk_text_stat *
 rk_textstat_server(u_int32_t nr)
 {
@@ -373,12 +392,7 @@ back:		ts = malloc(sizeof(*ts));
 	}
 	if (tss->text == 0) {
 		sprintf(buf, "25 %d 0 2000000\n", nr);
-		if (send_reply(buf)) {
-			get_eat('\n');
-		} else {
-			tss->text = get_string();
-			get_accept('\n');
-		}
+		send_callback(buf, nr, gettext_callback);
         }
 	tss->rts = ts;
 	goto back;
@@ -606,6 +620,86 @@ rk_get_uarea_server(char *str)
 int32_t
 rk_set_uarea_server(char *hej, struct rk_uarea *u)
 {
+	struct rk_val *v;
+	struct rk_person *p;
+	int i, len, tot, nlen;
+	char *narea, *nname, *tmp, *nhdr, *utstr;
+
+	v = u->ru_val.ru_val_val;
+	len = u->ru_val.ru_val_len;
+	/* First: make a storage string of our new uarea */
+	for (i = tot = 0; i < len; i++)
+		tot += strlen(v->rv_var) + strlen(v->rv_val);
+	tot += len * 10;
+	tmp = alloca(tot);
+	*tmp = 0;
+	narea = alloca(tot + 20);
+	for (i = 0; i < len; i++) {
+		sprintf(narea, " %dH%s %dH%s\n", strlen(v[i].rv_var),
+		    v[i].rv_var, strlen(v[i].rv_val), v[i].rv_val);
+		strcat(tmp, narea);
+	}
+	sprintf(narea, "%dH%s", strlen(tmp), tmp);
+	nname = alloca(strlen(hej) + 20);
+	sprintf(nname, "%dH%s", strlen(hej), hej);
+	/* Now the new uarea is in narea and its name in nname */
+	get_pers_stat(myuid, &p);
+	if (p->rp_user_area) {
+		char *txt, *odata, *ohdr, *t;
+		char buf[50];
+		int cnt;
+
+		sprintf(buf, "25 %d 0 2000000\n", p->rp_user_area);
+		if (send_reply(buf)) {
+			i = get_int();
+			get_eat('\n');  
+			return i;
+		}       
+		txt = get_string();
+		get_accept('\n');
+
+		cnt = atoi(txt);
+		ohdr = index(txt, 'H');
+		ohdr++;
+		odata = &ohdr[cnt + 1];
+		ohdr[cnt] = 0;
+		t = strstr(ohdr, nname); /* Search for correct storage */
+		if (t == 0) { /* Not found */
+			nhdr = alloca(strlen(nname) + strlen(ohdr) + 50);
+			sprintf(nhdr, "%dH%s %s",
+			    strlen(ohdr) + strlen(nname) + 1, ohdr, nname);
+			t = alloca(strlen(narea) + strlen(odata) + 50);
+			sprintf(t, "%s %s", odata, narea);
+			narea = t;
+		} else { /* Found, do substitution */
+
+
+		}
+		free(txt);
+	} else {
+		nhdr = alloca(strlen(nname) + 20);
+		sprintf(nhdr, "%dH %s", strlen(nname) + 1, nname);
+	}
+	nlen = strlen(nhdr) + strlen(narea);
+	utstr = alloca(nlen + 50);
+	sprintf(utstr, "86 %dH %s %s * { } * { }\n", nlen + 2, nhdr, narea);
+printf("Msg: %s\n", utstr);
+#if 0
+	if (send_reply(d)) {
+		i = get_int();
+		get_eat('\n');
+		return i;
+	}
+	no = get_int();
+	get_accept('\n');
+	sprintf(b, "57 %d %d\n", myuid, no);
+	if (send_reply(b)) {
+		i = get_int();
+		get_eat('\n');
+		return i;
+	}
+	get_accept('\n');
+#endif
 	return 0;
 }
 

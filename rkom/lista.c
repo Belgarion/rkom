@@ -6,7 +6,6 @@
 #include <strings.h>
 
 #include "rkom_proto.h"
-#include "exported.h"
 #include "rkom.h"
 #include "list.h"
 #include "next.h"
@@ -106,7 +105,9 @@ list_news(char *args)
 			free(m);
 		}
 		printf("\n");
-	}
+	} else
+		printf("Du har inga olästa inlägg.\n");
+	free(conf);
 }
 
 static int

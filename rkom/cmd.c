@@ -7,7 +7,6 @@
 #include <pwd.h>
 
 #include "rkom_proto.h"
-#include "exported.h"
 #include "rkom.h"
 #include "next.h"
 #include "list.h"
@@ -23,142 +22,9 @@ void cmd_send(char *);
 void cmd_say(char *);
 void cmd_where(char *);
 void cmd_goto(char *);
-void cmd_only(char *);
 void cmd_leave(char *);
 
-#if 0
-struct cmnd cmds[] = {
-	{"avmarkera", 0, list_unmark },
-	{"brev", 0, write_brev },
-	{"endast", 0, cmd_only },
-	{"flaggor", 0, set_flags },
-	{"fotnot", 0, write_footnote },
-	{"gå", 0, cmd_goto },
-	{"glöm", 0, write_forget },
-	{"hela", 0, write_whole },
-	{"hjälp", 0, list_comm },
-	{"hoppa", 0, next_hoppa },
-	{"igen", 0, next_again },
-	{"inlägg", 0, write_new },
-	{"kommentera", 0, write_cmnt },
-	{"kommentar", "till:", write_comment },
-	{"lista", "kommandon", list_comm },
-	{"lista", "markerade", list_marked },
-	{"lista", "möten", list_conf },
-	{"lista", "nyheter", list_news },
-	{"lista", "ärenden", list_subject },
-	{"login", 0, cmd_login },
-	{"logout", 0, cmd_logout },
-	{"lägga", 0, write_put },
-	{"markera", 0, list_mark },
-	{"mottagare:", 0, write_rcpt },
-	{"nästa", "inlägg", next_text },
-	{"nästa", "möte", next_conf },
-	{"nästa", "kommentar", next_comment },
-	{"redigera", "editor", write_editor },
-	{"sluta", 0, cmd_sluta },
-	{"spara", "text", show_savetext },
-	{"säg", 0, cmd_say },
-	{"sända", 0, cmd_send },
-	{"sätt", 0, set_setflag },
-	{"tiden", 0, cmd_tiden },
-	{"utträda", 0, cmd_leave },
-	{"var", 0, cmd_where },
- 	{"vilka", 0, cmd_vilka },
-	{"återse", 0, next_resee },
-};
-static int ncmds = sizeof(cmds)/sizeof(cmds[0]);
-
-#endif
-
 int myuid = 0, curconf = 0;
-
-#if 0
-/*
- * Parse the command.
- */
-void
-cmd_parse(str)
-	char *str;
-{
-	struct cmnd *lastmatch, *l2match;
-	int i, nmatch;
-	char *arg1, *arg2;
-
-	/*
-	 * First; try to match the command as a first-level command.
-	 */
-	arg1 = strsep(&str, " \t");
-
-	l2match = 0;
-	for (i = nmatch = 0; i < ncmds; i++)
-		if (bcmp(cmds[i].arg1, arg1, strlen(arg1)) == 0) {
-			lastmatch = &cmds[i];
-			nmatch++;
-			/* QUIRK QUIRK QUIRK */
-			/* Do special matching for some commands. */
-
-			if (bcmp(arg1, "kommentera", strlen(arg1)) == 0 &&
-			    ((str == 0) || (atoi(str) > 0) ||
-			    (str && bcmp(str, "föregående", strlen(str)) == 0)))
-				break; /* Match on only 'k' if necessary */
-
-			if (strcmp(arg1, "g") == 0 && 
-			    strcmp(cmds[i].arg1, "gå") == 0)
-				break;
-			/* END QUIRK QUIRK QUIRK */
-		}
-
-	if (nmatch == 0) {
-		printf("Okänt kommando: %s\n", arg1);
-		return;
-	}
-	if (nmatch == 1) {
-		(*lastmatch->func)(str);
-		return;
-	}
-
-	/*
-	 * It was not a first-level command. Try second-level.
-	 */
-	arg2 = strsep(&str, " \t");
-	if (arg2 == 0) {
-		printf("Flertydigt kommando. Du kan mena:\n\n");
-		for (i = 0; i < ncmds; i++)
-			if (bcmp(cmds[i].arg1, arg1, strlen(arg1)) == 0)
-				printf("%s %s\n", cmds[i].arg1, 
-				    cmds[i].arg2 ? cmds[i].arg2 : "");
-		printf("\n");
-		return;
-	}
-
-
-	for (i = nmatch = 0; i < ncmds; i++)
-		if (bcmp(cmds[i].arg1, arg1, strlen(arg1)) == 0)
-			if (cmds[i].arg2 && bcmp(cmds[i].arg2, arg2, 
-			    strlen(arg2)) == 0) {
-				lastmatch = &cmds[i];
-				nmatch++;
-			}
-
-	if (nmatch == 0) {
-		printf("Okänt kommando: %s %s\n", arg1, arg2);
-		return;
-	}
-	if (nmatch == 1) {
-		(*lastmatch->func)(str);
-		return;
-	}
-	printf("Flertydigt kommando. Du kan mena:\n\n");
-	for (i = 0; i < ncmds; i++)
-		if ((bcmp(cmds[i].arg1, arg1, strlen(arg1)) == 0) &&
-		    cmds[i].arg2 &&
-		    (bcmp(cmds[i].arg2, arg2, strlen(arg2)) == 0))
-			printf("%s %s\n", cmds[i].arg1, cmds[i].arg2);
-	printf("\n");
-};
-
-#endif
 
 static char *dindx[] = {"sön", "mån", "tis", "ons", "tors", "fre", "lör"};
 static char *mindx[] = {"januari", "februari", "mars", "april", "maj", "juni",
@@ -508,19 +374,7 @@ cmd_only(char *str)
 	struct rk_conference *conf;
 	int only, high;
 
-	if (str == 0) {
-		printf("Du måste ange hur många du endast vill se.\n");
-		return;
-	}
 	only = atoi(str);
-	if (isdigit(*str) == 0) {
-		printf("Du måste ange ett giltigt antal.\n");
-		return;
-	}
-	if (curconf == 0) {
-		printf("Du är inte i nåt möte just nu.\n");
-		return;
-	}
 	conf = rk_confinfo(curconf);
 	high = conf->rc_first_local_no + conf->rc_no_of_texts - 1;
 	rk_set_last_read(curconf, high - only);

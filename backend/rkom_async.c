@@ -7,7 +7,6 @@
 #include <string.h>
 
 #include "rkom_proto.h"
-#include "exported.h"
 #include "backend.h"
 
 static void async_new_text(void);
@@ -68,6 +67,7 @@ async(int level)
 
 	case 5:
 		m = malloc(sizeof(struct mesg));
+		m->type = type;
 		m->pers = get_int();
 		m->msg = get_string();
 		m->msg2 = get_string();
@@ -164,6 +164,7 @@ async_new_text()
 			read_in_time(&time);
 			break;
 
+		case cc_recpt:
 		case recpt:
 			conf = get_int();
 			if (get_int() != loc_no)

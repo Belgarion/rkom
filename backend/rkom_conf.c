@@ -6,7 +6,6 @@
 #include <string.h>
 
 #include "rkom_proto.h"
-#include "exported.h"
 #include "backend.h"
 
 struct membership_store {
@@ -20,6 +19,7 @@ struct person_store {
 	struct person_store *nextp;
 	struct membership_store *next;
 	struct rk_person person;
+	int nconfs, *confs;
 };
 
 static struct person_store *gps;
@@ -250,6 +250,10 @@ delete_membership_internal(int conf, int uid)
 	if ((pp = findperson(uid)) == 0)
 		return; /* Nothing in cache */
 
+	if (pp->nconfs) {
+		free(pp->confs);
+		pp->nconfs = 0;
+	}
 	if (pp->next == 0)
 		return;
 
@@ -427,14 +431,16 @@ void
 conf_set_high_local(int conf, int local)
 {
 	struct get_conf_stat_store *walker;
+	int tt;
 
 	/* First, see if we have this conference in the cache */
 	if (gcs != 0) {
 		walker = gcs;
 		while (walker) {
 			if (walker->number == conf) {
-				walker->confer.rc_no_of_texts =
-				    local - walker->confer.rc_first_local_no+1;
+				tt = local - walker->confer.rc_first_local_no+1;
+				if (walker->confer.rc_no_of_texts < tt)
+					walker->confer.rc_no_of_texts = tt;
 				return;
 			}
 			walker = walker->next;
@@ -468,6 +474,15 @@ cleanup_read(struct rk_membership *m)
 	m->rm_last_text_read = local;
 }
 
+static void
+rk_mark_read_server_callback(int err, int arg)
+{
+	if (err)
+		get_eat('\n');
+	else
+		get_accept('\n');
+}
+
 int32_t
 rk_mark_read_server(u_int32_t conf, u_int32_t local)
 {
@@ -498,10 +513,8 @@ rk_mark_read_server(u_int32_t conf, u_int32_t local)
 	}
 	i = 0;
 	sprintf(buf, "27 %d 1 { %d }\n", conf, local);
-	if (send_reply(buf))
-		i = get_int();
-	get_eat('\n');
-	return i;
+	send_callback(buf, 0, rk_mark_read_server_callback);
+	return 0;
 };
 
 int32_t
@@ -554,4 +567,55 @@ rk_sub_member_server(u_int32_t conf, u_int32_t uid)
 	get_accept('\n');
 	delete_membership_internal(conf, uid);
 	return ret;
+}
+
+/*
+ * XXX - should remember the membership structs also.
+ */
+struct rk_memberconflist *
+rk_memberconf_server(u_int32_t uid)
+{
+	struct rk_memberconflist *mcl;
+	struct person_store *ps;
+	struct rk_person **person;
+	int i;
+	char buf[50];
+
+	mcl = calloc(sizeof(*mcl), 1);
+	ps = findperson(uid);
+	if (ps == 0) {
+		if (get_pers_stat(uid, person)) {
+			mcl->rm_retval = -1;
+			return mcl;
+		}
+		ps = findperson(uid); /* Cannot fail here */
+		if (ps == 0)
+			printf("EEEK! Person %d finns inte!\n", uid);
+	}
+	if (ps->nconfs == 0) {
+		sprintf(buf, "46 %d 0 65535 0\n", uid);
+		if (send_reply(buf)) {
+			mcl->rm_retval = get_int();
+			get_eat('\n');
+			return mcl;
+		}
+		ps->nconfs = get_int();
+		if (ps->nconfs) {
+			ps->confs = malloc(sizeof(int) * ps->nconfs);
+			get_accept('{');
+			for (i = 0; i < ps->nconfs; i++) {
+				struct rk_time t;
+
+				read_in_time(&t);
+				ps->confs[i] = get_int();
+				get_int();get_int();get_int();get_accept('*');
+			}
+			get_accept('}');
+		} else
+			get_accept('*');
+		get_accept('\n');
+	}
+	mcl->rm_confs.rm_confs_len = ps->nconfs;
+	mcl->rm_confs.rm_confs_val = ps->confs;
+	return mcl;
 }

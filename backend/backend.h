@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.6 2000/10/18 20:49:09 ragge Exp $	*/
+/*	$Id: backend.h,v 1.7 2000/11/18 10:35:58 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -19,6 +19,7 @@ void	put_char(char c);
 void	put_string(char *str);
 void	get_accept(char ch);
 char	*get_string(void);
+void	send_callback(char *msg, int arg, void(*)(int, int));
 
 /* Main loop, in rkom_subr.c */
 int	rkom_loop(void);
