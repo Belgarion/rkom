@@ -9,17 +9,14 @@
 #include "rkom_proto.h"
 #include "backend.h"
 
-static void async_new_text(void);
 
 struct mesg {
+	struct rk_async ra;
 	struct mesg *next;
-	int type;
-	int conf;
-	int pers;
-	char *msg;
-	char *msg2;
 };
 static struct mesg *pole;
+
+static void async_new_text(struct mesg *);
 
 static void
 putinq(struct mesg *m)
@@ -36,7 +33,7 @@ putinq(struct mesg *m)
 }
 
 /*
- * Handle a async message. Put it on a queue; then leave it to
+ * Handle an async message. Put it on a queue; then leave it to
  * async_handler() to do the rest.
  */
 void
@@ -47,42 +44,37 @@ async(int level)
 
 	narg = get_int();
 	type = get_int();
+	m = calloc(sizeof(struct mesg), 1);
+	m->ra.ra_message = m->ra.ra_message2 = "";
+	m->ra.ra_type = type;
 
 	switch (type) {
 	case 15: /* New text created */
-		async_new_text();
-		m = calloc(sizeof(struct mesg), 1);
-		m->type = type;
-		m->msg = "";
+		async_new_text(m);
 		putinq(m);
 		break;
 
 	case 12: /* async-send-message */
-		m = calloc(sizeof(struct mesg), 1);
-		m->type = type; 
-		m->conf = get_int();
-		m->pers = get_int();
-		m->msg = get_string();
-		get_eat('\n');
+		m->ra.ra_conf = get_int();
+		m->ra.ra_pers = get_int();
+		m->ra.ra_message = get_string();
+		get_accept('\n');
 		putinq(m);
 		break;
+
 	case 9: /* async-login */
 	case 13: /* async-logout */
-		m = calloc(sizeof(struct mesg), 1);
-		m->type = type;
-		m->pers = get_int();
-		m->conf = get_int();
-		get_eat('\n');
+		m->ra.ra_pers = get_int();
+		m->ra.ra_conf = get_int();
+		get_accept('\n');
 		putinq(m);
 		break;
 
 	case 5: /* async-new-name */
-		m = calloc(sizeof(struct mesg), 1);
-		m->type = type;
-		tmp = m->pers = get_int();
-		m->msg = get_string();
-		m->msg2 = get_string();
-		get_eat('\n');
+		tmp = m->ra.ra_pers = get_int();
+		m->ra.ra_message = get_string();
+		m->ra.ra_message2 = get_string();
+		get_accept('\n');
 		putinq(m);
 		reread_conf_stat_bg(tmp);
 		newname(tmp);
@@ -94,86 +86,80 @@ async(int level)
 		reread_conf_stat_bg(get_int());
 		get_int();
 		get_accept('\n');
+		free(m);
 		break;
 
 	case 8: /* async-leave-conf */
+		m->ra.ra_conf = get_int();
+		get_accept('\n');
+		putinq(m);
+		break;
+
 	case 14: /* async-deleted-text */
-	case 18: /* async-new-membership */
-	default:
+		m->ra.ra_text = get_int();
 		get_eat('\n');
+		putinq(m);
+		break;
+
+	case 18: /* async-new-membership */
+		m->ra.ra_pers = get_int();
+		m->ra.ra_conf = get_int();
+		get_accept('\n');
+		putinq(m);
+		break;
+
+	default:
+		printf("BG: Unknown async %d\n", type);
+		get_eat('\n');
+		free(m);
 		return;
 	}
 	if (level == 1)
 		async_handle();
 }
 
-static int prefetch;
-
 void
 async_handle()
 {
-	struct rk_text_stat *ts;
 	extern int fepid;
 
 	if (pole)
 		kill(fepid, SIGIO);
-	if (prefetch) {
-		ts = rk_textstat_server(prefetch);
-		free(ts);
-		prefetch = 0;
-	}
 }
+
+static struct mesg *freepole = 0;
 
 struct rk_async *
 rk_async_server(void)
 {
-	struct mesg *m;
 	struct rk_async *ra;
-	int size;
 
-	if (pole) {
-		size = sizeof(struct rk_async);
-		if (pole->type == 12)
-			size += strlen(pole->msg) + 1;
-		if (pole->type == 5)
-			size += strlen(pole->msg) + strlen(pole->msg2) + 2;
-		ra = calloc(size, 2);
-		ra->ra_type = pole->type;
-		ra->ra_conf = pole->conf;
-		ra->ra_sender = pole->pers;
-		ra->ra_message = ra->ra_message2 = "";
-		if (pole->type == 12 || pole->type == 5) {
-			ra->ra_message = (void *)&ra[1];
-			strcpy(ra->ra_message, pole->msg);
-		}
-		if (pole->type == 5) {
-			ra->ra_message2 =
-			    ra->ra_message + strlen(pole->msg) + 1;
-			strcpy(ra->ra_message2, pole->msg2);
-		} else
-			ra->ra_message2 = "";
-		if (pole->type == 12 || pole->type == 5)
-			free(pole->msg);
-		if (pole->type == 5)
-			free(pole->msg2);
-		m = pole;
-		pole = pole->next;
-		free(m);
-	} else {
-		ra = calloc(sizeof(struct rk_async), 1);
-		ra->ra_message = "";
-		ra->ra_message2 = "";
+	if (freepole) {
+		if (*freepole->ra.ra_message)
+			free(freepole->ra.ra_message);
+		if (*freepole->ra.ra_message2)
+			free(freepole->ra.ra_message2);
+		free(freepole);
+		freepole = 0;
 	}
+	ra = calloc(sizeof(struct rk_async), 1);
+	if (pole) {
+		bcopy(pole, ra, sizeof(struct rk_async));
+		freepole = pole;
+		pole = pole->next;
+	} else
+		ra->ra_message = ra->ra_message2 = "";
 	return ra;
 }
 
 void
-async_new_text()
+async_new_text(struct mesg *m)
 {
 	int i, type, cnt, conf, local;
 	struct rk_time time;
 
-	prefetch = get_int();
+	m->ra.ra_text = get_int();
+	reread_text_stat_bg(m->ra.ra_text);
 	read_in_time(&time);
 	get_int();get_int();get_int();get_int();
 	cnt = get_int();

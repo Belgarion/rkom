@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.21 2000/12/19 17:30:26 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.22 2001/01/04 11:04:21 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -193,7 +193,8 @@ struct rk_text_info {
 struct rk_async {
 	u_int32_t	ra_type;
 	u_int32_t	ra_conf;
-	u_int32_t	ra_sender;
+	u_int32_t	ra_pers;
+	u_int32_t	ra_text;
 	string		ra_message;
 	string		ra_message2;
 };

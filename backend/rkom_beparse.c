@@ -497,13 +497,6 @@ rk_create_text_server(struct rk_text_info *rti)
 	rkr->rtr_textnr = get_int();
 	get_accept('\n');
 
-	/*
-	 * Invalidate status for those texts this is comment to.
-	 * Those will be refetched by async messages anyway.
-	 */
-	for (i = 0; i < nmi; i++)
-		if (mi[i].rmi_type == comm_to || mi[i].rmi_type == footn_to)
-			reread_text_stat_bg(mi[i].rmi_numeric);
 	return rkr;
 }
 
