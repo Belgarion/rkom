@@ -1,4 +1,4 @@
-/* $Id: container.c,v 1.1 2000/10/15 11:59:39 jens Exp $ */
+/* $Id: container.c,v 1.2 2000/10/15 19:14:24 jens Exp $ */
 /*
  * Copyright (c) 1999, 2000
  *      Jens A. Nilsson, jnilsson@ludd.luth.se. All rights reserved.
@@ -25,7 +25,7 @@
  * SUCH DAMAGE.
  */
 #ifndef lint
-static char const cvsid[] = "$Id: container.c,v 1.1 2000/10/15 11:59:39 jens Exp $";
+static char const cvsid[] = "$Id: container.c,v 1.2 2000/10/15 19:14:24 jens Exp $";
 #endif
 
 #include <sys/errno.h>
@@ -35,10 +35,10 @@ static char const cvsid[] = "$Id: container.c,v 1.1 2000/10/15 11:59:39 jens Exp
 
 #include "container.h"
 
-#ifdef NO_E_ERR
-#include <err.h>
-#else
+#ifdef USE_E_ERR
 #include "e_err.h"
+#else
+#include <err.h>
 #endif
 
 #define cl_insque(entry, pred) do { \
