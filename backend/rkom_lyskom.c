@@ -33,6 +33,7 @@ static int unget;
 static int level;
 extern FILE *sfd;
 extern int pfd;
+static int curc, maxc;
 
 struct callback {
 	int msgid;
@@ -73,6 +74,8 @@ rkom_loop()
 			async_collect();
 		/* Wait for something to happen */
 		pofd[0].revents = pofd[1].revents = 0;
+		if (curc != maxc)
+			goto gotchar;
 		rv = poll(pofd, 2, INFTIM);
 		if (rv == 0)
 			continue;
@@ -102,7 +105,7 @@ rkom_loop()
 				err(1, "fcntl2");
 #endif
 
-			c = get_char();
+gotchar:		c = get_char();
 
 			switch (c) {
 			case ':':
@@ -222,13 +225,19 @@ send_callback(char *msg, int arg, void (*func)(int, int))
 char
 get_char()
 {
+	static char buffer[BUFSIZ];
 	char c;
 
 	if (unget) {
 		c = unget;
 		unget = 0;
-	} else
-		read(pfd, &c, 1);
+	} else {
+		if (curc == maxc) {
+			maxc = read(pfd, buffer, BUFSIZ);
+			curc = 0;
+		}
+		c = buffer[curc++];
+	}
 	return c;
 }
 
