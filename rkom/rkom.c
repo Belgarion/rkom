@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.28 2001/01/28 16:38:50 ragge Exp $ */
+/* $Id: rkom.c,v 1.29 2001/02/13 09:58:57 jens Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -177,6 +177,8 @@ main(int argc, char *argv[])
 			while((len > 0 && buf[len - 1] == '\n')
 #if defined(__FreeBSD__) /* isspace() is broken for non-ascii on NetBSD */
 			    || isspace(buf[len-1])
+#else
+				|| buf[len - 1] == ' '
 #endif
 			    ) {
 				buf[len - 1] = '\0';

@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.29 2001/02/12 20:23:26 ragge Exp $ */
+/* $Id: parse.c,v 1.30 2001/02/13 09:58:57 jens Exp $ */
 
 #include <sys/param.h>
 
@@ -219,7 +219,7 @@ DROW("lista alias",				0,PE_NO_ARG,alias_list)
 
 /* Other commands */
 DROW("sätt",					0,PE_STR_ARG,other_set)
-DROW("login",					0,PE_STR_ARG,other_login)
+DROW("login",					1,PE_STR_ARG,other_login)
 DROW("logout",					0,PE_NO_ARG,other_logout)
 DROW("sluta",					0,PE_NO_ARG,other_quit)
 DROW("ändra lösenord",				0,PE_NO_ARG,other_password)
