@@ -1,4 +1,4 @@
-# $Id: mklibmake,v 1.1 2001/01/27 15:06:01 ragge Exp $
+# $Id: mklibmake,v 1.2 2001/01/27 16:41:32 ragge Exp $
 #
 # Generate an old makefile out of a BSD makefile.
 #
@@ -80,9 +80,9 @@ echo
 if [ -z "$mkpic" ]; then
 	echo "Cannot autogen rules for PIC files (yet) " >/dev/tty
 fi
-if [ -z "$mkprofile" ]; then
-	echo "Cannot autogen rules for profiling files (yet) " >/dev/tty
-fi
+#if [ -z "$mkprofile" ]; then
+#	echo "Cannot autogen rules for profiling files (yet) " >/dev/tty
+#fi
 if [ -z "$mklint" ]; then
 	echo "Cannot autogen rules for linting files (yet) " >/dev/tty
 fi
