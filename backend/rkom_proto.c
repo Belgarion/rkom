@@ -177,9 +177,17 @@ spc_write_msg(void *buf, size_t nbytes)
 	u_int32_t	msglen;
 
 	msglen = nbytes;
-	iov[0].iov_base = (void *)&msglen;
+#ifdef __FreeBSD__
+	iov[0].iov_base = (char *)&msglen;
+#else
+	iov[0].iov_base = &msglen;
+#endif
 	iov[0].iov_len = sizeof(msglen);
+#ifdef __FreeBSD__
+	iov[1].iov_base = (char *)buf;
+#else
 	iov[1].iov_base = buf;
+#endif
 	iov[1].iov_len = nbytes;
 
 	if (spc_mywritev(spc_write_fd, iov, 2) != nbytes + sizeof(msglen))
@@ -195,9 +203,17 @@ spc_write_fun_call(u_int32_t fun_num, void *buf, size_t nbytes)
 	size_t		len;
 
 	msglen = nbytes + sizeof(fun_num);
-	iov[0].iov_base = (void *)&msglen;
+#ifdef __FreeBSD__
+	iov[0].iov_base = (char *)&msglen;
+#else
+	iov[0].iov_base = &msglen;
+#endif
 	iov[0].iov_len = sizeof(msglen);
-	iov[1].iov_base = (void *)&fun_num;
+#ifdef __FreeBSD__
+	iov[1].iov_base = (char *)&fun_num;
+#else
+	iov[1].iov_base = &fun_num;
+#endif
 	iov[1].iov_len = sizeof(fun_num);
 	iov[2].iov_base = buf;
 	iov[2].iov_len = nbytes;
