@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.58 2003/10/01 18:39:23 ragge Exp $ */
+/* $Id: rkom.c,v 1.59 2003/10/12 13:35:52 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -158,7 +158,7 @@ main(int argc, char *argv[])
 	async_collect();
 	fflush(stdout);
 	setup_tty(1);
-	rkom_loop();
+	rkom_loop(POLL_KEYBOARD|POLL_NETWORK|POLL_ASYNCS);
 	return 0;
 }
 

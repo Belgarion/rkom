@@ -12,6 +12,7 @@
 
 #include "rkom.h"
 #include "rkomsupport.h"
+#include "backend.h"
 
 int outlines, discard;
 
@@ -83,7 +84,9 @@ rprintf(char const *fmt, ...)
 		outlines += (strlen(c)/wcols);
 		if (outlines++ >= (wrows - 1)) {
 			printf("(Tryck retur eller 'q' för att hoppa ur)");
+			fflush(stdout);
 			outlines = 1;
+			rkom_loop(POLL_NETWORK|POLL_KEYBOARD|POLL_RET_KBD);
 			ch = getchar();
 			if (ch == 'q') {
 				while (getchar() != '\n')

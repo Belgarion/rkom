@@ -30,7 +30,6 @@
 static int reqnr;
 static int wait_for_reply_no;
 static int unget;
-static int level;
 extern FILE *sfd;
 extern int pfd;
 static int curc, maxc;
@@ -45,11 +44,10 @@ struct callback {
 static struct callback *cpole;
 
 /*
- * Main loop. Running normally on level 1, waiting for replies on 
- * level 2. Handles async requests only on level 1.
+ * Main loop.
  */
 int
-rkom_loop()
+rkom_loop(int which)
 {
 	struct pollfd pofd[2];
 	int erra = 0;
@@ -57,11 +55,10 @@ rkom_loop()
 	/*
 	 * Set up the poll descriptors.
 	 */
-	level++;
 	pofd[0].fd = 0;	/* stdin */
-	pofd[0].events = (level < 2 ? POLLIN|POLLPRI : 0);
+	pofd[0].events = (which & POLL_KEYBOARD ? POLLIN|POLLPRI : 0);
 	pofd[1].fd = pfd;
-	pofd[1].events = POLLIN|POLLPRI;
+	pofd[1].events = (which & POLL_NETWORK ? POLLIN|POLLPRI : 0);
 
 	/*
 	 * Ok, everything seems OK. Get into the poll loop and wait
@@ -70,7 +67,7 @@ rkom_loop()
 	for (;;) {
 		int rv;
 	
-		if (level == 1)
+		if (which & POLL_ASYNCS)
 			async_collect();
 		/* Wait for something to happen */
 		pofd[0].revents = pofd[1].revents = 0;
@@ -84,32 +81,20 @@ rkom_loop()
 				err(1, "poll: säg till ragge");
 			continue;
 		}
-		if (pofd[0].revents & (POLLIN|POLLPRI))
+		if (pofd[0].revents & (POLLIN|POLLPRI)) {
+			if (which & POLL_RET_KBD)
+				return 0;
 			rkom_command();
+		}
 		if (pofd[1].revents & (POLLIN|POLLPRI)) {
 			int i;
 			char c;
-
-#if 0
-			/* Check if there are anything available */
-			if (fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1)
-				err(1, "fcntl");
-			if ((rv = read(sockfd, &c, 1)) != 1) {
-				if (rv < 0 && errno == EAGAIN)
-					continue;
-				err(1, "read sockfd: %d, säg till ragge", rv);
-				continue;
-			}
-			unget = c;
-			if (fcntl(sockfd, F_SETFL, 0) == -1)
-				err(1, "fcntl2");
-#endif
 
 gotchar:		c = get_char();
 
 			switch (c) {
 			case ':':
-				async(level);
+				async(which & POLL_ASYNCS);
 				break;
 
 			case '%':
@@ -129,7 +114,6 @@ gotchar:		c = get_char();
 				i = get_int();
 				if (wait_for_reply_no == i) {
 					wait_for_reply_no = 0;
-					level--;
 					return erra;
 				} else {
 					struct callback *nc = 0, *cc = cpole;
@@ -198,7 +182,7 @@ send_reply(msg, va_alist)
 	vfprintf(sfd, msg, ap);
 	va_end(ap);
 	in_state = (msg[strlen(msg) - 1] != '\n');
-	return (in_state ? 0 : rkom_loop());
+	return (in_state ? 0 : rkom_loop(POLL_NETWORK));
 }
 
 void

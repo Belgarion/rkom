@@ -41,7 +41,7 @@ putinq(struct mesg *m)
  * async_handler() to do the rest.
  */
 void
-async(int level)
+async(int handle)
 {
 	struct rk_text_stat rts;
 	struct mesg *m;
@@ -123,7 +123,7 @@ async(int level)
 		free(m);
 		return;
 	}
-	if (level == 1)
+	if (handle)
 		async_collect();
 }
 

@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.30 2003/10/10 14:18:32 ragge Exp $	*/
+/*	$Id: backend.h,v 1.31 2003/10/12 13:35:50 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -32,7 +32,15 @@ int	get_bitfield(void);
  * Connect to the kom server.
  */
 struct	rk_server *rkom_connect(char *, char *, char *, char *);
-int	rkom_loop(void);
+
+/*
+ * Main poll loop.
+ */
+#define	POLL_KEYBOARD	1	/* Poll keyboard fd */
+#define	POLL_NETWORK	2	/* Poll network fd */
+#define	POLL_RET_KBD	4	/* Return if gotten a keyboard response */
+#define	POLL_ASYNCS	8	/* Send asyncs to frontend */
+int	rkom_loop(int);
 void	rkom_command(void);
 void	rkom_logout(void);
 
