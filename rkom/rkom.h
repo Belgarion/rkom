@@ -21,6 +21,7 @@ void	cmd_only(char *);
 void	cmd_password(void);
 void	cmd_status(char *);
 void	cmd_info_extra(int);
+void	cmd_change_name(void);
 
 /* error.c */
 char *	error(int);

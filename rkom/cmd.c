@@ -482,3 +482,31 @@ cmd_info_extra(int text)
 		printf("Det finns ingen tilläggsinformation för denna text.\n");
 	free(rts);
 }
+
+void
+cmd_change_name()
+{
+	struct rk_confinfo_retval *retval;
+	int rv;
+	char *name;
+
+	printf("Ändra namn\n\n");
+
+	name = getstr("Vilket namn skall ändras? ");
+	if (strlen(name) == 0) {
+		printf("Nähej.\n");
+		free(name);
+		return;
+	}
+	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
+	free(name);
+	if (retval == NULL)
+		return;
+	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	name = getstr("Vad skall det ändras till? ");
+	rv = rk_change_name(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, name);
+	if (rv)
+		printf("Det gick inte: %s\n", error(rv));
+	free(retval);
+	free(name);
+}

@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.13 2000/12/10 15:49:11 ragge Exp $ */
+/* $Id: parse.c,v 1.14 2000/12/19 17:35:00 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -109,6 +109,7 @@ DCMD(other_login);
 DCMD(other_logout);
 DCMD(other_quit);
 DCMD(other_password);
+DCMD(other_name);
 
 #if 1
 /* Debug help */
@@ -195,7 +196,8 @@ DROW("sätt",					0,PE_STR_ARG,other_set)
 DROW("login",					0,PE_STR_ARG,other_login)
 DROW("logout",					0,PE_NO_ARG,other_logout)
 DROW("sluta",					0,PE_NO_ARG,other_quit)
-DROW("ändra",					0,PE_NO_ARG,other_password)
+DROW("ändra lösenord",				0,PE_NO_ARG,other_password)
+DROW("ändra namn",				0,PE_NO_ARG,other_name)
 
 #if 1
 /* Debug help */
@@ -801,5 +803,14 @@ exec_info_extra(int argc, char *argv[])
 	if (argc)
 		text = atoi(argv[0]);
 	cmd_info_extra(text);
+	return 0;
+}
+
+static int
+exec_other_name(int argc, char *argv[])
+{
+	LF;
+	TT(argc != 0, "Du kan inte ange några argument.\n");
+	cmd_change_name();
 	return 0;
 }
