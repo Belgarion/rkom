@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.3 2000/10/09 08:33:51 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.4 2000/10/11 17:36:26 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -94,12 +94,6 @@ struct rk_membership {
 };
 
 /*
- * Get membership information about a user in a conference.
- * Args are uid, mid.
- */
-struct rk_membership rk_membership(u_int32_t, u_int32_t);
-
-/*
  * Description of a conference.
  */
 struct rk_conference {
@@ -121,11 +115,6 @@ struct rk_conference {
 	u_int32_t	rc_no_of_texts;
 	u_int32_t	rc_expire;
 };
-
-/*
- * Get the conference struct based on the conference number.
- */
-struct rk_conference	rk_confinfo(u_int32_t);
 
 /*
  * Struct describing a person.
@@ -151,19 +140,6 @@ struct rk_person {
 	u_int32_t	rp_no_of_confs;
 };
 
-/*
- * Get the person struct based on the person number.
- */
-struct rk_person	rk_persinfo(u_int32_t);
-/*
- * Do a conference name match.
- * Return an array of matched confinfo structs.
- */
-struct rk_matchconfargs {
-	string		rm_name;
-	int8_t		rm_flags;
-};
-
 struct rk_confinfo {
 	string		rc_name;
 	u_int32_t	rc_type;
@@ -172,16 +148,6 @@ struct rk_confinfo {
 
 struct rk_confinfo_retval {
 	struct rk_confinfo rcr_ci<>;
-};
-
-struct rk_confinfo_retval rk_matchconf(struct rk_matchconfargs);
-
-/*
- * Check who is logged on to the server.
- */
-struct rk_vilka_args {
-	u_int32_t	rva_secs;
-	u_int32_t	rva_flags;
 };
 
 struct rk_dynamic_session_info {
@@ -197,36 +163,41 @@ struct rk_dynamic_session_info_retval {
 	struct rk_dynamic_session_info rdv_rds<>;
 };
 
-struct rk_dynamic_session_info_retval rk_vilka(struct rk_vilka_args);
-
-
-/*
- * Login a user to the system.
- */
-struct rk_loginargs {
-	u_int32_t	rk_userid;
-	string		rk_passwd;
-};
-
-int32_t rk_login(struct rk_loginargs);
-
-/*
- * Set the "what-i-am-doing" string.
- */
-struct rk_whatidoargs {
-	string		rw_whatido;
-};
-
-int32_t rk_whatido(struct rk_whatidoargs);
-
-/*
- * Get conferences with unread texts.
- */
 struct rk_unreadconfval {
 	u_int32_t	ru_confs<>;
 };
 
+/*
+ * Login a user to the system.
+ * Arguments are (userid, password).
+ */
+int32_t rk_login(u_int32_t, string);
+
+/*
+ * Set the "what-I-am-doing" string.
+ */
+int32_t rk_whatido(string);
+
+/*
+ * Get conferences with unread texts.
+ */
 struct rk_unreadconfval rk_unreadconf(u_int32_t);
+
+/*
+ * Do a conference/user name match.
+ * Return an array of matched confinfo structs.
+ */
+struct rk_confinfo_retval rk_matchconf(string, u_int8_t);
+
+/*
+ * Get the conference struct based on the conference number.
+ */
+struct rk_conference	rk_confinfo(u_int32_t);
+
+/*
+ * Get the person struct based on the person number.
+ */
+struct rk_person	rk_persinfo(u_int32_t);
 
 /*
  * Tell the server that the user is alive.
@@ -234,6 +205,17 @@ struct rk_unreadconfval rk_unreadconf(u_int32_t);
  */
 int32_t rk_alive(int32_t);
 
+/*
+ * Get membership information about a user in a conference.
+ * Args are uid, mid.
+ */
+struct rk_membership rk_membership(u_int32_t, u_int32_t);
+
+/*
+ * Return the users that are logged on to the system.
+ * Args are (idlesecs, flags).
+ */
+struct rk_dynamic_session_info_retval rk_vilka(u_int32_t, u_int32_t);
 /*
  * Ask for the server time.
  * XXX - should have void argument.

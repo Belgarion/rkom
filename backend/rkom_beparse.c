@@ -34,14 +34,13 @@ rk_alive_server(int32_t arg)
 }
 
 int32_t
-rk_whatido_server(struct rk_whatidoargs *args)
+rk_whatido_server(char *args)
 {
 	int i;
 	char *buf;
 
-	buf = alloca(strlen(args->rw_whatido));
-	sprintf(buf, "4 %ldH%s\n", (long)strlen(args->rw_whatido),
-	    args->rw_whatido);
+	buf = alloca(strlen(args));
+	sprintf(buf, "4 %ldH%s\n", (long)strlen(args), args);
 	i = send_reply(buf);
 	get_eat('\n');
 	return i;
@@ -49,17 +48,16 @@ rk_whatido_server(struct rk_whatidoargs *args)
 
 
 struct rk_confinfo_retval *
-rk_matchconf_server(struct rk_matchconfargs *args)
+rk_matchconf_server(char *name, u_int8_t flags)
 {
 	struct rk_confinfo_retval *retval;
 	int antal, i, p, k;
 	char *buf;
 
-	k = (args->rm_flags & MATCHCONF_CONF) == MATCHCONF_CONF;
-	p = (args->rm_flags & MATCHCONF_PERSON) == MATCHCONF_PERSON;
-	buf = alloca(strlen(args->rm_name) + 30);
-	sprintf(buf, "76 %ldH%s %d %d\n",
-	    (long)strlen(args->rm_name), args->rm_name, p, k);
+	k = (flags & MATCHCONF_CONF) == MATCHCONF_CONF;
+	p = (flags & MATCHCONF_PERSON) == MATCHCONF_PERSON;
+	buf = alloca(strlen(name) + 30);
+	sprintf(buf, "76 %ldH%s %d %d\n", (long)strlen(name), name, p, k);
 
 	send_reply(buf);
 
@@ -85,18 +83,17 @@ rk_matchconf_server(struct rk_matchconfargs *args)
 }
 
 int32_t
-rk_login_server(struct rk_loginargs *args)
+rk_login_server(u_int32_t userid, char *passwd)
 {
 	char *buf;
 	int i;
 
-	buf = alloca(strlen(args->rk_passwd) + 30);
-	sprintf(buf, "62 %d %ldH%s 0\n", args->rk_userid,
-	    (long)strlen(args->rk_passwd), args->rk_passwd);
+	buf = alloca(strlen(passwd) + 30);
+	sprintf(buf, "62 %d %ldH%s 0\n", userid, (long)strlen(passwd), passwd);
 	if (send_reply(buf)) {
 		i = get_int();
 	} else {
-		myuid = args->rk_userid;
+		myuid = userid;
 		i = 0;
 	}
 	get_eat('\n');
@@ -178,15 +175,15 @@ rk_membership_server(u_int32_t uid, u_int32_t mid)
 }
 
 struct rk_dynamic_session_info_retval *
-rk_vilka_server(struct rk_vilka_args *rva)
+rk_vilka_server(u_int32_t secs, u_int32_t flags)
 {
 	struct rk_dynamic_session_info_retval *pp;
 	struct rk_dynamic_session_info *ppp;
 	char buf[50];
 	int antal, i;
 
-	sprintf(buf, "83 %d %d %d\n", (rva->rva_flags & WHO_VISIBLE) != 0, 
-	    (rva->rva_flags & WHO_INVISIBLE) != 0, rva->rva_secs);
+	sprintf(buf, "83 %d %d %d\n", (flags & WHO_VISIBLE) != 0, 
+	    (flags & WHO_INVISIBLE) != 0, secs);
 	send_reply(buf);
 
 	antal = get_int();
