@@ -1,10 +1,10 @@
-#	$Id: Makefile,v 1.2 2000/10/15 19:14:50 jens Exp $
+#	$Id: Makefile,v 1.3 2000/10/15 21:39:14 jens Exp $
 #
 #	makefile for the rkom frontend
 #
 
 PROG		 = ckom
-SRCS		 = ckom.c container.c articles.c scr.c conf.c
+SRCS		 = ckom.c container.c articles.c scr.c conf.c keys.c
 NOMAN		 = y
 WARNS		?= 1
 LDADD		 = -lcurses -ltermcap

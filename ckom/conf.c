@@ -1,4 +1,4 @@
-/* $Id: conf.c,v 1.4 2000/10/15 19:33:34 jens Exp $ */
+/* $Id: conf.c,v 1.5 2000/10/15 21:39:15 jens Exp $ */
 
 #include <sys/cdefs.h>
 #include <sys/param.h>
@@ -10,6 +10,7 @@
 
 #include "conf.h"
 #include "scr.h"
+#include "keys.h"
 
 #include <assert.h>
 
@@ -35,11 +36,46 @@ static void goto_msg_num(int);
 
 static void scroll_text(int);
 
+enum {
+	M_UNBOUND = KD_UNBOUND,
+	M_NEXT_ENTRY,
+	M_PREVIOUS_ENTRY,
+	M_NEXT_PAGE,
+	M_PREVIOUS_PAGE,
+	M_NEXT_LINE,
+	M_PREVIOUS_LINE,
+	M_REFRESH,
+	M_QUIT
+};
+
+
+
+static key_def_t kd_tab[] = {
+/* keys to move in the thread window */
+{ 'j',			M_NEXT_ENTRY,			"next-entry"			},
+{ KEY_DOWN,		M_NEXT_ENTRY,			"next-entry"			},
+{ 'k',			M_PREVIOUS_ENTRY,		"previous-entry"		},
+{ KEY_UP,		M_PREVIOUS_ENTRY,		"previous-entry"		},
+
+/* keys to move in the text window */
+{ ' ',			M_NEXT_PAGE,			"next-page"				},
+{ KEY_NPAGE,	M_NEXT_PAGE,			"next-page"				},
+{ '-',			M_PREVIOUS_PAGE,		"previous-page"			},
+{ KEY_PPAGE,	M_PREVIOUS_PAGE,		"previous-page"			},
+{ '\n',			M_NEXT_LINE,			"next-line"				},
+{ CTRL('h'),	M_PREVIOUS_LINE,		"previous-line"			},
+
+{ CTRL('L'),	M_REFRESH,				"refresh-screen"		},
+{ 'q',			M_QUIT,					"quit-conference-menu"	}
+};
+
 
 void
 conference_menu(void)
 {
-	int			key;
+	int			key, i, num_elem, kd_id;
+	keybind_t	*kb;
+	
 
 	/*
 	 * Window at the top of the screen that shows all the threads in
@@ -61,6 +97,12 @@ conference_menu(void)
 
 	keypad(stdscr, 1);
 
+	kb = keybind_init();
+	num_elem = sizeof(kd_tab) / sizeof(key_def_t);
+	for (i = 0; i < num_elem; i++)
+		keybind_add(kb, &kd_tab[i]);
+	
+
 	goto_msg_num(0);
 
 	/* main loop if the conference menu */
@@ -72,38 +114,42 @@ conference_menu(void)
 		key = getch();
 		werase(cmdwin);
 		wrefresh(cmdwin);
-		switch (key) {
-		case 'j':
+		kd_id = keybind_lookup(kb, key);
+		switch (kd_id) {
+		case M_NEXT_ENTRY:
 			goto_msg_num(at_msg + 1);
 			break;
-		case 'k':
+		case M_PREVIOUS_ENTRY:
 			goto_msg_num(at_msg - 1);
 			break;
-		case '\n':
+		case M_NEXT_LINE:
 			scroll_text(1);
 			break;
-		case ' ':
+		case M_NEXT_PAGE:
 			scroll_text(textwin_height);
 			break;
-		case KEY_BACKSPACE:
+		case M_PREVIOUS_LINE:
 			scroll_text(-1);
 			break;
-		case 'b':
-		case '-':
+		case M_PREVIOUS_PAGE:
 			scroll_text(-textwin_height);
 			break;
-		case CTRL('L'):
+		case M_REFRESH:
 			wrefresh(stdscr);
 			break;
-		case 'q':
+		case M_QUIT:
 			goto end_menu;
-		default:
+		case M_UNBOUND:
 			beep();
 			scr_warnx(cmdwin, "Unbound key %d", key);
+			break;
+		default:
+			assert(0);
 		}
 	}
 
 end_menu:
+	keybind_free(kb);
 	keypad(stdscr, 0);
 	delwin(thrdwin);
 	delwin(statwin);
@@ -197,7 +243,7 @@ void
 conf_thrd_refresh(void)
 {
 	art_t	*art;
-	char	timestr[10];
+	char	timestr[10], buf[80];
 	int		i, last_msg;
 
 	werase(thrdwin);
@@ -212,8 +258,9 @@ conf_thrd_refresh(void)
 		} else
 			wprintw(thrdwin, "  ");
 		strftime(timestr, sizeof(timestr), "%b %d", localtime(&art->art_time));
-		wprintw(thrdwin, "%4d %-6.6s %-20.20s (%4d) %-30.30s",
+		snprintf(buf, sizeof(buf), "%4d %-6.6s %-20.20s (%4d) %s",
 			i, timestr, art->art_from, art->art_no_of_lines, art->art_subj);
+		wprintw(thrdwin, "%-78.78s", buf);
 	}
 	wrefresh(thrdwin);
 }
@@ -287,3 +334,4 @@ scroll_text(int num_rows)
 	at_msg_top_row = row_num;
 	conf_text_refresh();
 }
+
