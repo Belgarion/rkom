@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.59 2003/10/12 13:35:52 ragge Exp $ */
+/* $Id: rkom.c,v 1.60 2003/10/12 13:56:20 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -179,8 +179,10 @@ rkom_command()
 	 */
 	outlines = 0;
 	rprintf("%c", '\r');	
-	if (el_gets(main_el, &num, 1) == NULL)
+	if (el_gets(main_el, &num, 1) == NULL) {
+		setup_tty(1);
 		return;
+	}
 
 	lf = el_line(main_el);
 	strncpy(buf, lf->buffer, MAX_LINE);
