@@ -1,0 +1,44 @@
+"Lista kommandon
+Ord inom parantes ska inte skrivas.
+Kommandon med en '*' framför är inte implementerade ännu.
+
+  Kommandon för läsning:
+    (Läsa) nästa inlägg
+    (Läsa) nästa kommentar
+*   Återse (det) kommenterade
+*   Lista (alla) nyheter
+*   Endast (läsa senaste)
+
+  Kommandon för skrivning:
+    (Skriva eget) inlägg
+*   Kommentera (inlägget)
+*   Kommentera föregående (inlägg)
+
+  Kommandon för möten:
+    Var (är jag)
+    Gå (till möte)
+    (Gå till) nästa möte
+    Lista möten
+
+  Kommandon för texter:
+    Lägga (in texten)
+    Mottagare:
+    Ärende:
+    Kommentar till:
+    Glöm (bort texten du skriver)
+    (Visa) hela (texten jag skriver)
+
+  Kommandon för onlinekommunikation:
+    Vilka (är inloggade)
+*   Sänd (alarmmeddelande till alla)
+*   Säg (något till)
+
+  Kommandon för information:
+    Lista kommandon
+    (Se) tiden
+
+  Övriga kommandon:
+    Login
+    Logout
+    Sluta
+"

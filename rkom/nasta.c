@@ -6,13 +6,114 @@
 #include <strings.h>
 
 #include "rkom_proto.h"
+#include "exported.h"
 
-// #include "conf.h"
-// #include "komtyp.h"
 #include "rkom.h"
 #include "next.h"
 
-int lasttext;
+struct keeptrack {
+	struct keeptrack *back;
+	int textnr;
+	int listidx;
+};
+
+static struct keeptrack *pole;
+
+/*
+ * Next action: decide what to do next is. Choose between:
+ *	- Nästa kommentar
+ *	- Nästa fotnot
+ *	- Nästa inlägg
+ *	- Nästa möte
+ */
+static void
+next_action(int nr)
+{
+	struct keeptrack *kt;
+	struct rk_text_stat *ts;
+	struct rk_misc_info *mi;
+	int i, len;
+
+	ts = rk_textstat(nr);
+
+	/* First: see if there is anything following this text */
+	len = ts->rt_misc_info.rt_misc_info_len;
+	mi = ts->rt_misc_info.rt_misc_info_val;
+	for (i = 0; i < len; i++)
+		if (mi[i].rmi_type == footn_in ||
+		    mi[i].rmi_type == comm_in) {
+			struct rk_text_stat *ts2;
+			int r;
+
+			ts2 = rk_textstat(mi[i].rmi_numeric);
+			r = ts2->rt_retval;
+			free(ts2);
+			if (r)
+				continue;
+			else
+				break;
+		}
+
+	if (i == len) { /* No, nothing followed */
+again:		free(ts); /* Forget last text */
+		if (pole == 0) { /* Nothing to do at all */
+			prompt = PROMPT_NEXT_TEXT;
+			return;
+		}
+		ts = rk_textstat(pole->textnr);
+		len = ts->rt_misc_info.rt_misc_info_len;
+		mi = ts->rt_misc_info.rt_misc_info_val;
+
+		for (i = pole->listidx + 1; i < len; i++)
+			if (mi[i].rmi_type == footn_in ||
+			    mi[i].rmi_type == comm_in) {
+				struct rk_text_stat *ts2;
+				int r;
+
+				ts2 = rk_textstat(mi[i].rmi_numeric);
+				r = ts2->rt_retval;
+//printf("Textstatta %d retval %d\n", mi[i].rmi_numeric, r);
+				free(ts2);
+				if (r)
+					continue;
+				else
+					break;  
+			}
+		if (i == len) { /* last text at this leaf, iterate */
+			struct keeptrack *old;
+
+			old = pole;
+			pole = pole->back;
+			free(old);
+			goto again;
+		}
+		pole->listidx = i;
+	} else {
+		/* More to read, just follow */
+		kt = calloc(sizeof(struct keeptrack), 1);
+		kt->textnr = nr;
+		kt->listidx = i;
+		kt->back = pole;
+		pole = kt;
+	}
+	prompt = PROMPT_NEXT_COMMENT;
+	free(ts);
+}
+
+/*
+ * Deletes the comment chain.
+ */
+void
+next_resetchain()
+{
+	struct keeptrack *kt;
+
+	while (pole) {
+		kt = pole->back;
+		free(pole);
+		pole = kt;
+	}
+}
 
 void
 next_conf(char *str)
@@ -49,6 +150,29 @@ next_conf(char *str)
 	free(member);
 }
 
+static void
+mark_read(int nr)
+{
+	struct rk_text_stat *ts;
+	struct rk_misc_info *mi;
+	int i, len;
+
+	ts = rk_textstat(nr);
+	len = ts->rt_misc_info.rt_misc_info_len;
+	mi = ts->rt_misc_info.rt_misc_info_val;
+//printf("Inlägg %d markera: ", nr);
+	for (i = 0; i < len; i++) {
+		if (mi[i].rmi_type != recpt && mi[i].rmi_type != cc_recpt)
+			continue;
+		if (mi[i+1].rmi_type != loc_no)
+			continue;
+		rk_mark_read(mi[i].rmi_numeric, mi[i+1].rmi_numeric);
+//printf("möte %d local %d ", mi[i].rmi_numeric, mi[i+1].rmi_numeric);
+	}
+//printf("\n");
+	free(ts);
+}
+
 void
 next_text(char *str)
 {
@@ -62,6 +186,39 @@ next_text(char *str)
 	}
 	global = rk_local_to_global(curconf, local);
 	show_text(global);
-	lasttext = global;
-	rk_mark_read(curconf, local);
+	mark_read(global);
+	next_action(global);
 }
+
+void
+next_comment(char *str)
+{
+	struct rk_text_stat *ts;
+	struct rk_misc_info *mi;
+	int global, len, i;
+
+	if (pole == 0) {
+back:		printf("Det finns ingen nästa kommentar.\n");
+		return;
+	}
+	ts = rk_textstat(pole->textnr);
+	len = ts->rt_misc_info.rt_misc_info_len;
+	mi = ts->rt_misc_info.rt_misc_info_val;
+	for (i = pole->listidx; i < len; i++)
+		if (mi[i].rmi_type == footn_in ||
+		    mi[i].rmi_type == comm_in)
+			break;
+	if (i == len) {
+		free(ts);
+		goto back;
+	}
+	global = mi[i].rmi_numeric;
+	free(ts);
+	show_text(global);
+	mark_read(global);
+	next_action(global);
+}
+
+
+
+

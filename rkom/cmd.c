@@ -11,7 +11,7 @@
 #include "rkom.h"
 // #include "conf.h"
 #include "next.h"
-// #include "list.h"
+#include "list.h"
 // #include "write.h"
 
 static void cmd_logout(char *);
@@ -32,15 +32,16 @@ struct cmnd cmds[] = {
 //	{"inlägg", 0, write_new },
 //	{"kommentera", 0, write_cmnt },
 //	{"kommentar", "till:", write_comment },
-//	{"lista", "kommandon", list_comm },
-//	{"lista", "möten", list_conf },
-//	{"lista", "nyheter", list_news },
+	{"lista", "kommandon", list_comm },
+	{"lista", "möten", list_conf },
+	{"lista", "nyheter", list_news },
 	{"login", 0, cmd_login },
 	{"logout", 0, cmd_logout },
 //	{"lägg", 0, write_put },
 //	{"mottagare:", 0, write_rcpt },
 	{"nästa", "inlägg", next_text },
 	{"nästa", "möte", next_conf },
+	{"nästa", "kommentar", next_comment },
 //	{"redigera", "editor", write_editor },
 	{"sluta", 0, cmd_sluta },
 	{"säg", 0, cmd_say },
@@ -226,7 +227,7 @@ cmd_login(char *str)
 {
 	struct rk_confinfo_retval *retval;
 	struct rk_unreadconfval *conf;
-	int i, num, *confs, nconf, userid;
+	int i, num, nconf, userid;
 	char *passwd;
 
 	if (str == 0) {
@@ -264,49 +265,15 @@ cmd_login(char *str)
 	if (rk_whatido("Kör raggeklienten (nu med login!)"))
 		printf("Set what-i-am-doing sket sej\n");
 
-	/*
-	 * Get number of unread texts.
-	 */
-	conf = rk_unreadconf(myuid);
-
 	/* Show where we have unread texts. */
+	list_news(0);
+
+	conf = rk_unreadconf(myuid);
 	nconf = conf->ru_confs.ru_confs_len;
-	if (nconf) {
-		confs = conf->ru_confs.ru_confs_val;
-
-		for (i = 0; i < nconf; i++) {
-			struct rk_conference *rkc;
-			struct rk_membership *m;
-			int hln;
-
-			rkc = rk_confinfo(confs[i]);
-
-			if (rkc->rc_retval) {
-				printf("%d sket sej med %d\n",
-				    confs[i], rkc->rc_retval);
-				free(rkc);
-				continue;
-			}
-			hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
-			m = rk_membership(myuid, confs[i]);
-
-			if (m->rm_retval) {
-				printf("%d,%d sket sej med %d\n",
-				    confs[i], myuid, m->rm_retval);
-				free(rkc);
-				free(m);
-				continue;
-			}
-			printf("Du har %d olästa inlägg av %d i %s\n",
-			    hln - m->rm_last_text_read, hln, rkc->rc_name);
-			free(rkc);
-			free(m);
-		}
-		printf("\n");
+	if (nconf)
 		prompt = PROMPT_NEXT_CONF;
-	} else {
+	else
 		printf("\nDu har inga olästa inlägg.\n");
-	}
 	free(conf);
 }
 
@@ -401,22 +368,27 @@ cmd_say(char *str)
 void
 cmd_where(char *str)
 {
-#if 0
+	struct rk_conference *conf;
+
 	if (myuid == 0)
 		printf("Du är inte ens inloggad.\n");
 	else if (curconf == 0)
 		printf("Du är inte närvarande någonstans.\n");
-	else
-		printf("Du är i möte %s.\n", conf_num2name(curconf));
-#endif
+	else {
+		conf = rk_confinfo(curconf);
+		printf("Du är i möte %s.\n", conf->rc_name);
+		free(conf);
+	}
 }
 
 void
 cmd_goto(char *str)
 {
-#if 0
-	int conf, ret;
-	char *ch;
+	struct rk_conference *rkc;
+	struct rk_membership *m;
+	struct rk_confinfo_retval *retval;
+	int conf, ret, num, i;
+	char *ch, *name;
 
 	if (myuid == 0) {
 		printf("Logga in först.\n");
@@ -426,19 +398,33 @@ cmd_goto(char *str)
 		printf("Du måste ge ett möte som argument.\n");
 		return;
 	}
-	conf = conf_conf2num_complain(str);
-	if (conf == 0)
+	retval = rk_matchconf(str, MATCHCONF_CONF);
+	num = retval->rcr_ci.rcr_ci_len;
+	if (num == 0) {
+		printf("Det finns inget möte som matchar \"%s\".\n", str);
+		free(retval);
 		return;
-
-	ret = change_conference(conf);
+	} else if (num > 1) {
+		printf("Namnet \"%s\" är flertydigt. Du kan mena:\n", str);
+		for (i = 0; i < num; i++)
+			printf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
+		printf("\n");
+		free(retval);
+		return;
+	}
+	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	name = alloca(strlen(retval->rcr_ci.rcr_ci_val[0].rc_name) + 2);
+	strcpy(name, retval->rcr_ci.rcr_ci_val[0].rc_name);
+	free(retval);
+	ret = rk_change_conference(conf);
 	if (ret == 0) {
 		curconf = conf;
-		printf("Du gick nu till möte %s.\n", conf_num2name(conf));
+		printf("Du gick nu till möte %s.\n", name);
 		return;
 	}
 	/* XXX Check why change_conference failed; status of conf etc */
 	if (ret == 13) { /* XXX should be define */
-		printf("Du är inte medlem i %s.\n", conf_num2name(conf));
+		printf("Du är inte medlem i %s.\n", name);
 		do {
 			printf("Vill du bli medlem? (ja, nej) - ");
 			fflush(stdout);
@@ -452,31 +438,31 @@ cmd_goto(char *str)
 		printf("%s\n", error(ret));
 		return;
 	}
-	if ((ret = add_member(conf, myuid, 100, 3, 0))) {
+	if ((ret = rk_add_member(conf, myuid, 100, 3, 0))) {
 		printf("%s\n", error(ret));
 		return;
 	}
 	curconf = conf;
-	printf("Du är nu medlem i %s.\n", conf_num2name(conf));
-	delete_membership_internal();
-	ret = get_uconf_stat(curconf)->highest_local_no -
-	    get_membership(myuid, curconf)->last_text_read;
+	printf("Du är nu medlem i %s.\n", name);
+	rkc = rk_confinfo(conf);
+	m = rk_membership(myuid, conf);
+	ret = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1 -
+	    m->rm_last_text_read;
 	if (ret) {
-		printf("\nDu har %d ol\xe4sta inl\xe4gg.\n", ret);
+		printf("\nDu har %d olästa inlägg.\n", ret);
 		prompt = PROMPT_NEXT_TEXT;
 	} else {
-		printf("\nDu har inga ol\xe4sta inl\xe4gg.\n");
+		printf("\nDu har inga olästa inlägg.\n");
 		prompt = PROMPT_NEXT_CONF;
 	}
-#endif
+	next_resetchain();
 }
 
 void
 cmd_only(char *str)
 {
-#if 0
+	struct rk_conference *conf;
 	int only, high;
-	char buf[20];
 
 	if (str == 0) {
 		printf("Du måste ange hur många du endast vill se.\n");
@@ -491,15 +477,11 @@ cmd_only(char *str)
 		printf("Du är inte i nåt möte just nu.\n");
 		return;
 	}
-	high = get_uconf_stat(curconf)->highest_local_no;
-	sprintf(buf, "77 %d %d\n", curconf, high - only);
-	if (send_reply(buf)) {
-		printf("%s\n", error(get_int()));
-		get_eat('\n');
-		return;
-	}
-	get_eat('\n');
-	set_last_read_internal(curconf, high - only);
-	prompt = PROMPT_NEXT_CONF;
-#endif
+	conf = rk_confinfo(curconf);
+	high = conf->rc_first_local_no + conf->rc_no_of_texts - 1;
+	rk_set_last_read(curconf, high - only);
+	if (only == 0)
+		prompt = PROMPT_NEXT_CONF;
+	else
+		prompt = PROMPT_NEXT_TEXT;
 }

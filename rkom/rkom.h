@@ -1,5 +1,7 @@
 
 
+struct rk_time;
+
 /*
  * Describes a command and which function to call if a match is found.
  * All commands are one or two words.
@@ -29,16 +31,16 @@ void	cmd_lista(char *);
 void	cmd_nasta(char *);
 void	cmd_login(char *);
 void	show_text(int);
-// char *	get_date_string(struct Time *);
-// struct	Text_Stat *get_text_stat(int);
 void	cmd_exec(char *, struct cmnd *);
 char *	get_input_string(int);
-
+char * get_date_string(struct rk_time *t);
 
 extern	int myuid;
 extern	int curconf;
 extern	char *prompt, *p_see_time, *p_next_conf, *p_next_text;
+extern	char *p_next_comment;
 
 #define	PROMPT_SEE_TIME	p_see_time
 #define	PROMPT_NEXT_CONF p_next_conf
 #define	PROMPT_NEXT_TEXT p_next_text
+#define	PROMPT_NEXT_COMMENT p_next_comment

@@ -11,8 +11,6 @@
 //#include "conf.h"
 //#include "read.h"
 
-char * get_date_string(struct rk_time *t);
-
 static char *
 vem(int num)
 {
@@ -61,6 +59,8 @@ show_text(int nr)
 		if (mi[i].rmi_type == recpt)
 			printf("Mottagare: %s\n", vem(mi[i].rmi_numeric));
 
+		if (mi[i].rmi_type == cc_recpt)
+			printf("Extra kopia: %s\n", vem(mi[i].rmi_numeric));
 		if (mi[i].rmi_type == comm_to) {
 			struct rk_text_stat *tt;
 

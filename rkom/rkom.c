@@ -27,6 +27,7 @@ static int lasttime;
 char *p_next_conf = "(Gå till) nästa möte";
 char *p_next_text = "(Läsa) nästa inlägg";
 char *p_see_time  = "(Se) tiden";
+char *p_next_comment = "(Läsa) nästa kommentar";
 char *prompt;
 
 int
