@@ -84,6 +84,9 @@ show_text(int nr)
 		}
 	}
 
+	if (ts->rt_no_of_marks)
+		printf("Texten markerad av %d person%s.\n", ts->rt_no_of_marks,
+		    ts->rt_no_of_marks == 1 ? "" : "er");
 	c = rk_gettext(nr);
 	printf("Ärende: ");
 	cc = c;
