@@ -9,10 +9,9 @@
 #include "rkom_proto.h"
 #include "exported.h"
 #include "rkom.h"
-// #include "conf.h"
 #include "next.h"
 #include "list.h"
-// #include "write.h"
+#include "write.h"
 
 static void cmd_logout(char *);
 static void cmd_tiden(char *);
@@ -27,22 +26,22 @@ static void cmd_only(char *);
 struct cmnd cmds[] = {
 	{"endast", 0, cmd_only },
 	{"gå", 0, cmd_goto },
-//	{"glöm", 0, write_forget },
-//	{"hela", 0, write_whole },
-//	{"inlägg", 0, write_new },
-//	{"kommentera", 0, write_cmnt },
-//	{"kommentar", "till:", write_comment },
+	{"glöm", 0, write_forget },
+	{"hela", 0, write_whole },
+	{"inlägg", 0, write_new },
+	{"kommentera", 0, write_cmnt },
+	{"kommentar", "till:", write_comment },
 	{"lista", "kommandon", list_comm },
 	{"lista", "möten", list_conf },
 	{"lista", "nyheter", list_news },
 	{"login", 0, cmd_login },
 	{"logout", 0, cmd_logout },
-//	{"lägg", 0, write_put },
-//	{"mottagare:", 0, write_rcpt },
+	{"lägg", 0, write_put },
+	{"mottagare:", 0, write_rcpt },
 	{"nästa", "inlägg", next_text },
 	{"nästa", "möte", next_conf },
 	{"nästa", "kommentar", next_comment },
-//	{"redigera", "editor", write_editor },
+	{"redigera", "editor", write_editor },
 	{"sluta", 0, cmd_sluta },
 	{"säg", 0, cmd_say },
 	{"sända", 0, cmd_send },
@@ -287,13 +286,11 @@ void
 cmd_sluta(char *str)
 {
 	printf("Sluta\n");
-#if 0
 	if (is_writing) {
 		printf("Du håller på att skriva en text. ");
 		printf("Lägg in eller glöm den först.\n");
 		return;
 	}
-#endif
 	printf("Nu avslutar du rkom.\n");
 	exit(0);
 }
@@ -420,6 +417,7 @@ cmd_goto(char *str)
 	if (ret == 0) {
 		curconf = conf;
 		printf("Du gick nu till möte %s.\n", name);
+		next_resetchain();
 		return;
 	}
 	/* XXX Check why change_conference failed; status of conf etc */
@@ -432,6 +430,7 @@ cmd_goto(char *str)
 		} while (strcasecmp("ja", ch) && strcasecmp("nej", ch));
 		if (strcasecmp("nej", ch) == 0) {
 			printf("Nehepp.\n");
+			next_resetchain();
 			return;
 		}
 	} else if (ret != 0) {

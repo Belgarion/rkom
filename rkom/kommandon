@@ -6,12 +6,12 @@ Kommandon med en '*' framför är inte implementerade ännu.
     (Läsa) nästa inlägg
     (Läsa) nästa kommentar
 *   Återse (det) kommenterade
-*   Lista (alla) nyheter
-*   Endast (läsa senaste)
+    Lista (alla) nyheter
+    Endast (läsa senaste)
 
   Kommandon för skrivning:
     (Skriva eget) inlägg
-*   Kommentera (inlägget)
+    Kommentera (inlägget)
 *   Kommentera föregående (inlägg)
 
   Kommandon för möten:

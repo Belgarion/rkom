@@ -1,10 +1,10 @@
-#	$Id: Makefile,v 1.4 2000/10/12 18:22:40 ragge Exp $
+#	$Id: Makefile,v 1.5 2000/10/13 12:42:24 ragge Exp $
 #
 #	makefile for the rkom frontend
 #
 
 PROG=	rkom
-SRCS=	rkom.c set.c kbd.c cmd.c nasta.c show.c lista.c error.c
+SRCS=	rkom.c set.c kbd.c cmd.c nasta.c show.c lista.c error.c write.c
 NOMAN=	y
 WARNS?=	1
 

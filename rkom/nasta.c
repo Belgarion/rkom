@@ -17,6 +17,7 @@ struct keeptrack {
 	int listidx;
 };
 
+int lasttext;
 static struct keeptrack *pole;
 
 /*
@@ -113,6 +114,7 @@ next_resetchain()
 		free(pole);
 		pole = kt;
 	}
+	prompt = PROMPT_NEXT_TEXT;
 }
 
 void
@@ -188,6 +190,7 @@ next_text(char *str)
 	show_text(global);
 	mark_read(global);
 	next_action(global);
+	lasttext = global;
 }
 
 void
@@ -199,6 +202,7 @@ next_comment(char *str)
 
 	if (pole == 0) {
 back:		printf("Det finns ingen nästa kommentar.\n");
+		prompt = PROMPT_NEXT_TEXT;
 		return;
 	}
 	ts = rk_textstat(pole->textnr);
@@ -217,6 +221,7 @@ back:		printf("Det finns ingen nästa kommentar.\n");
 	show_text(global);
 	mark_read(global);
 	next_action(global);
+	lasttext = global;
 }
 
 
