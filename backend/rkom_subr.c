@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.18 2001/11/30 22:49:36 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.19 2001/12/07 21:10:36 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -130,5 +130,5 @@ void
 rkom_logout()
 {
 	kill(childpid, SIGTERM);
-	err(1, "rkom_logout");
+	exit(0);
 }

@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.57 2001/12/01 14:43:08 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.58 2001/12/07 21:10:39 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -274,7 +274,7 @@ cmd_sluta(char *str)
 		return;
 	}
 	rprintf("Nu avslutar du rkom.\n");
-	exit(0);
+	rkom_logout();
 }
 
 void 
