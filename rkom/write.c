@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.44 2002/05/18 21:30:36 offe Exp $	*/
+/*	$Id: write.c,v 1.45 2002/05/18 21:32:09 offe Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -536,23 +536,22 @@ write_fastcmnt_no(nr)
 	rprintf("Snabbkommentera (inlägg %d)\n", nr);
 	buf = getstr("Kommentarstext: ");
 	if(strlen(buf)) {
-	} else {
+		rtii = alloca(sizeof(*rtii));
+		rtii->raii_tag = RAI_TAG_FAST_REPLY;
+		rtii->inherit_limit = 1;
+		rtii->raii_data = buf;
+
+		retval = rk_add_text_info(nr, rtii);
+	
+		if(retval) {
+			rprintf("Kunde inte addera kommentaren till texten: %s\n",
+			    error(retval));
+		}
+		free(rtii);
+	} else
 		rprintf("Nehepp.");
-	}
 
-	rtii = alloca(sizeof(*rtii));
-	rtii->raii_tag = RAI_TAG_FAST_REPLY;
-	rtii->inherit_limit = 1;
-	rtii->raii_data = buf;
-
-	retval = rk_add_text_info(nr, rtii);
-
-	if(retval) {
-		rprintf("Kunde inte addera kommentaren till texten: %s\n",
-		    error(retval));
-	}
-
-	free(buf); free(rtii);
+	free(buf);
 }
 
 void
