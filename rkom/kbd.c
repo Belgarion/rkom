@@ -31,8 +31,7 @@ char *
 getstr(char *m)
 {
 	static EditLine *el = NULL;
-	char *ret;
-	const char *tc;
+	static char *ret;
 	int len;  
 
 	if (el == NULL) {
@@ -42,11 +41,7 @@ getstr(char *m)
 	}
 	
 	msg = m;
-	tc = el_gets(el, &len, 0);
-	if (tc) {
-		ret = strdup(tc);
-		ret[len - 1] = 0; /* Forget \n */
-	} else
-		ret = strdup("");
+	ret = (char *)el_gets(el, &len, 0);
+	ret[len-1] = 0;
 	return ret;
 }

@@ -27,7 +27,7 @@ show_superhoppa(char *arg)
 		return;
 	}
 	ch = rk_gettext(lasttext);
-	c = index(supstr, '\n');
+	c = index(ch, '\n');
 	if (c != NULL) {
 		supstr = calloc(c - ch + 1, 1);
 		bcopy(ch, supstr, c - ch);

@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.60 2003/09/25 18:38:19 ragge Exp $	*/
+/*	$Id: write.c,v 1.61 2003/10/01 18:30:38 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -634,7 +634,7 @@ write_fastcmnt_no(nr)
 
 	rprintf("Snabbkommentera (inlägg %d)\n", nr);
 	buf = getstr("Kommentarstext: ");
-	if(strlen(buf)) {
+	if(*buf != 0) {
 		rtii = alloca(sizeof(*rtii));
 		rtii->raii_tag = RAI_TAG_FAST_REPLY;
 		rtii->inherit_limit = 1;
@@ -649,8 +649,6 @@ write_fastcmnt_no(nr)
 		free(rtii);
 	} else
 		rprintf("Nehepp.");
-
-	free(buf);
 }
 
 void

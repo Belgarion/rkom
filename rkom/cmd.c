@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.73 2003/10/01 17:56:50 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.74 2003/10/01 18:30:38 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -269,12 +269,10 @@ cmd_send(char *str)
 	rprintf("Sänd (alarmmeddelande till alla)\n");
 
 	buf = getstr("Meddelande: ");
-
-	if (strlen(buf) == 0)
+	if (*buf == 0)
 		rprintf("Nähej.");
 	else
 		rk_send_msg(0, buf);
-	free(buf);
 }
 
 void 
@@ -293,14 +291,13 @@ cmd_say(char *str)
 	rprintf("Sänd meddelande till %s\n", rv[0].rc_name);
 
 	buf = getstr("Meddelande: ");
-	if (strlen(buf)) {
+	if (*buf != 0) {
 		if (rk_send_msg(rv[0].rc_conf_no, buf))
 			rprintf("\nMeddelandet kunde inte skickas.\n");
 		else
 			rprintf("\nMeddelandet sänt till %s.\n", rv[0].rc_name);
 	} else
 		rprintf("Nähej.");
-	free(buf);
 }
 
 void
@@ -556,9 +553,8 @@ cmd_change_name()
 	rprintf("Ändra namn\n\n");
 
 	name = getstr("Vilket namn skall ändras? ");
-	if (strlen(name) == 0) {
+	if (*name == 0) {
 		rprintf("Nähej.\n");
-		free(name);
 		return;
 	}
 	if ((rv = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON)) == 0)
@@ -568,7 +564,6 @@ cmd_change_name()
 	r = rk_change_name(rv[0].rc_conf_no, name);
 	if (r)
 		rprintf("Det gick inte: %s\n", error(r));
-	free(name);
 }
 
 void
@@ -581,27 +576,23 @@ cmd_add_member()
 	rprintf("Addera medlem\n\n");
 
 	name = getstr("Vem skall adderas? ");
-	if (strlen(name) == 0) {
+	if (*name == 0) {
 		rprintf("Nähej.\n"); 
-		free(name);
 		return;
 	}
 	rv = match_complain(name, MATCHCONF_PERSON);
-	free(name);
 	if (rv == NULL)
 		return;
 	rprintf("%s\n", rv[0].rc_name);
 	user = strdup(rv[0].rc_name);
 	uid = rv[0].rc_conf_no;
 	name = getstr("Till vilket möte? ");
-	if (strlen(name) == 0) {
+	if (*name == 0) {
 		rprintf("Nähej.\n");
-		free(name);
 		free(user);
 		return;
 	}
 	rv = match_complain(name, MATCHCONF_CONF);
-	free(name);
 	if (rv == NULL) {
 		free(user);
 		return;
@@ -626,25 +617,21 @@ cmd_sub_member()
 	rprintf("Subtrahera medlem\n\n");
 
 	name = getstr("Vem skall subtraheras? ");
-	if (strlen(name) == 0) {
+	if (*name == 0) {
 		rprintf("Nähej.\n"); 
-		free(name);
 		return;
 	}
 	retval = match_complain(name, MATCHCONF_PERSON);
-	free(name);
 	if (retval == NULL)
 		return;
 	rprintf("%s\n", retval[0].rc_name);
 	uid = retval[0].rc_conf_no;
 	name = getstr("Från vilket möte? ");
-	if (strlen(name) == 0) {
+	if (*name == 0) {
 		rprintf("Nähej.\n");
-		free(name);
 		return;
 	}
 	retval = match_complain(name, MATCHCONF_CONF);
-	free(name);
 	if (retval == NULL)
 		return;
 	mid = retval[0].rc_conf_no;
@@ -663,13 +650,11 @@ cmd_add_rcpt()
 	rprintf("Addera mottagare\n\n");
 
 	name = getstr("Vilket möte skall adderas? ");
-	if (strlen(name) == 0) {
+	if (*name == 0) {
 		rprintf("Nähej.\n"); 
-		free(name);
 		return;
 	}
 	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
-	free(name);
 	if (retval == NULL)
 		return;
 	rprintf("%s\n", retval[0].rc_name);
@@ -679,15 +664,13 @@ cmd_add_rcpt()
 	else
 		sprintf(buf, "Till vilken text? ");
 	name = getstr(buf);
-	if ((strlen(name) == 0) && lasttext) {
+	if ((*name == 0) && lasttext) {
 		text = lasttext;
 	} else if (strlen(name) == 0) {
 		rprintf("Nähej.\n");
-		free(name);
 		return;
 	} else 
 		text = atoi(name);
-	free(name);
 	if (text == 0) {
 		rprintf("Det var ett dåligt textnummer.\n");
 		return;
@@ -717,7 +700,6 @@ cmd_move_text()
 		nr = atoi(text);
 	else
 		nr = lasttext;
-	free(text);
 	if (nr == 0) {
 		rprintf("Du måste ange ett giltigt textnummer.\n\n");
 		return;
@@ -741,11 +723,9 @@ cmd_move_text()
 	text = getstr("Till vilket möte? ");
 	if (*text == 0) {
 		rprintf("Nähej.\n"); 
-		free(text);
 		return;
 	}
 	retval = match_complain(text, MATCHCONF_CONF|MATCHCONF_PERSON);
-	free(text);
 	if (retval == NULL)
 		return;
 	rprintf("Till %s\n", retval[0].rc_name);
@@ -773,13 +753,11 @@ cmd_sub_rcpt()
 	rprintf("Subtrahera mottagare \n\n");
 
 	name = getstr("Vilket möte skall subtraheras? ");
-	if (strlen(name) == 0) {
+	if (*name == 0) {
 		rprintf("Nähej.\n"); 
-		free(name);
 		return;
 	}
 	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
-	free(name);
 	if (retval == NULL)
 		return;
 	rprintf("%s\n", retval[0].rc_name);
@@ -789,15 +767,13 @@ cmd_sub_rcpt()
 	else
 		sprintf(buf, "Från vilken text? ");
 	name = getstr(buf);
-	if ((strlen(name) == 0) && lasttext) {
+	if ((*name == 0) && lasttext) {
 		text = lasttext;
 	} else if (strlen(name) == 0) {
 		rprintf("Nähej.\n");
-		free(name);
 		return;
 	} else
 		text = atoi(name);
-	free(name);
 	if (text == 0) {
 		rprintf("Det var ett dåligt textnummer.\n");
 		return;
@@ -828,7 +804,7 @@ cmd_create(void)
 	char *name, *ch;
 	int type = 0, ret;
 
-	name = getstr("Vad skall mötet heta? ");
+	name = strdup(getstr("Vad skall mötet heta? "));
 	if (*name == 0) {
 		rprintf("Nehej.\n");
 		return;
@@ -839,13 +815,11 @@ cmd_create(void)
 	} while (strcasecmp("öppet", ch) && strcasecmp("slutet", ch));
 	if (strcasecmp("slutet", ch) == 0)
 		type |= RK_CONF_TYPE_RD_PROT;
-	free(ch);
 	do {
 		ch = getstr("Skall mötet vara hemligt? (ja, nej) -");
 	} while (strcasecmp("ja", ch) && strcasecmp("nej", ch));
 	if (strcasecmp("ja", ch) == 0)
 		type |= RK_CONF_TYPE_SECRET;
-	free(ch);
 	ret = rk_create_conf(name, type);
 	if (ret < 0) {
 		rprintf("Det sket sej: %s\n", error(-ret));
@@ -872,7 +846,6 @@ cmd_create_person(void)
 	if (r) for (i = 0; r[i].rc_name; i++)
 		if (strcasecmp(r[i].rc_name, name) == 0) {
 			rprintf("Personen finns redan: %s\n", r[i].rc_name);
-			free(name);
 			return;
 		}
 	
@@ -895,7 +868,6 @@ cmd_create_person(void)
 	}
 	free(npass1);
 	free(npass2);
-	free(name);
 }
 
 void
@@ -923,13 +895,11 @@ cmd_copy()
 	rprintf("(Skicka) kopia\n\n");
 
 	name = getstr("Vart skall kopian skickas? ");
-	if (strlen(name) == 0) {
+	if (*name == 0) {
 		rprintf("Nähej.\n"); 
-		free(name);
 		return;
 	}
 	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
-	free(name);
 	if (retval == NULL)
 		return;
 	rprintf("%s\n", retval[0].rc_name);
@@ -939,15 +909,13 @@ cmd_copy()
 	else
 		sprintf(buf, "Vilken text skall ha en kopia? ");
 	name = getstr(buf);
-	if ((strlen(name) == 0) && lasttext) {
+	if ((*name == 0) && lasttext) {
 		text = lasttext;
-	} else if (strlen(name) == 0) {
+	} else if (*name == 0) {
 		rprintf("Nähej.\n");
-		free(name);
 		return;
 	} else 
 		text = atoi(name);
-	free(name);
 	if (text == 0) {
 		rprintf("Det var ett dåligt textnummer.\n");
 		return;
@@ -976,15 +944,13 @@ cmd_change_priority(char *str)
 	}
 	rprintf("Tidigare prioritet: %d\n", rm->rm_priority);
 	name = getstr("Vilken ny prioritet skall mötet ha? ");
-	if (strlen(name) == 0) {
+	if (*name == 0) {
 		rprintf("Nähej.\n");
-		free(name);
 		return;
 	}
 	pri = atoi(name);
 	if (pri <= 0 || pri > 255) {
 		rprintf("'%s' är en otillåten prioritet.\n", name);
-		free(name);
 		return;
 	}
 	if ((i = rk_add_member(rv->rc_conf_no, myuid, pri, 
@@ -992,5 +958,4 @@ cmd_change_priority(char *str)
 		rprintf("Det sket sej: %s\n", error(i));
 	else
 		rprintf("Prioriteten nu ändrad till %d.\n", pri);
-	free(name);
 }
