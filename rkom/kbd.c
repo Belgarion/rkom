@@ -47,8 +47,5 @@ getstr(char *m)
 		ret[len - 1] = 0; /* Forget \n */
 	} else
 		ret = strdup("");
-#ifndef MACOSX
-	el_end(el);
-#endif
 	return ret;
 }
