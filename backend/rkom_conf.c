@@ -415,7 +415,8 @@ conf_set_high_local(int conf, int local)
 		walker = gcs;
 		while (walker) {
 			if (walker->number == conf) {
-				walker->confer.rc_no_of_texts++;
+				walker->confer.rc_no_of_texts =
+				    local - walker->confer.rc_first_local_no+1;
 				return;
 			}
 			walker = walker->next;
