@@ -128,6 +128,28 @@ async_collect()
 			free(ra);
 			return retval;
 
+		case 12: {
+			struct rk_conference *sender, *rcpt;
+
+			sender = rk_confinfo(ra->ra_sender);
+printf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+			if (ra->ra_conf == 0)
+				printf("Allmänt meddelande från %s\n\n",
+				    sender->rc_name);
+			else if (ra->ra_conf == myuid)
+				printf("Personligt meddelande från %s\n\n",
+				    sender->rc_name);
+			else {
+				rcpt = rk_confinfo(ra->ra_conf);
+				printf("Meddelande till %s från %s\n\n",
+				    rcpt->rc_name, sender->rc_name);
+				free(rcpt);
+			}
+			printf("%s\n", ra->ra_message);
+printf("----------------------------------------------------------------\n");
+		}
+		break;
+
 		case 15: /* New text created */
 			hej = prompt;
 			next_prompt();

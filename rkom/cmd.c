@@ -304,68 +304,56 @@ cmd_sluta(char *str)
 static void 
 cmd_send(char *str)
 {
-#if 0
-	int i;
-	char *buf, *dst;
+	char *buf;
 
 	printf("Sänd (alarmmeddelande till alla)\nMeddelande: ");
 	fflush(stdout);
 
 	buf = get_input_string(0, 0); /* XXX */
 
-	if (strlen(buf) == 0) {
+	if (strlen(buf) == 0)
 		printf("Nähej.");
-		free(buf);
-		return;
-	}
-	dst = malloc(strlen(buf) + 10);
-	sprintf(dst, "53 0 %ldH%s\n", (long)strlen(buf), buf);
+	else
+		rk_send_msg(0, buf);
 	free(buf);
-	if (send_reply(dst)) {
-		i = get_int();
-		if (i)
-			printf("%s\n", error(i));
-		get_eat('\n');
-		return;
-	}
-	get_eat('\n');
-#endif
 }
 
 void 
 cmd_say(char *str)
 {
-#if 0
-	int i, id;
-	char *buf, *dst;
+	struct rk_confinfo_retval *retval;
+	int num, i;
+	char *buf;
 
-	id = conf_any2num_complain(str);
-	if (id == 0)
+	if (str == 0) {
+		printf("Du måste ange vem du vill skicka meddelande till.\n");
 		return;
-
-	printf("Sänd meddelande till %s\nMeddelande: ", conf_num2name(id));
-	fflush(stdout);
-
-	buf = get_input_string(0, 0); /* XXX */
-
-	if (strlen(buf) == 0) {
-		printf("Nähej.");
+	}
+	retval = rk_matchconf(str, MATCHCONF_PERSON|MATCHCONF_CONF);
+	num = retval->rcr_ci.rcr_ci_len;
+	if (num == 0) {
+		printf("Det finns ingen person som matchar \"%s\".\n", str);
+	} else if (num > 1) {
+		printf("Namnet \"%s\" är flertydigt. Du kan mena:\n", str);
+		for (i = 0; i < num; i++)
+			printf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
+		printf("\n");
+	} else {
+		printf("Sänd meddelande till %s\nMeddelande: ",
+		    retval->rcr_ci.rcr_ci_val[0].rc_name);
+		fflush(stdout);
+		buf = get_input_string(0, 0); /* XXX */
+		if (strlen(buf) == 0)
+			printf("Nähej.");
+		else {
+			rk_send_msg(retval->rcr_ci.rcr_ci_val[0].rc_conf_no,
+			    buf);
+			printf("\nMeddelandet sänt till %s.\n", 
+			    retval->rcr_ci.rcr_ci_val[0].rc_name);
+		}
 		free(buf);
-		return;
 	}
-	dst = malloc(strlen(buf) + 10);
-	sprintf(dst, "53 %d %ldH%s\n", id, (long)strlen(buf), buf);
-	free(buf);
-	if (send_reply(dst)) {
-		i = get_int();
-		if (i)
-			printf("%s\n", error(i));
-		get_eat('\n');
-		return;
-	}
-	get_eat('\n');
-	printf("\nMeddelandet sänt till %s.\n", str);
-#endif
+	free(retval);
 }
 
 void
