@@ -21,6 +21,20 @@ struct mesg {
 };
 static struct mesg *pole;
 
+static void
+putinq(struct mesg *m)
+{
+	struct mesg *w = pole;
+
+	if (w == 0)
+		pole = m;
+	else {
+		while (w->next)
+			w = w->next;
+		w->next = m;
+	}
+}
+
 /*
  * Handle a async message. Put it on a queue; then leave it to
  * async_handler() to do the rest.
@@ -37,45 +51,52 @@ async(int level)
 	switch (type) {
 	case 15: /* New text created */
 		async_new_text();
-		m = malloc(sizeof(struct mesg));
+		m = calloc(sizeof(struct mesg), 1);
 		m->type = type;
-		m->next = pole;
 		m->msg = "";
-		pole = m;
+		putinq(m);
 		break;
 
 	case 12: /* async-send-message */
-		m = malloc(sizeof(struct mesg));
+		m = calloc(sizeof(struct mesg), 1);
 		m->type = type; 
 		m->conf = get_int();
 		m->pers = get_int();
 		m->msg = get_string();
 		get_eat('\n');
-		m->next = pole;
-		pole = m;
+		putinq(m);
 		break;
-	case 9:
-	case 13:
-		m = malloc(sizeof(struct mesg));
+	case 9: /* async-login */
+	case 13: /* async-logout */
+		m = calloc(sizeof(struct mesg), 1);
 		m->type = type;
 		m->pers = get_int();
 		m->conf = get_int();
 		get_eat('\n');
-		m->next = pole;
-		pole = m;
+		putinq(m);
 		break;
 
-	case 5:
+	case 5: /* async-new-name */
 		m = malloc(sizeof(struct mesg));
 		m->type = type;
 		m->pers = get_int();
 		m->msg = get_string();
 		m->msg2 = get_string();
 		get_eat('\n');
-		m->next = pole;
-		pole = m;
+		putinq(m);
 		break;
 
+	case 16: /* async-new-recipient */
+	case 17: /* async-sub-recipient */
+		reread_text_stat_bg(get_int());
+		reread_conf_stat_bg(get_int());
+		get_int();
+		get_accept('\n');
+		break;
+
+	case 8: /* async-leave-conf */
+	case 14: /* async-deleted-text */
+	case 18: /* async-new-membership */
 	default:
 		get_eat('\n');
 		return;
@@ -164,6 +185,7 @@ async_new_text()
 			read_in_time(&time);
 			break;
 
+		case bcc_recpt:
 		case cc_recpt:
 		case recpt:
 			conf = get_int();
@@ -176,7 +198,7 @@ async_new_text()
 
 		case comm_to:
 		case footn_to:
-			invalidate_text_stat(get_int());
+			reread_text_stat_bg(get_int());
 			break;
 
 		default:
@@ -185,5 +207,24 @@ async_new_text()
 		}
 	}
 	get_accept('}');
-	get_eat('\n');
+	cnt = get_int(); /* aux-info, throw it away */
+	if (cnt) { 
+		struct rk_time t;
+		char *c;
+		get_accept('{');
+		for (i = 0; i < cnt; i++) {
+			get_int(); /* aux-no */
+			get_int(); /* tag */ 
+			get_int(); /* creator */
+			read_in_time(&t); /* created-at */
+			get_int(); /* flags */
+			get_int(); /* inherit-limit */
+			c = get_string(); /* data */
+			if (*c)
+				free(c);
+		}
+		get_accept('}');
+	} else
+		get_accept('*');
+	get_accept('\n');
 }

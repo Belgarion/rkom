@@ -95,41 +95,25 @@ struct get_conf_stat_store {
 
 static struct get_conf_stat_store *gcs;
 
-/*
- * Returns the conference struct for a given conference.
- * If it's not in the cache; ask the server for it.
- */
-int
-get_conf_stat(int conf, struct rk_conference **confer)
+static struct get_conf_stat_store *
+findconf(int conf)
 {
 	struct get_conf_stat_store *walker;
-	struct rk_conference *c;
-	int i;
-	char buf[20];
 
-	/* First, see if we have this conference in the cache */
 	if (gcs != 0) {
 		walker = gcs;
 		while (walker) {
-			if (walker->number == conf) {
-				*confer = &walker->confer;
-				return 0;
-			}
+			if (walker->number == conf)
+				return walker;
 			walker = walker->next;
 		}
 	}
+	return 0;
+}
 
-	/* Nope, alloc a new struct and put it into the cache */
-	sprintf(buf, "91 %d\n", conf);
-	if (send_reply(buf)) {
-		i = get_int();
-		get_eat('\n');
-		return i;
-        }
-	walker = calloc(sizeof(struct get_conf_stat_store), 1);
-	walker->number = conf;
-	c = &walker->confer;
-
+static void
+readin_conf_stat(struct rk_conference *c)
+{
 	c->rc_name = get_string();
 	c->rc_type = get_int();
 	read_in_time(&c->rc_creation_time);
@@ -162,6 +146,69 @@ get_conf_stat(int conf, struct rk_conference **confer)
 #else
 	get_eat('\n');
 #endif
+}
+
+static void
+reread_conf_stat_bg_callback(int err, int arg)
+{
+	struct get_conf_stat_store *walker;
+
+	if (err) {
+		printf("reread_conf_stat_bg_callback: error %d\n", err);
+		get_eat('\n');
+		return;
+	}
+	walker = findconf(arg);
+	if (walker) {
+		free(walker->confer.rc_name);
+	} else {
+		walker = calloc(sizeof(struct get_conf_stat_store), 1);
+		walker->number = arg;
+		walker->next = gcs;
+		gcs = walker;
+	}
+	readin_conf_stat(&walker->confer);
+}
+
+void	
+reread_conf_stat_bg(int conf)
+{
+	char buf[40];
+
+	sprintf(buf, "91 %d\n", conf);
+	send_callback(buf, conf, reread_conf_stat_bg_callback);
+}
+
+/*
+ * Returns the conference struct for a given conference.
+ * If it's not in the cache; ask the server for it.
+ */
+int
+get_conf_stat(int conf, struct rk_conference **confer)
+{
+	struct get_conf_stat_store *walker;
+	struct rk_conference *c;
+	int i;
+	char buf[20];
+
+	/* First, see if we have this conference in the cache */
+	if ((walker = findconf(conf))) {
+		*confer = &walker->confer;
+		return 0;
+	}
+
+	/* Nope, alloc a new struct and put it into the cache */
+	sprintf(buf, "91 %d\n", conf);
+	if (send_reply(buf)) {
+		i = get_int();
+		get_eat('\n');
+		return i;
+	}
+	walker = calloc(sizeof(struct get_conf_stat_store), 1);
+	walker->number = conf;
+	c = &walker->confer;
+	readin_conf_stat(c);
+
 	walker->next = gcs;
 	gcs = walker;
 	*confer = c;

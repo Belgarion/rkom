@@ -318,27 +318,13 @@ gettext_callback(int err, int arg)
 	tss->text = c;
 }
 
-struct rk_text_stat *
-rk_textstat_server(u_int32_t nr)
+
+static void
+readin_textstat(struct rk_text_stat *ts)
 {
-	struct text_stat_store *tss;
-	struct rk_text_stat *ts;
 	struct rk_misc_info *pmi;
-	char buf[30];
 	int len, i;
 
-	if ((tss = findtxt(nr)) && (tss->rts)) {
-back:		ts = malloc(sizeof(*ts));
-		bcopy(tss->rts, ts, sizeof(*ts));
-		return ts;
-	}
-	ts = calloc(sizeof(struct rk_text_stat), 1);
-	sprintf(buf, "90 %d\n", nr);
-	if (send_reply(buf)) {
-		ts->rt_retval = get_int();
-		get_eat('\n');
-		return ts;
-	}
 	read_in_time(&ts->rt_time);
 	ts->rt_author = get_int();
 	ts->rt_no_of_lines = get_int();
@@ -382,7 +368,28 @@ back:		ts = malloc(sizeof(*ts));
 	} else
 		get_accept('*');
 	get_accept('\n');
+}
 
+struct rk_text_stat *
+rk_textstat_server(u_int32_t nr)
+{
+	struct text_stat_store *tss;
+	struct rk_text_stat *ts;
+	char buf[30];
+
+	if ((tss = findtxt(nr)) && (tss->rts)) {
+back:		ts = malloc(sizeof(*ts));
+		bcopy(tss->rts, ts, sizeof(*ts));
+		return ts;
+	}
+	ts = calloc(sizeof(struct rk_text_stat), 1);
+	sprintf(buf, "90 %d\n", nr);
+	if (send_reply(buf)) {
+		ts->rt_retval = get_int();
+		get_eat('\n');
+		return ts;
+	}
+	readin_textstat(ts);
 	if (tss == 0) {
 		tss = calloc(sizeof(*tss), 1);
 		tss->nummer = nr;
@@ -398,20 +405,44 @@ back:		ts = malloc(sizeof(*ts));
 
 }
 
+static void
+reread_text_stat_bg_callback(int err, int arg)
+{
+	struct text_stat_store *tss;
+
+	tss = findtxt(arg);
+	if (err) {
+		printf("Couldn't reread text %d: %d\n", arg, err);
+		get_eat('\n');
+		free(tss->rts);
+		tss->rts = 0;
+		return;
+	}
+	readin_textstat(tss->rts);
+	return;
+}
+
 void
-invalidate_text_stat(int text)
+reread_text_stat_bg(int text)
 {
 	struct text_stat_store *tss;
 	struct rk_text_stat *ts;
+	char buf[40];
 
 	tss = findtxt(text);
-	if (tss == 0 || tss->rts == 0)
-		return;
+	if (tss == 0) {
+		tss = calloc(sizeof(*tss), 1);
+		tss->nummer = text;
+		tss->next = pole;
+		pole = tss;
+	}
+	if (tss->rts == 0)
+		tss->rts = calloc(sizeof(struct rk_text_stat), 1);
 	ts = tss->rts;
-	tss->rts = 0;
 	if (ts->rt_misc_info.rt_misc_info_len)
 		free(ts->rt_misc_info.rt_misc_info_val);
-	free(ts);
+	sprintf(buf, "90 %d\n", text);
+	send_callback(buf, text, reread_text_stat_bg_callback);
 }
 	
 /*
@@ -422,11 +453,12 @@ rk_create_text_server(struct rk_text_info *rti)
 {
 	struct rk_text_retval *rkr;
 	struct rk_misc_info *mi;
+	struct rk_aux_item_input *raii;
 	extern int sockfd;
 	char buf[30];
-	int i, nmi;
+	int i, nmi, nraii;
 
-	sprintf(buf, "28 %ldH", (long)strlen(rti->rti_text));
+	sprintf(buf, "86 %ldH", (long)strlen(rti->rti_text));
 	send_reply(buf);
 	write(sockfd, rti->rti_text, strlen(rti->rti_text));
 	nmi = rti->rti_misc.rti_misc_len;
@@ -438,13 +470,28 @@ rk_create_text_server(struct rk_text_info *rti)
 		sprintf(buf, "%d %d ", mi[i].rmi_type, mi[i].rmi_numeric);
 		send_reply(buf);
 	}
-	rkr = malloc(sizeof(struct rk_text_retval));
+	nraii = rti->rti_input.rti_input_len;
+	raii = rti->rti_input.rti_input_val;
+	sprintf(buf, "} %d { ", nraii);
+	send_reply(buf);
+	for (i = 0; i < nraii; i++) {
+		char *nbuf;
+
+		sprintf(buf, "%d 00000000 %d ", raii[i].raii_tag,
+		    raii[i].inherit_limit);
+		send_reply(buf);
+		nbuf = alloca(strlen(raii[i].raii_data) + 10);
+		sprintf(nbuf, "%ldH%s ", (long)strlen(raii[i].raii_data),
+		    raii[i].raii_data);
+		send_reply(nbuf);
+	}
+
+	rkr = calloc(sizeof(struct rk_text_retval), 1);
 	if (send_reply("}\n")) {
 		rkr->rtr_status = get_int();
 		get_eat('\n');
 		return rkr;
 	}
-	rkr->rtr_status = 0;
 	rkr->rtr_textnr = get_int();
 	get_accept('\n');
 
@@ -454,7 +501,7 @@ rk_create_text_server(struct rk_text_info *rti)
 	 */
 	for (i = 0; i < nmi; i++)
 		if (mi[i].rmi_type == comm_to || mi[i].rmi_type == footn_to)
-			invalidate_text_stat(mi[i].rmi_numeric);
+			reread_text_stat_bg(mi[i].rmi_numeric);
 	return rkr;
 }
 
