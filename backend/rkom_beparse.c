@@ -780,3 +780,26 @@ rk_set_motd_server(u_int32_t conf, struct rk_text_info *rti)
 	get_accept('\n');
 	return 0;
 }
+
+int32_t
+rk_add_text_info_server(u_int32_t textno, struct rk_aux_item_input *raii)
+{
+	extern int sockfd;
+	char buf[30];
+	int ret;
+
+	sprintf(buf, "92 %ld 0 { }", (long)textno);
+	send_reply(buf);
+
+	sprintf(buf, " 1 { %d 00000000 %d %ldH", raii->raii_tag,
+		raii->inherit_limit, (long)strlen(raii->raii_data));
+	send_reply(buf);
+	write(sockfd, raii->raii_data, strlen(raii->raii_data));
+	sprintf(buf, " }\n");
+	send_reply(buf);
+
+	ret = get_int();
+	get_eat('\n');
+
+	return ret;
+}

@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.29 2001/11/25 21:09:41 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.30 2002/05/18 21:24:29 offe Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -482,3 +482,10 @@ int32_t rk_create_person(string, string, u_int32_t);
  * Returns a normal Lyskom error code.
  */
 int32_t rk_set_motd(u_int32_t, struct rk_text_info);
+
+/*
+ * Add an auxillary item for a text.
+ * Args are (text, rk_aux_item_input).
+ * Returns a normal Lyskom error code.
+ */
+int32_t rk_add_text_info(u_int32_t, struct rk_aux_item_input);
