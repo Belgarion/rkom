@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.30 2001/03/03 11:17:24 ragge Exp $	*/
+/*	$Id: write.c,v 1.31 2001/03/31 10:21:02 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -185,7 +185,7 @@ write_put(char *str)
 	rtii = alloca(sizeof(*rtii));
 	rtii->raii_tag = RAI_TAG_CREATING_SW;
 	rtii->inherit_limit = 0;
-	rtii->raii_data = "raggkom ett.ett.beta"; /* XXX */
+	rtii->raii_data = "raggkom ett.ett.release"; /* XXX */
 	rti->rti_input.rti_input_len = 1;
 	rti->rti_input.rti_input_val = rtii;
 
