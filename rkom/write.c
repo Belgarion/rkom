@@ -375,10 +375,10 @@ write_internal(char *str, char *typ, int ktyp)
 		mi = ts->rt_misc_info.rt_misc_info_val;
 		len = ts->rt_misc_info.rt_misc_info_len;
 		for (i = 0; i < len; i++)
-			if (mi[i].rmi_type == comm_to)
+			if (mi[i].rmi_type == comm_in)
 				break;
 		if (i == len) {
-			printf("Senaste inlägget är inte en kommentar.\n");
+			printf("Senaste inlägget har ingen kommentar.\n");
 			free(ts);
 			return;
 		}
