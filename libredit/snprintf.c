@@ -1,4 +1,4 @@
-/*	$Id: snprintf.c,v 1.2 2001/11/19 20:27:23 ragge Exp $	*/
+/*	$Id: snprintf.c,v 1.3 2001/11/20 22:55:52 ragge Exp $	*/
 
 /*
  * Copyright Patrick Powell 1995
@@ -379,8 +379,8 @@ dopr(char *buffer, size_t maxlen, size_t *retlen, const char *format,
 }
 
 static void
-fmtstr(char *buffer, size_t *currlen, size_t maxlen, char *value, int flags,
-	int min, int max)
+fmtstr(char *buffer, size_t *currlen, size_t maxlen, char *value,
+	int min, int max, int flags)
 {
 	int	padlen, strln;	/* amount to pad */
 	int	cnt = 0;
