@@ -82,7 +82,7 @@ rprintf(char const *fmt, ...)
 		printf("%s\n", c);
 		outlines += (strlen(c)/wcols);
 		if (outlines++ >= (wrows - 1)) {
-			printf("(Tryck retur)");
+			printf("(Tryck retur eller 'q' för att hoppa ur)");
 			outlines = 1;
 			ch = getchar();
 			if (ch == 'q') {
