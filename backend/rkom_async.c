@@ -116,6 +116,8 @@ async(int level)
 
 	default:
 		printf("BG: Unknown async %d\n", type);
+
+	case 7:	/* Save database */
 		get_eat('\n');
 		free(m);
 		return;
