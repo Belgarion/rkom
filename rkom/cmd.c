@@ -12,6 +12,7 @@
 #include "next.h"
 #include "list.h"
 #include "write.h"
+#include "set.h"
 
 static void cmd_logout(char *);
 static void cmd_login(char *);
@@ -29,6 +30,7 @@ struct cmnd cmds[] = {
 	{"avmarkera", 0, list_unmark },
 	{"brev", 0, write_brev },
 	{"endast", 0, cmd_only },
+	{"flaggor", 0, set_flags },
 	{"fotnot", 0, write_footnote },
 	{"gå", 0, cmd_goto },
 	{"glöm", 0, write_forget },
@@ -54,6 +56,7 @@ struct cmnd cmds[] = {
 	{"sluta", 0, cmd_sluta },
 	{"säg", 0, cmd_say },
 	{"sända", 0, cmd_send },
+	{"sätt", 0, set_setflag },
 	{"tiden", 0, cmd_tiden },
 	{"utträda", 0, cmd_leave },
 	{"var", 0, cmd_where },
@@ -323,6 +326,7 @@ cmd_login(char *str)
 	myuid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	free(retval);
 
+	readvars();
 	/*
 	 * Set some informative text.
 	 */
@@ -330,7 +334,8 @@ cmd_login(char *str)
 		printf("Set what-i-am-doing sket sej\n");
 
 	/* Show where we have unread texts. */
-	list_news(0);
+	if (iseql("print-number-of-unread-on-entrance", "1"))
+		list_news(0);
 
 	conf = rk_unreadconf(myuid);
 	nconf = conf->ru_confs.ru_confs_len;

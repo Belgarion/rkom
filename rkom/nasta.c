@@ -10,6 +10,7 @@
 
 #include "rkom.h"
 #include "next.h"
+#include "set.h"
 
 struct keeptrack {
 	struct keeptrack *back;
@@ -126,7 +127,10 @@ again:		free(ts); /* Forget last text */
 		kt->back = pole;
 		pole = kt;
 	}
-	prompt = PROMPT_NEXT_COMMENT;
+	if (iseql("read-depth-first", "1"))
+		prompt = PROMPT_NEXT_COMMENT;
+	else
+		prompt = PROMPT_NEXT_TEXT;
 	free(ts);
 }
 

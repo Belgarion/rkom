@@ -31,13 +31,35 @@ vem(int num)
 	return ret;
 }
 
+static void
+printcmnt(struct rk_misc_info *mi, int len, int p)
+{
+	int i;
+
+	for (i = 0; i < len; i++) {
+		if (mi[i].rmi_type == footn_in ||
+		    mi[i].rmi_type == comm_in) {
+			struct rk_text_stat *tt;
+
+			printf("%s%s i text %d", p ? "(" : "",
+			    (mi[i].rmi_type == footn_in ?
+			    "Fotnot" : "Kommentar"), mi[i].rmi_numeric);
+			tt = rk_textstat(mi[i].rmi_numeric);
+			if (tt->rt_retval == 0)
+				printf(" av %s", vem(tt->rt_author));
+			free(tt);
+			printf("%s\n", p ? ")" : "");
+		}
+	}
+}
+
 void
 show_text(int nr)
 {
 	struct rk_conference *conf;
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mi;
-	int i, len;
+	int i, len, p;
 	char *c, *cc, *namn, buf[20];
 
 	ts = rk_textstat(nr);
@@ -88,6 +110,9 @@ show_text(int nr)
 			printf("\n");
 		}
 	}
+	p = iseql("reading-puts-comments-in-pointers-last", "1");
+	if (p == 0)
+		printcmnt(mi, len, p);
 
 	if (ts->rt_no_of_marks)
 		printf("Texten markerad av %d person%s.\n", ts->rt_no_of_marks,
@@ -111,21 +136,9 @@ show_text(int nr)
 	else
 		printf("\n");
 	free(c);
+	if (p)
+		printcmnt(mi, len, p);
 
-	for (i = 0; i < len; i++) {
-		if (mi[i].rmi_type == footn_in ||
-		    mi[i].rmi_type == comm_in) {
-			struct rk_text_stat *tt;
-
-			printf("(%s i text %d", (mi[i].rmi_type == footn_in ?
-			    "Fotnot" : "Kommentar"), mi[i].rmi_numeric);
-			tt = rk_textstat(mi[i].rmi_numeric);
-			if (tt->rt_retval == 0)
-				printf(" av %s", vem(tt->rt_author));
-			free(tt);
-			printf(")\n");
-		}
-	}
 	free(ts);
 }
 

@@ -128,6 +128,29 @@ async_collect()
 			free(ra);
 			return retval;
 
+		case 9:
+		case 13: {
+			struct rk_conference *sender;
+
+			if (iseql("presence-messages", "1")) {
+				sender = rk_confinfo(ra->ra_sender);
+				printf("\n%s har just loggat %s.",
+				    sender->rc_name,
+				    (ra->ra_type == 13 ? "ut" : "in"));
+				free(sender);
+				retval = 0;
+			}
+		}
+		break;
+
+		case 5: 
+			if (iseql("presence-messages", "1")) {
+				printf("\n%s bytte just namn till %s.",
+				    ra->ra_message, ra->ra_message2);
+				retval = 0;
+			}
+		break;
+
 		case 12: {
 			struct rk_conference *sender, *rcpt;
 
@@ -147,6 +170,7 @@ printf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 			}
 			printf("%s\n", ra->ra_message);
 printf("----------------------------------------------------------------\n");
+			retval = 0;
 		}
 		break;
 

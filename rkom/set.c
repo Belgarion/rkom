@@ -91,8 +91,46 @@ parsefile(char *fname)
 	fclose(fd);
 }
 
-static struct rk_val *rkv;
-static int rkn;
+struct vars {
+	char *c_name;
+	char *c_val;
+};
+
+static struct vars commonvars[] = {
+	{ "created-texts-are-read", "1" },
+	{ "dashed-lines", "1" },
+	{ "presence-messages", "1" },
+	{ "print-number-of-unread-on-entrance", "1" },
+	{ "read-depth-first", "1" },
+	{ "reading-puts-comments-in-pointers-last", "1" },
+	{ "confirm-multiple-recipients", "0" },
+	{ "default-mark", "100" },
+	{ 0, 0 }
+};
+
+static struct vars rkomvars[] = {
+	{ "use-editor", "0" },
+	{ 0, 0 }
+};
+
+static void
+put_in_vars(struct rk_uarea *ru, struct vars *w)
+{
+	int i, j;
+
+	for (i = 0; i < ru->ru_val.ru_val_len; i++) {
+		for (j = 0; w[j].c_name; j++) {
+			if (strcmp(ru->ru_val.ru_val_val[i].rv_var, 
+			    w[j].c_name) == 0) {
+printf("Matchar %s %s\n", ru->ru_val.ru_val_val[i].rv_var,
+	ru->ru_val.ru_val_val[i].rv_val);
+				w[j].c_val =
+				    strdup(ru->ru_val.ru_val_val[i].rv_val);
+				break;
+			}
+		}
+	}
+}
 
 void
 readvars()
@@ -100,12 +138,13 @@ readvars()
 	struct rk_uarea *ru;
 
 	ru = rk_get_uarea("common");
-	if (ru->ru_retval || (ru->ru_val.ru_val_len == 0))
-		return;
+	if (ru->ru_retval == 0)
+		put_in_vars(ru, commonvars);
+	free(ru);
 
-	rkn = ru->ru_val.ru_val_len;
-	rkv = calloc(sizeof(*rkv), rkn);
-	bcopy(ru->ru_val.ru_val_val, rkv, sizeof(*rkv) * rkn);
+	ru = rk_get_uarea("rkom");
+	if (ru->ru_retval == 0)
+		put_in_vars(ru, rkomvars);
 	free(ru);
 }
 
@@ -114,11 +153,13 @@ iseql(char *var, char *val)
 {
 	int i;
 
-	if (rkv == 0)
-		return 0;
-	for (i = 0; i < rkn; i++)
-		if ((strcmp(rkv->rv_var, var) == 0) &&
-		    (strcmp(rkv->rv_val, val) == 0))
+	for (i = 0; commonvars[i].c_name; i++)
+		if ((strcmp(commonvars[i].c_name, var) == 0) &&
+		    (strcmp(commonvars[i].c_val, val) == 0))
+			return 1;
+	for (i = 0; rkomvars[i].c_name; i++)
+		if ((strcmp(rkomvars[i].c_name, var) == 0) &&
+		    (strcmp(rkomvars[i].c_val, val) == 0))
 			return 1;
 	return 0;
 }
@@ -128,11 +169,69 @@ isneq(char *var, char *val)
 {
 	int i;
 
-	if (rkv == 0)
-		return 1;
-	for (i = 0; i < rkn; i++)
-		if ((strcmp(rkv->rv_var, var) == 0) &&
-		    (strcmp(rkv->rv_val, val) == 0))
+	for (i = 0; commonvars[i].c_name; i++)
+		if ((strcmp(commonvars[i].c_name, var) == 0) &&
+		    (strcmp(commonvars[i].c_val, val) == 0))
+			return 0;
+	for (i = 0; rkomvars[i].c_name; i++)
+		if ((strcmp(rkomvars[i].c_name, var) == 0) &&
+		    (strcmp(rkomvars[i].c_val, val) == 0))
 			return 0;
 	return 1;
+}
+
+void
+set_flags(char *str)
+{
+	int i;
+
+	printf("(Lista) flaggor\n");
+	for (i = 0; commonvars[i].c_name; i++)
+		printf("\t%s  %s\n", commonvars[i].c_name, commonvars[i].c_val);
+	for (i = 0; rkomvars[i].c_name; i++)
+		printf("\t%s  %s\n", rkomvars[i].c_name, rkomvars[i].c_val);
+	printf("\n");
+}
+
+void
+set_setflag(char *str)    
+{
+	int inc, match, i, nc;
+	char *f, *c;
+
+	if (str == 0) {
+		printf("Du måste ange en flagga också.\n");
+		return;
+	}
+	f = str;
+	if ((c = index(str, ' ')) == 0 || (strlen(&c[1]) == 0)) {
+		printf("Du måste ange ett värde på flaggan också.\n");
+		return;
+	}
+	*c++ = 0;
+	match = 0;
+	for (i = 0; commonvars[i].c_name; i++) {
+		if (bcmp(commonvars[i].c_name, f, strlen(f)) == 0) {
+			match++;
+			nc = i;
+		}
+	}
+	inc = match;
+	for (i = 0; rkomvars[i].c_name; i++) {
+		if (bcmp(rkomvars[i].c_name, f, strlen(f)) == 0) {
+			match++;
+			nc = i;
+		}
+	}
+	if (match == 0) {
+		printf("Flaggan finns inte.\n");
+		return;
+	} else if (match > 1) {
+		printf("Flaggans namn är inte entydigt.\n");
+		return;
+	}
+	if (inc)
+		commonvars[nc].c_val = strdup(c);
+	else
+		rkomvars[nc].c_val = strdup(c);
 }
