@@ -97,6 +97,7 @@ async(int level)
 
 	case 14: /* async-deleted-text */
 		m->ra.ra_text = get_int();
+		reread_text_stat_bg(m->ra.ra_text);
 		get_eat('\n');
 		putinq(m);
 		break;

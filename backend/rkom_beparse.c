@@ -411,7 +411,7 @@ reread_text_stat_bg_callback(int err, int arg)
 
 	tss = findtxt(arg);
 	if (err) {
-		printf("Couldn't reread text %d: %d\n", arg, err);
+		/* Text probably erased */
 		get_eat('\n');
 		free(tss->rts);
 		tss->rts = 0;
@@ -669,6 +669,54 @@ rk_set_presentation_server(u_int32_t conf, struct rk_text_info *rti)
 	rti->rti_misc.rti_misc_val = old;
 	/* Set text as presentation */
 	sprintf(buf, "16 %d %d\n", conf, rtr->rtr_textnr);
+	if (send_reply(buf)) {
+		i = get_int();
+		get_eat('\n');
+		return i;
+	}
+	get_accept('\n');
+	return 0;
+}
+
+int32_t
+rk_add_rcpt_server(u_int32_t text, u_int32_t conf, u_int32_t type)
+{
+	char buf[30];
+	int i;
+
+	sprintf(buf, "30 %d %d %d\n", text, conf, type);
+	if (send_reply(buf)) {
+		i = get_int();
+		get_eat('\n');
+		return i;
+	}
+	get_accept('\n');
+	return 0;
+}
+
+int32_t
+rk_sub_rcpt_server(u_int32_t text, u_int32_t conf)
+{
+	char buf[30];
+	int i;
+
+	sprintf(buf, "31 %d %d\n", text, conf);
+	if (send_reply(buf)) {
+		i = get_int();
+		get_eat('\n');
+		return i;
+	}
+	get_accept('\n');
+	return 0;
+}
+
+int32_t
+rk_delete_text_server(u_int32_t text)
+{
+	char buf[30];
+	int i;
+
+	sprintf(buf, "29 %d\n", text);
 	if (send_reply(buf)) {
 		i = get_int();
 		get_eat('\n');

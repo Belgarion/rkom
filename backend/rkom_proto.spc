@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.23 2001/01/07 11:48:32 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.24 2001/01/07 14:11:18 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -354,6 +354,18 @@ int32_t rk_add_member(u_int32_t, u_int32_t, u_int8_t, u_int16_t, u_int32_t);
 int32_t rk_sub_member(u_int32_t, u_int32_t);
 
 /*
+ * Adds a text as a recipient to a conference. Corresponds to call #30.
+ * Args are (text, conf, rcpt-type) and returns a normal Lyskom number.
+ */
+int32_t rk_add_rcpt(u_int32_t, u_int32_t, u_int32_t);
+
+/* 
+ * Remove a text from a conference. Corresponds to call #31.
+ * Args are (text, conf) and returns a normal Lyskom number.
+ */
+int32_t rk_sub_rcpt(u_int32_t, u_int32_t);
+
+/*
  * Puts a text in the conferences described in the misc_info struct.
  * Arg in rk_text_info and returns a status struct.
  */
@@ -418,3 +430,9 @@ int32_t rk_change_name(u_int32_t, string);
  * Returns a normal Lyskom error code.
  */
 int32_t rk_set_presentation(u_int32_t, struct rk_text_info);
+
+/*
+ * Deletes the given text from the database. Corresponds to call #29.
+ * Arg is textnumber, and returns a normal Lyskom error code.
+ */
+int32_t rk_delete_text(u_int32_t);
