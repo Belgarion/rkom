@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.24 2001/01/14 11:12:43 ragge Exp $	*/
+/*	$Id: write.c,v 1.25 2001/01/15 17:33:38 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -176,6 +176,10 @@ write_put(char *str)
 	struct rk_aux_item_input *rtii;
 
 	TW;
+
+	/* Remove extra '\n' after txt */
+	while (strlen(ctext) && ctext[strlen(ctext) - 1] == '\n')
+		ctext[strlen(ctext) - 1] = 0;
 
 	rti = alloca(sizeof(struct rk_text_info));
 	rti->rti_misc.rti_misc_len = nmi;
