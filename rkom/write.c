@@ -1,3 +1,4 @@
+/*	$Id: write.c,v 1.23 2001/01/13 20:52:05 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -217,7 +218,11 @@ get_text(char *sub)
 	char *str, *base;
 
 	rprintf("\n");
-	base = input_string("Ärende: ");
+	if (sub) {
+		base = strdup(sub);
+		rprintf("Ärende: %s", base);
+	} else
+		base = input_string("Ärende: ");
 
 	for (;;) {
 		str = input_string("");
