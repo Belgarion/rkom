@@ -423,7 +423,19 @@ persstat(int uid)
 	struct rk_person *p;
 
 	p = rk_persinfo(uid);
-	rprintf("Nummer: Person %-5d\t\tNamn: %s\n", uid, p->rp_username);
+	rprintf("Person nummer:        %-5d\n", uid);
+	rprintf("Inloggad från:        %s\n", p->rp_username);
+	rprintf("Senast inloggad:      %s\n",
+	    get_date_string(&p->rp_last_login));
+	rprintf("Total närvarotid:     %dd %d:%d.%d\n",
+	    p->rp_total_time_present/(60*60*24),
+	    p->rp_total_time_present/(60*60) % 24,
+	    p->rp_total_time_present/60 % 60,
+	    p->rp_total_time_present % 60);
+	rprintf("Skrivna texter:       %d\n", p->rp_no_of_created_texts);
+	rprintf("Skrivna rader:        %d\n", p->rp_created_lines);
+	rprintf("Lästa texter:         %d\n", p->rp_read_texts);
+	rprintf("Markerade texter:     %d\n", p->rp_no_of_marks);
 
 	free(p);
 }
