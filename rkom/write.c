@@ -26,7 +26,7 @@ static char *show_format(void);
 static void wfotnot(char *str);
 
 static struct rk_misc_info *mi;
-static int nmi = 0;
+static int nmi = 0, ispres = 0;
 static char *ctext = 0;
 
 #define	TW if (!is_writing) {rprintf("Du skriver ingen text just nu.\n");return;}
@@ -166,12 +166,9 @@ parse_text(char *txt)
 void
 write_put(char *str)
 {
-	struct rk_text_stat *ts;
 	struct rk_text_info *rti;
 	struct rk_text_retval *rtr;
 	struct rk_aux_item_input *rtii;
-	struct rk_misc_info *imi;
-	int cnt, i, conf;
 
 	TW;
 
@@ -187,27 +184,22 @@ write_put(char *str)
 	rti->rti_input.rti_input_len = 1;
 	rti->rti_input.rti_input_val = rtii;
 
-	rtr = rk_create_text(rti);
-	if (rtr->rtr_status)
-		rprintf("write_new: %s\n", error(rtr->rtr_status));
-	else
-		rprintf("Text %d har skapats.\n", rtr->rtr_textnr);
-	if (isneq("created-texts-are-read", "0") && (rtr->rtr_status == 0)) {
-		ts = rk_textstat(rtr->rtr_textnr);
-		imi = ts->rt_misc_info.rt_misc_info_val;
-		cnt = ts->rt_misc_info.rt_misc_info_len;
-		for (i = 0; i < cnt; i++) {
-			if (imi[i].rmi_type == recpt ||
-			    imi[i].rmi_type == cc_recpt ||
-			    imi[i].rmi_type == bcc_recpt)
-				conf = imi[i].rmi_numeric;
-			if (imi[i].rmi_type == loc_no)
-				rk_mark_read(conf, imi[i].rmi_numeric);
-		}
+	if (ispres) {
+		if (rk_set_presentation(ispres, rti))
+			printf("Det gick inte.\n");
+		else
+			printf("Presentationen ändrad.\n");
+		ispres = 0;
+	} else {
+		rtr = rk_create_text(rti);
+		if (rtr->rtr_status)
+			rprintf("write_new: %s\n", error(rtr->rtr_status));
+		else
+			rprintf("Text %d har skapats.\n", rtr->rtr_textnr);
+		free(rtr);
 	}
 	free(ctext);
 	free(mi);
-	free(rtr);
 	nmi = 0;
 	is_writing = 0;
 	ctext = 0;
@@ -262,7 +254,7 @@ write_forget(char *str)
 		rprintf("Texten du höll på att skriva är nu bortkastad.\n");
 	else
 		rprintf("Du håller inte på att skriva någon text.\n");
-	is_writing = 0;
+	ispres = is_writing = 0;
 	if (ctext)
 		free(ctext);
 	if (nmi)
@@ -538,3 +530,22 @@ write_footnote_no(int num)
 	rprintf("Fotnot (till inlägg %d)\n", num);
 	write_internal(num, footn_to);
 }
+
+void
+write_change_presentation(char *str)
+{
+        struct rk_confinfo_retval *retval;
+
+        if ((retval = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF)) == 0)
+                return;
+
+	ispres = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	rprintf("Ändra presentation (för) %s\n",
+	    retval->rcr_ci.rcr_ci_val[0].rc_name);
+	is_writing = 1;
+	mi = calloc(sizeof(struct rk_misc_info), 2);
+	nmi = 0;
+	doedit(retval->rcr_ci.rcr_ci_val[0].rc_name);
+	free(retval);
+}
+

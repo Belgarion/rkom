@@ -588,3 +588,16 @@ cmd_sub_member()
 	if (rv)
 		printf("Det gick inte: %s\n", error(rv));
 }
+
+void    
+cmd_add_rcpt(char *str)
+{
+	struct rk_confinfo_retval *retval;
+
+	retval = match_complain(str, MATCHCONF_PERSON);
+}
+
+void 
+cmd_sub_rcpt(char *str)
+{
+}

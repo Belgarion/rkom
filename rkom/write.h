@@ -14,5 +14,6 @@ void	write_put(char *);
 void	write_whole(char *);
 void	write_brev(char *);
 void	write_private(int);
+void	write_change_presentation(char *);
 
 int	is_writing; /* Is writing text right now */

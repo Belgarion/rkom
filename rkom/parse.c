@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.15 2000/12/19 22:32:07 ragge Exp $ */
+/* $Id: parse.c,v 1.16 2001/01/07 11:49:08 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -68,6 +68,7 @@ DCMD(conf_goto);
 DCMD(conf_goto_next);
 DCMD(conf_list);
 DCMD(conf_leave);
+DCMD(conf_change_presentation);
 
 /* Commands for texts */
 DCMD(text_add_rcpt_late);
@@ -160,10 +161,11 @@ DROW("gå",					0,PE_STR_ARG,conf_goto)
 DROW("nästa möte",				0,PE_NO_ARG,conf_goto_next)
 DROW("lista möten",				0,PE_NO_ARG,conf_list)
 DROW("utträda",					0,PE_STR_ARG,conf_leave)
+DROW("ändra presentation",		0,PE_STR_ARG,conf_change_presentation)
 
 /* Commands for texts */
-DROW("addera mottagare",			0,PE_NO_ARG,text_add_rcpt_late)
-DROW("subtrahera mottagare",			0,PE_NO_ARG,text_sub_rcpt_late)
+DROW("addera mottagare",			0,PE_STR_ARG,text_add_rcpt_late)
+DROW("subtrahera mottagare",			0,PE_STR_ARG,text_sub_rcpt_late)
 DROW("lägga",					0,PE_NO_ARG,text_put)
 DROW("mottagare:",				0,PE_STR_ARG,text_add_rcpt)
 DROW("kommentar till:",			0,PE_NUM_ARG,text_add_cmt_to)
@@ -844,12 +846,26 @@ exec_conf_sub_member(int argc, char *argv[])
 static int
 exec_text_add_rcpt_late(int argc, char *argv[])
 {
+	LF;
+	cmd_add_rcpt(re_concat(argc, argv));
 	return 0;
 }
 
 static int
 exec_text_sub_rcpt_late(int argc, char *argv[])
 {
+	LF;
+	cmd_sub_rcpt(re_concat(argc, argv));
+	return 0;
+}
+
+static int
+exec_conf_change_presentation(int argc, char *argv[])
+{
+	LF;
+	NWA;
+	TT(argc == 0, "Du måste ange vad du vill ändra presentationen för.\n");
+	write_change_presentation(re_concat(argc, argv));
 	return 0;
 }
 
