@@ -42,11 +42,8 @@ int32_t
 rk_whatido(char *args)
 {
 	int i;
-	char *buf;
 
-	buf = alloca(strlen(args) + 17);
-	sprintf(buf, "4 %ldH%s\n", (long)strlen(args), args);
-	i = send_reply(buf);
+	i = send_reply("4 %ldH%s\n", (long)strlen(args), args);
 	get_accept('\n');
 	return i;
 }
