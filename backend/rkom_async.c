@@ -146,7 +146,7 @@ rk_async_server(void)
 		}
 		if (pole->type == 5) {
 			ra->ra_message2 =
-			    ra->ra_message + strlen(pole->msg2) + 1;
+			    ra->ra_message + strlen(pole->msg) + 1;
 			strcpy(ra->ra_message2, pole->msg2);
 		} else
 			ra->ra_message2 = "";
