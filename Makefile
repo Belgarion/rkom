@@ -1,8 +1,9 @@
-#	$Id: Makefile,v 1.3 2001/01/12 23:50:58 offe Exp $
+#	$Id: Makefile,v 1.4 2001/06/24 09:46:47 ragge Exp $
 #
-SUBDIR=	backend rkom
+all:
+	@(cd backend; make)
+	@(cd rkom; make)
 
-.include <bsd.subdir.mk>
-.ifdef __NetBSD__
-.include <bsd.prog.mk>
-.endif
+clean:
+	@(cd backend; make clean)
+	@(cd rkom; make clean)

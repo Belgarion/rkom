@@ -1,26 +1,23 @@
-#	$Id: Makefile,v 1.8 2001/01/06 16:05:05 ragge Exp $
+#	$Id: Makefile,v 1.9 2001/06/24 09:46:56 ragge Exp $
 #
 # Rkom backend library Makefile
 #
+CFLAGS=	-O2 -g -Wall -Werror -Wstrict-prototypes -Wmissing-prototypes
 
-LIB=	rkom
-SRCS=	rkom_subr.c rkom_lyskom.c rkom_beparse.c rkom_conf.c \
-	rkom_helpers.c rkom_proto.c rkom_async.c rkom_uarea.c
+OBJS=	rkom_subr.o rkom_lyskom.o rkom_beparse.o rkom_conf.o \
+	rkom_helpers.o rkom_proto.o rkom_async.o rkom_uarea.o
 
-MKLINT=	no	# No lint library
-MKPROFILE=no	# No profiling library
-MKPIC=	no	# No shared library
-WARNS?=	1	# All possible warnings
+all:	librkom.a
 
-SPCGEN?= spcgen
-
-.if defined(DEBUG)
-CFLAGS= -g
-.endif
-
-CLEANFILES+= rkom_proto.c rkom_proto.h rkom_proto_stubs.c
+librkom.a: rkom_proto.h $(OBJS)
+	ar cq librkom.a $(OBJS)
+	ranlib librkom.a
 
 rkom_proto.c rkom_proto.h rkom_proto_stubs.c: rkom_proto.spc
-	${SPCGEN} -ch -i rkom_proto.spc
+	spcgen -ch -i rkom_proto.spc
 
-.include <bsd.lib.mk>
+clean:
+	rm -f $(OBJS) librkom.a
+
+.c.o:
+	$(CC) $(CFLAGS) -c $*.c
