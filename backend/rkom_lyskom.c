@@ -73,20 +73,22 @@ rkom_loop()
 			continue;
 		if (rv < 0) {
 			if (errno != EINTR)
-				warn("poll");
+				err(1, "poll: säg till ragge");
 			continue;
 		}
 		if (pfd[0].revents & (POLLIN|POLLPRI))
 			spc_process_request();
 		if (pfd[1].revents & (POLLIN|POLLPRI)) {
-			int i;
+			int i, rv;
 			char c;
 
 			/* Check if there are anything available */
 			if (fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1)
 				err(1, "fcntl");
-			if (read(sockfd, &c, 1) != 1) {
-				err(1, "read sockfd: säg till ragge");
+			if ((rv = read(sockfd, &c, 1)) != 1) {
+				if (rv < 0 && errno == EAGAIN)
+					continue;
+				err(1, "read sockfd: %d, säg till ragge", rv);
 				continue;
 			}
 			unget = c;
