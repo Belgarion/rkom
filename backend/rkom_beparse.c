@@ -287,7 +287,7 @@ rk_create_text_server(struct rk_text_info *rti)
 	char buf[30];
 	int i, nmi;
 
-	sprintf(buf, "28 %dH", strlen(rti->rti_text));
+	sprintf(buf, "28 %ldH", (long)strlen(rti->rti_text));
 	send_reply(buf);
 	write(sockfd, rti->rti_text, strlen(rti->rti_text));
 	nmi = rti->rti_misc.rti_misc_len;

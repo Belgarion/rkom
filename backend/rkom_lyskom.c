@@ -3,6 +3,7 @@
 #include <sys/poll.h>
 
 #include <unistd.h>
+#include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <errno.h>
