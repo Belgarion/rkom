@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.53 2003/10/13 20:53:53 ragge Exp $ */
+/* $Id: parse.c,v 1.54 2003/10/20 08:48:20 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -148,6 +148,7 @@ DCMD(other_disable);
 
 /* debug commands */
 DCMD(debug_dump_membership);
+DCMD(debug_dump_conference);
 
 #if 1
 /* Debug help */
@@ -277,6 +278,7 @@ DROW("lämna (administratörsmod)",		0,PE_NO_ARG,other_disable)
 DROW("!", 					0,PE_STR_ARG,other_exec)
 
 DROW("debug membership",		0,PE_STR_ARG,debug_dump_membership)
+DROW("debug conference",		0,PE_STR_ARG,debug_dump_conference)
 
 #if 1
 /* Debug help */
@@ -1230,5 +1232,13 @@ exec_debug_dump_membership(int argc, char *argv[])
 {
 	LF;
 	debug_dump_membership(re_concat(argc, argv));
+	return 0;
+}
+
+static int
+exec_debug_dump_conference(int argc, char *argv[])
+{
+	LF;
+	debug_dump_conference(re_concat(argc, argv));
 	return 0;
 }
