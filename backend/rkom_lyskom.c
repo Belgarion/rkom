@@ -61,6 +61,7 @@ rkom_loop()
 		if (level == 1)
 			async_handle();
 		/* Wait for something to happen */
+		pfd[0].revents = pfd[1].revents = 0;
 		rv = poll(pfd, 2, INFTIM);
 		if (rv == 0)
 			continue;
