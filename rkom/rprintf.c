@@ -19,7 +19,7 @@ static char *cvtstr[] = {
 	"}å", "]Å", "{ä", "[Ä", "|ö", "\\Ö", 
 };
 
-#if defined(SOLARIS) || defined(SUNOS4) || defined(AIX) || defined(__APPLE__)
+#if defined(SOLARIS) || defined(SUNOS4) || defined(AIX)
 /*
  * Simple and dumb implementation of vasprintf(): loop around and try
  * bigger and bigger buffer to print result in.
