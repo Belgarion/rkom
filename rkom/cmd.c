@@ -44,7 +44,8 @@ cmd_tiden(char *str)
 	tm = rk_time();
 
 	if(iseql("short-time-format","1")) {
-		rprintf("Det är %sdag %s\n", dindx[tm->rt_day_of_week],
+		rprintf("Det är %sdag %s (enligt servern).\n",
+			dindx[tm->rt_day_of_week],
 			get_date_string(tm));
 		free(tm);
 		return;
