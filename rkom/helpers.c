@@ -55,14 +55,14 @@ match_complain(char *str, int type)
 int
 ismember(int conf)
 {
-	struct rk_memberconflist *mcl;
-	int i, rv = 0;
+	u_int32_t *list;
+	int i;
 
-	if ((mcl = rk_memberconf(myuid)) != NULL)
-		for (i = 0; i < mcl->rm_confs.rm_confs_len; i++)
-			if (mcl->rm_confs.rm_confs_val[i] == conf) {
-				rv = 1;
-				break;
-			}
-	return rv;
+	if ((list = rk_memberconf(myuid)) == NULL)
+		return 0;
+
+	for (i = 0; list[i]; i++)
+		if (list[i] == conf)
+			return 1;
+	return 0;
 }

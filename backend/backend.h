@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.26 2003/10/01 17:56:46 ragge Exp $	*/
+/*	$Id: backend.h,v 1.27 2003/10/01 18:52:16 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -190,8 +190,9 @@ int32_t rk_sub_member(u_int32_t conf, u_int32_t uid);
 
 /*
  * Get the conferences where the user is member.
+ * Returns a null-terminated array of the conferences.
  */
-struct rk_memberconflist * rk_memberconf(u_int32_t uid);
+u_int32_t *rk_memberconf(u_int32_t uid);
 void rk_sync(void);
 int32_t rk_create_conf(char *name, u_int32_t btype);
 int32_t rk_create_person(char *name, char *passwd, u_int32_t btype);
@@ -378,13 +379,6 @@ struct rk_dynamic_session_info {
 	u_int32_t	rds_idletime;
 	u_int32_t	rds_flags;
 	char *	rds_doing;
-};
-
-struct rk_memberconflist {
-	struct {
-		u_int32_t	rm_confs_len;
-		u_int32_t	*rm_confs_val;
-	} rm_confs;
 };
 
 struct rk_text_info {

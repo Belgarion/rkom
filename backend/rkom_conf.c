@@ -19,7 +19,7 @@ struct person_store {
 	struct person_store *nextp;
 	struct membership_store *next;
 	struct rk_person person;
-	int nconfs, *confs;
+	int *confs;
 };
 
 static struct person_store *gps;
@@ -405,9 +405,9 @@ delete_membership_internal(int conf, int uid)
 	if ((pp = findperson(uid)) == 0)
 		return; /* Nothing in cache */
 
-	if (pp->nconfs) {
+	if (pp->confs) {
 		free(pp->confs);
-		pp->nconfs = 0;
+		pp->confs = NULL;
 	}
 	if (pp->next == 0)
 		return;
@@ -751,12 +751,11 @@ rk_sub_member(u_int32_t conf, u_int32_t uid)
 /*
  * XXX - should remember the membership structs also.
  */
-struct rk_memberconflist *
+u_int32_t *
 rk_memberconf(u_int32_t uid)
 {
-	static struct rk_memberconflist rkm;
 	struct person_store *ps;
-	int i;
+	int i, nconfs;
 
 	ps = findperson(uid);
 	if (ps == 0) {
@@ -766,17 +765,17 @@ rk_memberconf(u_int32_t uid)
 		if (ps == 0)
 			printf("EEEK! Person %d finns inte!\n", uid);
 	}
-	if (ps->nconfs == 0) {
+	if (ps->confs == NULL) {
 		if (send_reply("46 %d 0 65535 0\n", uid)) {
 			komerr = get_int();
 			get_eat('\n');
 			return NULL;
 		}
-		ps->nconfs = get_int();
-		if (ps->nconfs) {
-			ps->confs = malloc(sizeof(int) * ps->nconfs);
+		nconfs = get_int();
+		ps->confs = calloc(sizeof(u_int32_t), nconfs+1);
+		if (nconfs) {
 			get_accept('{');
-			for (i = 0; i < ps->nconfs; i++) {
+			for (i = 0; i < nconfs; i++) {
 				struct rk_time t;
 
 				read_in_time(&t);
@@ -788,9 +787,7 @@ rk_memberconf(u_int32_t uid)
 			get_accept('*');
 		get_accept('\n');
 	}
-	rkm.rm_confs.rm_confs_len = ps->nconfs;
-	rkm.rm_confs.rm_confs_val = ps->confs;
-	return &rkm;
+	return ps->confs;
 }
 
 /*

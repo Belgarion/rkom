@@ -81,19 +81,17 @@ list_conf(char *str)
 void
 list_priorities(char *foo)
 {
-	struct rk_memberconflist *rm;
 	u_int32_t *list;
 	int i;
 
-	if ((rm = rk_memberconf(myuid)) == NULL) {
+	if ((list = rk_memberconf(myuid)) == NULL) {
 		rprintf("rk_memberconf: %s\n", error(komerr));
 		return;
 	}
 
 	rprintf("\nLista prioriteter (för möten jag är medlem i)\n");
 	rprintf("Prioritet\tMötesnamn\n");
-	list = rm->rm_confs.rm_confs_val;
-	for (i = 0; i < rm->rm_confs.rm_confs_len; i++) {
+	for (i = 0; list[i]; i++) {
 		struct rk_membership *rkm;
 		struct rk_conference *rc;
 
