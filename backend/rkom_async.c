@@ -134,6 +134,7 @@ rk_async(void)
 {
 	static struct rk_async rka;
 
+	bzero(&rka, sizeof(struct rk_async));
 	if (freepole) {
 		if (*freepole->ra.ra_message)
 			free(freepole->ra.ra_message);
