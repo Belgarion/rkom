@@ -1,0 +1,15 @@
+#	$Id: Makefile.bsd,v 1.1 2001/11/18 14:26:52 ragge Exp $
+#
+
+FLAGS="XFLAGS=-DSTAR_BSD -DREGEX"
+LIBS="XLIBS=-ltermcap"
+
+all:
+	@(cd backend; make $(FLAGS))
+	@(cd libredit; make $(FLAGS))
+	@(cd rkom; make $(FLAGS) $(LIBS))
+
+clean:
+	@(cd backend; make clean)
+	@(cd libredit; make clean)
+	@(cd rkom; make clean)
