@@ -686,3 +686,29 @@ rk_memberconf_server(u_int32_t uid)
 	mcl->rm_confs.rm_confs_val = ps->confs;
 	return mcl;
 }
+
+/*
+ * Delete all cached membership records.
+ */
+void
+rk_sync_server(void)
+{
+	struct membership_store *m, *nm;
+	struct person_store *walker;
+
+	walker = gps;
+	while (walker) {
+		if (walker->next) {
+			m = walker->next;
+			while (m) {
+				if (m->member.rm_read_texts.rm_read_texts_len)
+					free(m->member.rm_read_texts.rm_read_texts_val);
+				nm = m->next;
+				free(m);
+				m = nm;
+			}
+			walker->next = NULL;
+		}
+		walker = walker->nextp;
+	}
+}

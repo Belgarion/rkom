@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.24 2001/01/07 14:11:18 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.25 2001/01/12 17:33:31 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -436,3 +436,9 @@ int32_t rk_set_presentation(u_int32_t, struct rk_text_info);
  * Arg is textnumber, and returns a normal Lyskom error code.
  */
 int32_t rk_delete_text(u_int32_t);
+
+/*
+ * Reread all needed info to get the cached text read status to be in
+ * sync with the server. 
+ */
+void rk_sync(void);
