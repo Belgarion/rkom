@@ -44,6 +44,7 @@ putinq(struct mesg *m)
 void
 async(int level)
 {
+	struct rk_text_stat rts;
 	struct mesg *m;
 	int narg, type, tmp;
 
@@ -102,8 +103,9 @@ async(int level)
 
 	case 14: /* async-deleted-text */
 		m->ra.ra_text = get_int();
+		readin_textstat(&rts);
+		invalidate_local(&rts);
 		reread_text_stat_bg(m->ra.ra_text);
-		get_eat('\n');
 		putinq(m);
 		break;
 

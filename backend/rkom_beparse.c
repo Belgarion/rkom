@@ -348,7 +348,7 @@ gettext_callback(int err, int arg)
 }
 
 
-static void
+void
 readin_textstat(struct rk_text_stat *ts)
 {
 	struct rk_misc_info *pmi;

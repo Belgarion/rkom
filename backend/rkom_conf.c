@@ -468,6 +468,31 @@ next_local(int conf, int local)
 	return 0;
 }
 
+void
+invalidate_local(struct rk_text_stat *ts)
+{
+	struct get_conf_stat_store *g;
+	struct rk_misc_info *mi = ts->rt_misc_info.rt_misc_info_val;
+	int nmi = ts->rt_misc_info.rt_misc_info_len;
+	int i, conf, local;
+
+	for (i = 0; i < nmi; i++) {
+		if (mi[i].rmi_type != recpt && mi[i].rmi_type != cc_recpt)
+			continue;
+		conf = mi[i].rmi_numeric;
+		if (mi[i+1].rmi_type != loc_no)
+			continue;
+		i++;
+		local = mi[i].rmi_numeric;
+		if ((g = findconf(conf)) == NULL)
+			continue;
+		if (local >= g->mapsz)
+			continue;
+printf("Raderar lokal text %d från möte %d\n", local, conf);
+		g->map[local] = 0;
+	}
+}
+
 static int
 is_read(int conf, int text, int uid)
 {

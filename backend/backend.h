@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.11 2002/08/31 20:01:17 ragge Exp $	*/
+/*	$Id: backend.h,v 1.12 2002/09/04 12:38:02 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -34,6 +34,7 @@ void	bgsendv(int retval, int elem, struct iovec *iov);
 /* Parsing of messages, in rkom_beparse.c */
 void	rkom_beparse(int cmd, void *svar, int len);
 void	reread_text_stat_bg(int text);
+void	readin_textstat(struct rk_text_stat *ts);
 
 /* conference requests, in rkom_conf.c */
 int	get_conf_stat(int confno, struct rk_conference **confer);
@@ -42,6 +43,7 @@ int	get_membership(int uid, int conf, struct rk_membership **member);
 void	conf_set_high_local(int conf, int local, int global);
 void	reread_conf_stat_bg(int conf);
 void	newname(int);
+void	invalidate_local(struct rk_text_stat *ts);
 
 /* Helper functions, in rkom_helpers.c */
 void	read_in_time(struct rk_time *t);
