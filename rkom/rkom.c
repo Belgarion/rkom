@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.16 2000/11/22 11:58:25 ragge Exp $ */
+/* $Id: rkom.c,v 1.17 2000/12/03 20:30:40 jens Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -175,7 +175,7 @@ main(int argc, char *argv[])
 
 			gettimeofday(&tp, 0);
 			if (tp.tv_sec - lasttime > 30) {
-				rk_alive(0);
+				rk_alive();
 				lasttime = tp.tv_sec;
 			}
 			outlines = 0;
@@ -207,7 +207,7 @@ async_collect()
 	int retval = 1;
 
 	while (1) {
-		ra = rk_async(0);
+		ra = rk_async();
 		switch (ra->ra_type) {
 		case 0:
 			free(ra);

@@ -14,7 +14,7 @@
 int myuid;
 
 struct rk_time *
-rk_time_server(int32_t arg)
+rk_time_server(void)
 {
 	struct rk_time *ret;
 
@@ -25,12 +25,11 @@ rk_time_server(int32_t arg)
 	return ret;
 }
 
-int32_t
-rk_alive_server(int32_t arg)
+void
+rk_alive_server(void)
 {
 	send_reply("82\n");
 	get_accept('\n');
-	return 0;
 }
 
 int32_t
@@ -461,7 +460,7 @@ rk_create_text_server(struct rk_text_info *rti)
 
 /* Get the marked texts. */
 struct rk_mark_retval *
-rk_getmarks_server(u_int32_t arg0)
+rk_getmarks_server(void)
 {
 	struct rk_mark_retval *rmr;
 	struct rk_marks *rm;

@@ -102,7 +102,7 @@ async_handle()
 }
 
 struct rk_async *
-rk_async_server(u_int32_t arg)
+rk_async_server(void)
 {
 	struct mesg *m;
 	struct rk_async *ra;

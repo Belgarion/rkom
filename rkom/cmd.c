@@ -40,7 +40,7 @@ cmd_tiden(char *str)
 {
 	struct rk_time *tm;
 
-	tm = rk_time(0);
+	tm = rk_time();
 
 	rprintf("Klockan är ");
 	if (tm->rt_minutes > 30)

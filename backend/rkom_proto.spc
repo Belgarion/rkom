@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.17 2000/11/22 11:58:46 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.18 2000/12/03 20:30:40 jens Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -248,9 +248,8 @@ struct rk_person	rk_persinfo(u_int32_t);
 
 /*
  * Tell the server that the user is alive.
- * XXX - should have void arguments.
  */
-int32_t rk_alive(int32_t);
+void rk_alive(void);
 
 /*
  * Get membership information about a user in a conference.
@@ -280,9 +279,8 @@ string rk_client_name(u_int32_t);
 
 /*
  * Ask for the server time.
- * XXX - should have void argument.
  */
-struct rk_time rk_time(int32_t);
+struct rk_time rk_time(void);
 
 /*
  * Get next unread message in a conference.
@@ -349,9 +347,8 @@ struct	rk_text_retval rk_create_text(struct rk_text_info);
 
 /*
  * Returns an async message if there is one to get.
- * XXX - no argument to this one.
  */
-struct rk_async rk_async(u_int32_t);
+struct rk_async rk_async(void);
 
 /*
  * Sends a message to a user, a conference or to all logged in.
@@ -361,9 +358,8 @@ int32_t rk_send_msg(u_int32_t, string);
 
 /*
  * Get marked texts for the current user.
- * XXX - no argument to this one.
  */
-struct rk_mark_retval rk_getmarks(u_int32_t);
+struct rk_mark_retval rk_getmarks(void);
 
 /*
  * Mark a text for the current user.

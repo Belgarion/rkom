@@ -141,7 +141,7 @@ list_marked(char *str)
 		rprintf("Du måste logga in först.\n");
 		return;
 	}
-	rmr = rk_getmarks(0);
+	rmr = rk_getmarks();
 	rm = rmr->rmr_marks.rmr_marks_val;
 	if (rmr->rmr_retval) {
 		rprintf("Det sket sej: %s\n", error(rmr->rmr_retval));
