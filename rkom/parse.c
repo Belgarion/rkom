@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.47 2003/10/01 13:31:06 ragge Exp $ */
+/* $Id: parse.c,v 1.48 2003/10/01 15:06:58 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -76,6 +76,7 @@ DCMD(conf_where);
 DCMD(conf_goto);
 DCMD(conf_goto_next);
 DCMD(conf_list);
+DCMD(conf_list_members);
 DCMD(conf_list_q);
 DCMD(conf_leave);
 DCMD(conf_change_presentation);
@@ -191,6 +192,7 @@ DROW("subtrahera medlem",			0,PE_NO_ARG,conf_sub_member)
 DROW("var",					0,PE_NO_ARG,conf_where)
 DROW("gå",					0,PE_STR_ARG,conf_goto)
 DROW("nästa möte",			1,PE_NO_ARG,conf_goto_next)
+DROW("lista medlemmar",				0,PE_STR_ARG,conf_list_members)
 DROW("lista möten",				0,PE_NO_ARG,conf_list)
 DROW("snabblista möten",			0,PE_NO_ARG,conf_list_q)
 DROW("utträda",					0,PE_STR_ARG,conf_leave)
@@ -650,6 +652,14 @@ static int
 exec_conf_list_q(int argc, char *argv[])
 {
 	list_conf_q(NULL);
+	return 0;
+}
+
+static int
+exec_conf_list_members(int argc, char *argv[])
+{
+	TT(argc < 1, "Handhavande:\nlista medlemmar <mötesnamn>\n");
+	list_conf_members(re_concat(argc, argv));
 	return 0;
 }
 

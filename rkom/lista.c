@@ -80,6 +80,29 @@ list_conf(char *str)
 }
 
 void
+list_conf_members(char *str)
+{
+	struct rk_confinfo *ci;
+	struct rk_member *rm;
+	int i;
+
+	if ((ci = match_complain(str, MATCHCONF_CONF)) == NULL)
+		return;
+	if ((rm = rk_get_membership(ci->rc_conf_no)) == NULL) {
+		rprintf("rk_get_membership sket sej: %s\n", error(komerr));
+		return;
+	}
+	rprintf("%s har följande medlemmar:\n", ci->rc_name);
+	rprintf("Senast inne\t  Osett\t  Namn\n");
+	for (i = 0; rm[i].rm_member; i++) {
+		struct rk_conference *rp = rk_confinfo(rm[i].rm_member);
+
+		rprintf("%s%7d\t  %s\n", get_date_string(&rm[i].rm_added_at),
+		    0, rp ? rp->rc_name : "(Okänd)");
+	}
+}
+
+void
 list_news(char *args)
 {
 	int i;
