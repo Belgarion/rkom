@@ -1,4 +1,4 @@
-/*	$Id: strunvis.c,v 1.4 2001/11/20 22:24:50 ragge Exp $	*/
+/*	$Id: strunvis.c,v 1.5 2001/11/24 20:26:01 offe Exp $	*/
 /*	$NetBSD: unvis.c,v 1.16 1999/09/20 04:39:06 lukem Exp $	*/
 
 /*-
@@ -34,7 +34,7 @@
  * SUCH DAMAGE.
  */
 
-#if defined(SOLARIS) || defined(SUNOS4) || defined(LINUX)
+#if defined(SOLARIS) || defined(SUNOS4) || defined(LINUX) || defined(AIX)
 
 #include "sys.h"
 

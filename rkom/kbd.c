@@ -3,7 +3,9 @@
 #include <sys/ioctl.h>
 #endif
 
+#if !defined(AIX)
 #include <termcap.h>
+#endif
 #include <stdio.h>
 #include <termios.h>
 #include <stdlib.h>

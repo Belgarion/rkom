@@ -1,4 +1,4 @@
-#	$Id: Makefile,v 1.9 2001/11/20 22:24:37 ragge Exp $
+#	$Id: Makefile,v 1.10 2001/11/24 20:25:53 offe Exp $
 #
 all:
 	@if [ `uname` = NetBSD -o `uname` = FreeBSD ]; then \
@@ -15,6 +15,9 @@ all:
 	elif [ `uname` = Linux ]; then \
 		echo "Using Linux"; \
 		make -f Makefile.linux; \
+        elif [ `uname` = AIX ]; then \
+                echo "Using AIX"; \
+                make -f Makefile.aix; \
 	else \
 		echo "Unsupported OS" ; \
 		exit 1 ; \

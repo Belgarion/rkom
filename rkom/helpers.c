@@ -1,6 +1,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#if defined(AIX)
+#include <strings.h>
+#endif
 #include <string.h>
 
 #include "rkomsupport.h"

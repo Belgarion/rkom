@@ -13,7 +13,7 @@
 #include "rkom_proto.h"
 #include "backend.h"
 
-int myuid;
+extern int myuid;
 
 struct rk_time *
 rk_time_server(void)

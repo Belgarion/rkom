@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.37 2001/11/24 16:50:08 offe Exp $ */
+/* $Id: rkom.c,v 1.38 2001/11/24 20:26:01 offe Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -18,7 +18,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <termios.h>
+#if !defined(AIX)
 #include <termcap.h>
+#else
+#endif
 #include <errno.h>
 #include <err.h>
 #include <unistd.h>
@@ -69,7 +72,7 @@ prompt_fun(EditLine *el)
 	return buf;
 }
 
-#if defined(SOLARIS) || defined(SUNOS4)
+#if defined(SOLARIS) || defined(SUNOS4) || defined(AIX)
 char * __progname;
 #endif
 

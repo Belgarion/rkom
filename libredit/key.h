@@ -69,7 +69,7 @@ protected key_value_t	*key_map_str(EditLine *, char *);
 protected void		 key_reset(EditLine *);
 protected int		 key_get(EditLine *, char *, key_value_t *);
 protected void		 key_add(EditLine *, char *, key_value_t *, int);
-protected void		 key_clear(EditLine *, el_action_t *, char *);
+protected void		 key_clearx(EditLine *, el_action_t *, char *);
 protected int		 key_delete(EditLine *, char *);
 protected void		 key_print(EditLine *, char *);
 protected void	         key_kprint(EditLine *, char *, key_value_t *, int);

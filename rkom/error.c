@@ -51,7 +51,7 @@ error(int code)
 	return fel[code];
 }
 
-#if defined(SOLARIS) || defined(SUNOS4)
+#if defined(SOLARIS) || defined(SUNOS4) || defined(AIX)
 int vfprintf(FILE *, const char *, va_list);
 extern char * __progname;
 

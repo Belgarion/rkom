@@ -1355,7 +1355,7 @@ map_bind(EditLine *el, int argc, char **argv)
 				key_add(el, in, key_map_cmd(el, cmd), ntype);
 				map[(unsigned char) *in] = ED_SEQUENCE_LEAD_IN;
 			} else {
-				key_clear(el, map, in);
+				key_clearx(el, map, in);
 				map[(unsigned char) *in] = cmd;
 			}
 		}

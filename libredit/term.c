@@ -44,10 +44,15 @@
 #include "sys.h"
 #include "el.h"
 
-#ifndef SUNOS4
+#if !defined(SUNOS4) && !defined(AIX)
 #include <sys/ioctl.h>
 #endif
+#ifndef AIX
 #include <termcap.h>
+#else
+#include <curses.h>
+#include <term.h>
+#endif
 #ifdef SOLARIS
 #undef _XPG4_2
 #include <unistd.h>
@@ -1136,7 +1141,7 @@ term_bind_arrow(EditLine *el)
 			 *    unassigned key.
 		         */
 			if (arrow[i].type == XK_NOD)
-				key_clear(el, map, p);
+				key_clearx(el, map, p);
 			else {
 				if (p[1] && (dmap[j] == map[j] ||
 					map[j] == ED_SEQUENCE_LEAD_IN)) {
@@ -1144,7 +1149,7 @@ term_bind_arrow(EditLine *el)
 					    arrow[i].type);
 					map[j] = ED_SEQUENCE_LEAD_IN;
 				} else if (map[j] == ED_UNASSIGNED) {
-					key_clear(el, map, p);
+					key_clearx(el, map, p);
 					if (arrow[i].type == XK_CMD)
 						map[j] = arrow[i].fun.cmd;
 					else

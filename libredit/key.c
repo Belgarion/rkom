@@ -205,7 +205,7 @@ key_add(EditLine *el, char *key, key_value_t *val, int ntype)
  *
  */
 protected void
-key_clear(EditLine *el, el_action_t *map, char *in)
+key_clearx(EditLine *el, el_action_t *map, char *in)
 {
 
 	if ((map[(unsigned char) *in] == ED_SEQUENCE_LEAD_IN) &&
