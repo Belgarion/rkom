@@ -1,4 +1,4 @@
-/* $Id: parse_eng.c,v 1.5 2000/11/29 11:22:08 jens Exp $ */
+/* $Id: parse_eng.c,v 1.6 2000/12/03 15:57:28 jens Exp $ */
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
@@ -45,25 +45,53 @@ struct parse_commands {
 	cmd_lst_t	*pc_alias;
 };
 
+static void
+unescape(const char *str, int *idx, char *next_char,
+	int *is_word_sep, int *inside_quotes)
+{
+	*is_word_sep = 0;
+	*next_char = str[*idx];
+
+	if (*next_char == '"') {
+		(*idx)++;
+		*next_char =str[*idx];
+
+		/* Double quotes counts as one literal quote charachter. */
+		if (*next_char == '"')
+			return;
+
+		*inside_quotes = !*inside_quotes;
+	}
+
+	if (*next_char == ' ') {
+		/* Spaces between quotes doesn't count as word terminators. */
+		if (*inside_quotes)
+			return;
+
+		*is_word_sep = 1;
+	}
+}
 
 static void
 build_argc_argv(const char *str, int *argc, char ***argv)
 {
-	char	**p;
-	int		i, num_words, num_chars, between_words, word_num, char_num;
+	char	**p, next_char;
+	int		i, num_words, num_chars, word_num, char_num;
+	int		between_words, is_word_sep, inside_quotes;
 	size_t	len;
 
 	len = strlen(str);
 
 	between_words = 1;
+	inside_quotes = 0;
 	num_chars = num_words = 0;
 	for (i = 0; i < len; i++) {
-		if (str[i] == ' ') {
+		unescape(str, &i, &next_char, &is_word_sep, &inside_quotes);
+		if (is_word_sep) {
 			between_words = 1;
 			continue;
 		}
 
-		/* str[i] != ' ' */
 		num_chars++;
 		if (between_words) {
 			between_words = 0;
@@ -80,11 +108,13 @@ build_argc_argv(const char *str, int *argc, char ***argv)
 		err(1, "malloc");
 
 	between_words = 1;
+	inside_quotes = 0;
 	char_num = word_num = 0;
 	p[0] = (char *)&p[num_words];
 	for (i = 0; i < len; i++) {
-		if (str[i] == ' ') {
+		unescape(str, &i, &next_char, &is_word_sep, &inside_quotes);
 
+		if (is_word_sep) {
 			/*
 			 * char_num != 0 implies that there is something in the last
 			 * string and it has to be terminated.
@@ -97,19 +127,17 @@ build_argc_argv(const char *str, int *argc, char ***argv)
 				if ((word_num + 1) == num_words)
 					break;
 
-				/* Start the new string */
+				/* Point to the new string */
 				p[word_num + 1] = &p[word_num][char_num + 1];
 
 				/* Set up the "pointers" for the new string */
 				word_num++;
 				char_num = 0;
 			}
-
 			continue;
 		}
 
-		/* str[i] != ' ' */
-		p[word_num][char_num] = str[i];
+		p[word_num][char_num] = next_char;
 		char_num++;
 	}
 	/* NULL terminate the last string */

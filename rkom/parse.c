@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.11 2000/11/29 21:48:34 ragge Exp $ */
+/* $Id: parse.c,v 1.12 2000/12/03 15:57:28 jens Exp $ */
 
 #include <sys/param.h>
 
@@ -109,6 +109,11 @@ DCMD(other_logout);
 DCMD(other_quit);
 DCMD(other_password);
 
+#if 1
+/* Debug help */
+DCMD(debug_show_args);
+#endif
+
 struct command_list {
 	char	*cl_str;
 	int		cl_prio;
@@ -189,6 +194,11 @@ DROW("login",					0,PE_STR_ARG,other_login)
 DROW("logout",					0,PE_NO_ARG,other_logout)
 DROW("sluta",					0,PE_NO_ARG,other_quit)
 DROW("ändra",					0,PE_NO_ARG,other_password)
+
+#if 1
+/* Debug help */
+DROW("showarg",					0,PE_STR_ARG,debug_show_args)
+#endif
 
 /* Terminate list */
 {NULL,0,0,NULL}
@@ -765,5 +775,16 @@ exec_read_see_presentation(int argc, char *argv[])
 	TT(argc == 0, "Du måste ange vem du vill se presentationen för.\n");
 
 	next_resee_presentation(re_concat(argc, argv));
+	return 0;
+}
+
+static int
+exec_debug_show_args(int argc, char *argv[])
+{
+	int		i;
+
+	printf("argc = %d\n", argc);
+	for (i = 0; i < argc; i++)
+		printf("argv[%d] = '%s'\n", i, argv[i]);
 	return 0;
 }
