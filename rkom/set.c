@@ -105,6 +105,7 @@ static int cmod, rmod;
 
 static struct rk_val rkomvars[] = {
 	{ "use-editor", "0" },
+	{ "show-writer-after-text", "1" },
 };
 static int nrkomvars = sizeof(rkomvars)/sizeof(rkomvars[0]);
 

@@ -133,7 +133,10 @@ show_text(int nr)
 			rprintf("\n");
 	} else
 		rprintf("\n");
-	sprintf(buf, "(%d) /%s/ ", nr, namn);
+	if (iseql("show-writer-after-text", "1"))
+		sprintf(buf, "(%d) /%s/ ", nr, namn);
+	else
+		sprintf(buf, "(%d) ", nr);
 	if (isneq("dashed-lines", "0") && strlen(buf) < 60)
 		rprintf("%s%s", buf, &"------------------------------------------------------------\n"[strlen(buf)]);
 	else
