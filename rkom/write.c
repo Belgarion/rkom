@@ -199,6 +199,8 @@ write_put(char *str)
 			rprintf("write_new: %s\n", error(rtr->rtr_status));
 		else
 			rprintf("Text %d har skapats.\n", rtr->rtr_textnr);
+		lastlasttext = lasttext;
+		lasttext = rtr->rtr_textnr;
 		free(rtr);
 	}
 	free(ctext);
