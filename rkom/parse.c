@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.50 2003/10/02 08:19:49 ragge Exp $ */
+/* $Id: parse.c,v 1.51 2003/10/10 14:08:16 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -10,6 +10,7 @@
 #include "next.h"
 #include "write.h"
 #include "backend.h"
+#include "debug.h"
 
 void cmd_logout(char *);
 void cmd_login(char *);
@@ -142,6 +143,9 @@ DCMD(other_sync);
 DCMD(other_exec);
 DCMD(other_create_person);
 
+/* debug commands */
+DCMD(debug_dump_membership);
+
 #if 1
 /* Debug help */
 DCMD(debug_show_args);
@@ -265,6 +269,8 @@ DROW("synkronisera",				0,PE_NO_ARG,other_sync)
 DROW("ändra lösenord",				0,PE_NO_ARG,other_password)
 DROW("ändra namn",				0,PE_NO_ARG,other_name)
 DROW("!", 					0,PE_STR_ARG,other_exec)
+
+DROW("debug membership",		0,PE_STR_ARG,debug_dump_membership)
 
 #if 1
 /* Debug help */
@@ -1184,5 +1190,13 @@ exec_text_anonymisera(int argc, char *argv[])
 	TT(argc != 0, "Anonymisera tar inga argument.\n");
 	rprintf("Texten får nu en osynlig skrivare.\n");
 	anonymisera = 1;
+	return 0;
+}
+
+static int
+exec_debug_dump_membership(int argc, char *argv[])
+{
+	LF;
+	debug_dump_membership(re_concat(argc, argv));
 	return 0;
 }

@@ -424,9 +424,6 @@ skip(u_int32_t nr)
 	struct rk_misc_info *mi;
 	int len, i;
 
-	if (checkifread(nr))
-		return; /* This message is already marked read */
-
 	if ((ts = rk_textstat(nr)) == NULL)
 		return; /* Can't do anything */
 	mi = ts->rt_misc_info.rt_misc_info_val;
@@ -434,11 +431,16 @@ skip(u_int32_t nr)
 
 	for (i = 0; i < len; i++) {
 		if (mi[i].rmi_type == footn_in ||
-		    mi[i].rmi_type == comm_in)
+		    mi[i].rmi_type == comm_in) {
+			if (checkifread(mi[i].rmi_numeric))
+				continue;
 			skip(mi[i].rmi_numeric);
+		}
 	}
-	hoppade++;
-	mark_read(nr);
+	if (checkifread(mi[i].rmi_numeric) == 0) {
+		hoppade++;
+		mark_read(nr);
+	}
 }
 
 void
