@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.23 2003/09/25 09:37:59 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.24 2003/09/25 15:13:06 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -36,32 +36,30 @@ int komerr;
 struct rk_server *
 rkom_connect(char *server, char *frontend, char *os_username, char *fevers)
 {
-	struct rk_server *rs;
+	static struct rk_server rs;
 	struct sockaddr_in sin;
 	struct hostent *hp;
 	char *buf2;
 
-	rs = malloc(sizeof(struct rk_server));
-	rs->rs_retval = -1;
-	rs->rs_servtype = rs->rs_version = "";
+	komerr = -1; /* XXX */
 
 	/* Locate our KOM server */
 	if ((hp = gethostbyname(server)) == NULL)
-		return rs;
+		return NULL;
 
 	/* Create a socket to play with */
 	if ((pfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-		return rs;
+		return NULL;
 
 	/* Connect to the server we want to talk with */
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(4894); /* XXX should be configureable */
 	bcopy(hp->h_addr, &sin.sin_addr, hp->h_length);
 	if (connect(pfd, (struct sockaddr *)&sin, sizeof(sin)) < 0)
-		return rs;
+		return NULL;
 
 	if ((sfd = fdopen(pfd, "w")) == NULL)
-		return rs;
+		return NULL;
 	setvbuf(sfd, (char *)NULL, _IOLBF, 0);
 
 	put_char('A');
@@ -72,7 +70,7 @@ rkom_connect(char *server, char *frontend, char *os_username, char *fevers)
 
 	read(pfd, buf2, 7);
 	if (bcmp(buf2, "LysKOM\n", 7))
-		return rs;
+		return NULL;
 
 	if (*frontend == 0) {
 		buf2 = alloca(20);
@@ -87,17 +85,16 @@ rkom_connect(char *server, char *frontend, char *os_username, char *fevers)
 
 	/* Check what the server is running */
 	send_reply("75\n");
-	rs->rs_proto = get_int();
-	rs->rs_servtype = get_string();
-	rs->rs_version = get_string();
-	rs->rs_retval = 0;
+	rs.rs_proto = get_int();
+	rs.rs_servtype = get_string();
+	rs.rs_version = get_string();
 	get_accept('\n');
 
 	/* Set what async messages we want */
 	send_reply("80 10 { 5 8 9 12 13 14 15 16 17 18 }\n");
 	get_accept('\n');
 
-	return rs;
+	return &rs;
 }
 
 void

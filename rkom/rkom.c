@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.55 2003/09/25 11:45:05 ragge Exp $ */
+/* $Id: rkom.c,v 1.56 2003/09/25 15:13:08 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -133,9 +133,8 @@ main(int argc, char *argv[])
 	/* Attach to the KOM server */
 	if ((uname = getenv("USER")) == NULL)
 		uname = "amnesia";
-	rs = rkom_connect(server, "", uname, client_version);
-	if (rs->rs_retval)
-		errx(1, "misslyckades koppla upp, error %d", rs->rs_retval);
+	if ((rs = rkom_connect(server, "", uname, client_version)) == NULL)
+		errx(1, "misslyckades koppla upp, error %d", komerr);
 
 	rprintf("Välkommen till raggkom kopplad till server %s.\n", server);
 	rprintf("Servern kör %s, version %s. Protokollversion %d.\n",

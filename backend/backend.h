@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.20 2003/09/25 15:01:47 ragge Exp $	*/
+/*	$Id: backend.h,v 1.21 2003/09/25 15:13:06 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -27,6 +27,10 @@ void	send_callback(char *msg, int arg, void(*)(int, int));
 int	get_bitfield(void);
 
 /* Main loop, in rkom_subr.c */
+
+/*
+ * Connect to the kom server.
+ */
 struct	rk_server *rkom_connect(char *, char *, char *, char *);
 int	rkom_loop(void);
 void	rkom_command(void);
@@ -389,7 +393,6 @@ struct rk_val {
 };
 
 struct rk_uarea {
-		int32_t	ru_retval;
 	struct {
 		u_int32_t	ru_val_len;
 		struct rk_val	*ru_val_val;
@@ -397,8 +400,7 @@ struct rk_uarea {
 };
 
 struct rk_server {
-		int32_t	rs_retval;
-		int32_t	rs_proto;
-		char *	rs_servtype;
-		char *	rs_version;
+	int32_t	rs_proto;
+	char *	rs_servtype;
+	char *	rs_version;
 };

@@ -158,26 +158,27 @@ rk_get_uarea(char *str)
 	uarea = NULL;
 
 	if (myuid == 0) {
-		rku.ru_retval = 6;
-		return &rku;
+		komerr = 6;
+		return NULL;
 	}
-	uarea = get_uarea(myuid);
-	if (uarea == NULL) {
-		rku.ru_retval = 11;
-		return &rku;
+	if ((uarea = get_uarea(myuid)) == NULL) {
+		komerr = 11;
+		return NULL;
 	}
 
 	/* Check if there is any entry in the uarea matching our string */
 	for (i = 0; uarea[i].key; i++)
 		if (strcmp(uarea[i].key, str) == 0)
 			break;
-	if (uarea[i].key == NULL)
-		return &rku;
+	if (uarea[i].key == NULL) {
+		komerr = 12;
+		return NULL;
+	}
 
 	vec = splitup(uarea[i].elem, &i, 1);
 	if (vec == NULL) {
-		rku.ru_retval = 12;
-		return &rku;
+		komerr = 12;
+		return NULL;
 	}
 
 	rv = calloc(sizeof(struct rk_val), i + 1);

@@ -144,12 +144,10 @@ readvars()
 {
 	struct rk_uarea *ru;
 
-	ru = rk_get_uarea("common");
-	if (ru->ru_retval == 0)
+	if ((ru = rk_get_uarea("common")) != NULL)
 		put_in_vars(ru, commonvars, ncommonvars);
 
-	ru = rk_get_uarea("rkom");
-	if (ru->ru_retval == 0)
+	if ((ru = rk_get_uarea("rkom")) != NULL)
 		put_in_vars(ru, rkomvars, nrkomvars);
 }
 
