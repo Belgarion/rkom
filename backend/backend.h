@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.29 2003/10/02 08:19:46 ragge Exp $	*/
+/*	$Id: backend.h,v 1.30 2003/10/10 14:18:32 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -178,7 +178,12 @@ struct rk_member *rk_get_membership(u_int32_t conf);
 int	rk_local_is_read(u_int32_t conf, u_int32_t localno);
 u_int32_t rk_next_unread(u_int32_t conf, u_int32_t uid);
 u_int32_t rk_local_to_global(u_int32_t conf, u_int32_t local);
-int32_t rk_mark_read(u_int32_t conf, u_int32_t local);
+
+/*
+ * Mark local text local in conference conf as read.
+ * Silently ignore if it is not possible.
+ */
+void rk_mark_read(u_int32_t conf, u_int32_t local);
 int32_t rk_set_last_read(u_int32_t conf, u_int32_t local);
 int32_t rk_add_member(u_int32_t, u_int32_t, u_int8_t, u_int16_t, u_int32_t);
 int32_t rk_sub_member(u_int32_t conf, u_int32_t uid);
@@ -302,10 +307,8 @@ struct rk_membership {
 	u_int32_t	rm_conference;
 	u_int32_t	rm_priority;
 	u_int32_t	rm_last_text_read;
-	struct {
-		u_int32_t	rm_read_texts_len;
-		u_int32_t	*rm_read_texts_val;
-	} rm_read_texts;
+	u_int32_t	rm_read_texts_len;
+	u_int32_t	*rm_read_texts_val;
 	u_int32_t	rm_added_by;
 	struct rk_time	rm_added_at;
 	u_int32_t	rm_type;

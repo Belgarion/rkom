@@ -373,7 +373,7 @@ rk_membership(u_int32_t uid, u_int32_t conf)
 	m->rm_conference = get_int();
 	m->rm_priority = get_int();
 	m->rm_last_text_read = get_int();
-	len = m->rm_read_texts.rm_read_texts_len = get_int();
+	len = m->rm_read_texts_len = get_int();
 	if (len) {
 		int *txts, j;
 
@@ -382,7 +382,7 @@ rk_membership(u_int32_t uid, u_int32_t conf)
 		for (j = 0; j < len; j++)
 			txts[j] = get_int();
 		get_accept('}');
-		m->rm_read_texts.rm_read_texts_val = txts;
+		m->rm_read_texts_val = txts;
 	} else
 		get_accept('*');
 	m->rm_added_by = get_int();
@@ -445,9 +445,11 @@ set_last_read_internal(int conf, int local)
 		if (mb == 0)
 			return;
 		mb->member.rm_last_text_read = local;
-		if (mb->member.rm_read_texts.rm_read_texts_len)
-			free(mb->member.rm_read_texts.rm_read_texts_val);
-		mb->member.rm_read_texts.rm_read_texts_len = 0;
+		if (mb->member.rm_read_texts_len) {
+			free(mb->member.rm_read_texts_val);
+			mb->member.rm_read_texts_val = NULL;
+		}
+		mb->member.rm_read_texts_len = 0;
 	}
 }
 
@@ -521,8 +523,8 @@ is_read(int conf, int text, int uid)
 		return 1; /* ??? */
 	if (text<= m->rm_last_text_read)
 		return 1;
-	num = m->rm_read_texts.rm_read_texts_len;
-	txts = m->rm_read_texts.rm_read_texts_val;
+	num = m->rm_read_texts_len;
+	txts = m->rm_read_texts_val;
 	for (i = 0; i < num; i++)
 		if (txts[i] == text)
 			return 1;
@@ -543,8 +545,8 @@ rk_local_is_read(u_int32_t conf, u_int32_t localno)
 
 	if (localno <= m->rm_last_text_read)
 		return 1;
-	num = m->rm_read_texts.rm_read_texts_len;
-	txts = m->rm_read_texts.rm_read_texts_val;
+	num = m->rm_read_texts_len;
+	txts = m->rm_read_texts_val;
 	for (i = 0; i < num; i++) {
 		if (txts[i] == localno)
 			return 1;
@@ -644,7 +646,7 @@ rk_mark_read_server_callback(int err, int arg)
 		get_accept('\n');
 }
 
-int32_t
+void
 rk_mark_read(u_int32_t conf, u_int32_t local)
 {
 	struct rk_membership *m;
@@ -652,12 +654,12 @@ rk_mark_read(u_int32_t conf, u_int32_t local)
 	int i, j, num, *txts;
 
 	if (is_read(conf, local, myuid))
-		return 0;
+		return;
 	if ((m = rk_membership(myuid, conf)) == NULL)
-		return 0; /* Nothing to do */
+		return; /* Nothing to do */
 
 	if (local <= m->rm_last_text_read)
-		return 0; /* Already marked read, ignore */
+		return; /* Already marked read, ignore */
 
 	/* Mark read on server */
 	sprintf(buf, "27 %d 1 { %d }\n", conf, local);
@@ -666,15 +668,15 @@ rk_mark_read(u_int32_t conf, u_int32_t local)
 	if (m->rm_last_text_read + 1 == local) {
 		m->rm_last_text_read = local;
 	} else {
-		txts = m->rm_read_texts.rm_read_texts_val;
-		num = m->rm_read_texts.rm_read_texts_len;
+		txts = m->rm_read_texts_val;
+		num = m->rm_read_texts_len;
 		txts = realloc(txts, sizeof(u_int32_t) * (num+1));
 		txts[num++] = local;
-		m->rm_read_texts.rm_read_texts_val = txts;
-		m->rm_read_texts.rm_read_texts_len = num;
+		m->rm_read_texts_val = txts;
+		m->rm_read_texts_len = num;
 	}
-	txts = m->rm_read_texts.rm_read_texts_val;
-	num = m->rm_read_texts.rm_read_texts_len;
+	txts = m->rm_read_texts_val;
+	num = m->rm_read_texts_len;
 	for (i = j = 0; i < num; i++) {
 		if (txts[i] <= m->rm_last_text_read)
 			continue;
@@ -682,8 +684,7 @@ rk_mark_read(u_int32_t conf, u_int32_t local)
 			txts[j] = txts[i];
 		j++;
 	}
-	m->rm_read_texts.rm_read_texts_len = j;
-	return 0;
+	m->rm_read_texts_len = j;
 }
 
 int32_t
@@ -789,8 +790,8 @@ rk_sync(void)
 		if (walker->next) {
 			m = walker->next;
 			while (m) {
-				if (m->member.rm_read_texts.rm_read_texts_len)
-					free(m->member.rm_read_texts.rm_read_texts_val);
+				if (m->member.rm_read_texts_len)
+					free(m->member.rm_read_texts_val);
 				nm = m->next;
 				free(m);
 				m = nm;
