@@ -3,6 +3,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef LINUX
+#include <string.h>
+#endif
 #include <strings.h>
 
 #include "rkomsupport.h"

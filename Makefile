@@ -1,4 +1,4 @@
-#	$Id: Makefile,v 1.8 2001/11/19 20:27:13 ragge Exp $
+#	$Id: Makefile,v 1.9 2001/11/20 22:24:37 ragge Exp $
 #
 all:
 	@if [ `uname` = NetBSD -o `uname` = FreeBSD ]; then \
@@ -12,6 +12,9 @@ all:
 			echo "Using Solaris" ; \
 			make -f Makefile.solaris ; \
 		fi \
+	elif [ `uname` = Linux ]; then \
+		echo "Using Linux"; \
+		make -f Makefile.linux; \
 	else \
 		echo "Unsupported OS" ; \
 		exit 1 ; \

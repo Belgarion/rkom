@@ -1,4 +1,4 @@
-/*	$Id: fgetln.c,v 1.3 2001/11/19 20:27:22 ragge Exp $	*/
+/*	$Id: fgetln.c,v 1.4 2001/11/20 22:24:49 ragge Exp $	*/
 
 /*
  * Copyright 1999 Luke Mewburn <lukem@netbsd.org>.
@@ -27,7 +27,7 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if defined(SOLARIS) || defined(SUNOS4)
+#if defined(SOLARIS) || defined(SUNOS4) || defined(LINUX)
 
 #include <err.h>
 

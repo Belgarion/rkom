@@ -1,9 +1,12 @@
-/*	$Id: cmd.c,v 1.53 2001/11/19 20:27:23 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.54 2001/11/20 22:24:53 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
 #endif
 
+#ifdef LINUX
+#include <string.h>
+#endif
 #include <strings.h>
 #include <stdio.h>
 #include <stdlib.h>

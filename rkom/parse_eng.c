@@ -1,4 +1,4 @@
-/* $Id: parse_eng.c,v 1.10 2001/11/18 18:05:30 ragge Exp $ */
+/* $Id: parse_eng.c,v 1.11 2001/11/20 22:24:53 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -460,6 +460,7 @@ parse_exec(cmds_t *c, const char *str)
 
 	/* An escape label for a nested for-statement */
 skip:
+		;
 	}
 
 	if (max_prio < 0) {

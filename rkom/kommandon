@@ -1,83 +1,83 @@
-"Lista kommandon
-Ord inom parentes ska inte skrivas.
-
-  Kommandon för läsning:
-    (Läsa) nästa inlägg
-    (Läsa) nästa kommentar
-    Återse (det) kommenterade
-    Återse presentation (för)
-    Återse urinlägg
-    Lista (alla) nyheter
-    Endast (läsa senaste)
-    (Se inlägget) igen
-    Hoppa (över alla kommentarer)
-
-  Kommandon för skrivning:
-    (Skriva eget) inlägg
-    Kommentera (inlägget)
-    Kommentera föregående (inlägg)
-    Fotnot (till inlägg)
-    (Skicka) brev (till)
-    Personligt (svar)
-    Lägga (in texten)
-    Extrakopia: (till)
-    Mottagare:
-    Ärende:
-    Kommentar till:
-    Lägga (in texten)
-    Glöm (bort texten du skriver)
-    (Visa) hela (texten du skriver)
-    Redigera (med extern editor)
-
-  Kommandon för möten:
-    Addera medlem (till möte)
-    Subtrahera medlem (från möte)
-    Var (är jag)
-    Gå (till möte)
-    (Gå till) nästa möte
-    Lista möten
-    Skapa (möte)
-    Utträda (ur möte)
-    Ändra presentation (för)
-
-  Kommandon för texter:
-    Addera mottagare (till inlägg)
-    Subtrahera mottagare (till inlägg)
-    Markera (inlägg)
-    Avmarkera (inlägg)
-    Lista (alla) markerade
-    Spara (text på fil)
-    Lista (alla) ärenden
-    Lista olästa (ärenden)
-    Radera (inlägg)
-    Kopia (till)
-
-  Kommandon för onlinekommunikation:
-    Vilka (är inloggade) [ synliga | osynliga | klienter | <inaktivtid> ]
-    Sänd (alarmmeddelande till alla)
-    Säg (något till)
-
-  Kommandon för information:
-    Lista kommandon
-    Tilläggsinformation (för text)
-    (Lista) flaggor
-    (Se) tiden
-    (Sätt) lapp (på dörren för)
-    Ta (bort lapp på dörren för)
-
-  Kommandon för alias:
-    Alias
-    Unalias
-    Lista alias
-
-  Övriga kommandon:
-    Sätt (flagga)
-    Spara flaggor
-    Login
-    Logout
-    Sluta
-    Ändra lösenord
-    Ändra namn
-    Synkronisera (lästa texter med servern)
-    ! (kommando)
+"Lista kommandon\n\
+Ord inom parentes ska inte skrivas.\n\
+\n\
+  Kommandon för läsning:\n\
+    (Läsa) nästa inlägg\n\
+    (Läsa) nästa kommentar\n\
+    Återse (det) kommenterade\n\
+    Återse presentation (för)\n\
+    Återse urinlägg\n\
+    Lista (alla) nyheter\n\
+    Endast (läsa senaste)\n\
+    (Se inlägget) igen\n\
+    Hoppa (över alla kommentarer)\n\
+\n\
+  Kommandon för skrivning:\n\
+    (Skriva eget) inlägg\n\
+    Kommentera (inlägget)\n\
+    Kommentera föregående (inlägg)\n\
+    Fotnot (till inlägg)\n\
+    (Skicka) brev (till)\n\
+    Personligt (svar)\n\
+    Lägga (in texten)\n\
+    Extrakopia: (till)\n\
+    Mottagare:\n\
+    Ärende:\n\
+    Kommentar till:\n\
+    Lägga (in texten)\n\
+    Glöm (bort texten du skriver)\n\
+    (Visa) hela (texten du skriver)\n\
+    Redigera (med extern editor)\n\
+\n\
+  Kommandon för möten:\n\
+    Addera medlem (till möte)\n\
+    Subtrahera medlem (från möte)\n\
+    Var (är jag)\n\
+    Gå (till möte)\n\
+    (Gå till) nästa möte\n\
+    Lista möten\n\
+    Skapa (möte)\n\
+    Utträda (ur möte)\n\
+    Ändra presentation (för)\n\
+\n\
+  Kommandon för texter:\n\
+    Addera mottagare (till inlägg)\n\
+    Subtrahera mottagare (till inlägg)\n\
+    Markera (inlägg)\n\
+    Avmarkera (inlägg)\n\
+    Lista (alla) markerade\n\
+    Spara (text på fil)\n\
+    Lista (alla) ärenden\n\
+    Lista olästa (ärenden)\n\
+    Radera (inlägg)\n\
+    Kopia (till)\n\
+\n\
+  Kommandon för onlinekommunikation:\n\
+    Vilka (är inloggade) [ synliga | osynliga | klienter | <inaktivtid> ]\n\
+    Sänd (alarmmeddelande till alla)\n\
+    Säg (något till)\n\
+\n\
+  Kommandon för information:\n\
+    Lista kommandon\n\
+    Tilläggsinformation (för text)\n\
+    (Lista) flaggor\n\
+    (Se) tiden\n\
+    (Sätt) lapp (på dörren för)\n\
+    Ta (bort lapp på dörren för)\n\
+\n\
+  Kommandon för alias:\n\
+    Alias\n\
+    Unalias\n\
+    Lista alias\n\
+\n\
+  Övriga kommandon:\n\
+    Sätt (flagga)\n\
+    Spara flaggor\n\
+    Login\n\
+    Logout\n\
+    Sluta\n\
+    Ändra lösenord\n\
+    Ändra namn\n\
+    Synkronisera (lästa texter med servern)\n\
+    ! (kommando)\n\
 "

@@ -75,12 +75,12 @@ typedef void	*ptr_t;
 typedef void	*ioctl_t;
 #endif
 
-#if defined(SOLARIS) || defined(SUNOS4)
+#if defined(SOLARIS) || defined(SUNOS4) || defined(LINUX)
 /* fgetln() stdio routine missing */
 char	*fgetln(FILE *, size_t *);
 #endif
 
-#if defined(SOLARIS) || defined(SUNOS4)
+#if defined(SOLARIS) || defined(SUNOS4) || defined(LINUX)
 /* vis() soutines missing */
 #define VIS_SP          0x04    /* also encode space */
 #define VIS_TAB         0x08    /* also encode tab */
@@ -114,7 +114,7 @@ int     unvis(char *, int, int *, int);
 #include <memory.h>
 #endif
 
-#ifdef SUNOS4
+#if defined(SUNOS4) || defined(LINUX)
 size_t strlcpy(char *dst, const char *src, size_t size);
 size_t strlcat(char *dst, const char *src, size_t size);
 #endif

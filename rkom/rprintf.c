@@ -1,3 +1,7 @@
+#ifdef LINUX
+#define _GNU_SOURCE 1
+#include <string.h>
+#endif
 
 #include <sys/param.h>
 

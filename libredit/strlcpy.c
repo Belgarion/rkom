@@ -1,4 +1,4 @@
-/*	$Id: strlcpy.c,v 1.2 2001/11/19 20:27:23 ragge Exp $	*/
+/*	$Id: strlcpy.c,v 1.3 2001/11/20 22:24:50 ragge Exp $	*/
 /*	$NetBSD: strlcpy.c,v 1.5 1999/09/20 04:39:47 lukem Exp $	*/
 /*	from OpenBSD: strlcpy.c,v 1.4 1999/05/01 18:56:41 millert Exp 	*/
 
@@ -29,7 +29,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef SUNOS4
+#if defined(SUNOS4) || defined(LINUX)
 
 #include "sys.h"
 
