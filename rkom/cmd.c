@@ -140,7 +140,7 @@ cmd_parse(str)
 	printf("\n");
 };
 
-static char *dindx[] = {"mån", "tis", "ons", "tors", "fre", "lör", "sön"};
+static char *dindx[] = {"sön", "mån", "tis", "ons", "tors", "fre", "lör"};
 static char *mindx[] = {"januari", "februari", "mars", "april", "maj", "juni",
 	"juli", "augusti", "september", "oktober", "november", "december"};
 
