@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.53 2003/09/17 10:52:03 ragge Exp $	*/
+/*	$Id: write.c,v 1.54 2003/09/17 12:15:44 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -488,7 +488,6 @@ show_format()
 				strcat(ret, "!Mottagare: ");
 			strcat(ret, r);
 			strcat(ret, "\n");
-			free(conf);
 			break;
 		case comm_to:
 			ret = realloc(ret, strlen(ret) + 40);
@@ -714,7 +713,6 @@ write_change_faq(char *str)
 		rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
 		if (rc->rc_retval == 0 && rc->rc_presentation)
 			c = rk_gettext(rc->rc_presentation);
-		free(rc);
 	}
 	if (c == NULL)
 		c = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);
@@ -752,7 +750,6 @@ write_change_presentation(char *str)
 		rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
 		if (rc->rc_retval == 0 && rc->rc_presentation)
 			c = rk_gettext(rc->rc_presentation);
-		free(rc);
 	}
 	if (c == NULL)
 		c = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);

@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.65 2003/09/17 10:52:03 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.66 2003/09/17 12:15:44 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -57,7 +57,6 @@ cmd_tiden(char *str)
 		rprintf("Det är %sdag %s (enligt servern).\n",
 			dindx[tm->rt_day_of_week],
 			get_date_string(tm));
-		free(tm);
 		return;
 	}
 
@@ -79,7 +78,6 @@ cmd_tiden(char *str)
 	if (tm->rt_is_dst)
 		rprintf(" (sommartid)");
 	rprintf(" (enligt servern)\n");
-	free(tm);
 }
 
 static char *
@@ -143,7 +141,6 @@ cmd_vilka(char *str)
 	pp = ppp->rdv_rds.rdv_rds_val;
 	if (antal == 0) {
 		rprintf("Det är inga påloggade alls.\n");
-		free(ppp);
 		return;
 	}
 
@@ -182,19 +179,12 @@ cmd_vilka(char *str)
 
 			nn = rk_client_name(pp[i].rds_session);
 			vv = rk_client_version(pp[i].rds_session);
-			rprintf("   %-37s", (strlen(nn) == 0 ? "(Okänd)" : nn));
-			rprintf("%s\n", (strlen(vv) == 0 ? "(Okänt)" : vv));
-			free(nn);
-			free(vv);
+			rprintf("   %-37s", (nn == 0 ? "(Okänd)" : nn));
+			rprintf("%s\n", (vv == 0 ? "(Okänt)" : vv));
 		}
 		rprintf("\n");
-		free(c1);
-		if (pp[i].rds_conf)
-			free(c2);
-		free(p);
 	}
 	rprintf("-------------------------------------------------------\n");
-	free(ppp);
 }
 
 void
@@ -249,7 +239,6 @@ cmd_login(char *str)
 		rprintf("Du har en lapp på dörren.\n");
 		show_text(rc->rc_msg_of_day, 1);
 	}
-	free(rc);
 
 	conf = rk_unreadconf(myuid);
 	nconf = conf->ru_confs.ru_confs_len;
@@ -335,7 +324,6 @@ cmd_where(char *str)
 	else {
 		conf = rk_confinfo(curconf);
 		rprintf("Du är i möte %s", conf->rc_name);
-		free(conf);
 	}
 	rprintf(" på server %s.\n", server);
 }
@@ -482,8 +470,6 @@ persstat(int uid)
 	rprintf("Skrivna rader:        %d\n", p->rp_created_lines);
 	rprintf("Lästa texter:         %d\n", p->rp_read_texts);
 	rprintf("Markerade texter:     %d\n", p->rp_no_of_marks);
-
-	free(p);
 }
 
 static void

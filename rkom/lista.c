@@ -45,7 +45,6 @@ list_conf_q(char *str)
 			continue;
 
 		rprintf("%08d  %s\n", UC->ru_type, UC->ru_name);
-		free(UC);
 	}
 	rprintf("\n");
 	free(rv);
@@ -80,9 +79,6 @@ list_conf(char *str)
 		    (C->rc_supervisor == myuid ? "O" :
 		    (M->rm_retval ? " " : "*" ))), ci[i].rc_name);
 
-		free(C);
-		if (myuid)
-			free(M);
 		if (discard)
 			break;
 	}
@@ -126,7 +122,6 @@ list_news(char *args)
 			if (rkc->rc_retval) {
 				rprintf("%d sket sej med %d\n",
 				    confs[i], rkc->rc_retval);
-				free(rkc);
 				continue;
 			}
 			hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
@@ -135,8 +130,6 @@ list_news(char *args)
 			if (m->rm_retval) {
 				rprintf("%d,%d sket sej med %d\n",
 				    confs[i], myuid, m->rm_retval);
-				free(rkc);
-				free(m);
 				continue;
 			}
 			nr = hln - m->rm_last_text_read;
@@ -148,8 +141,6 @@ list_news(char *args)
 				    nr, nr == 1 ? "" : "a", rkc->rc_name);
 			unr_texts += nr;
 			unr_confs++;
-			free(rkc);
-			free(m);
 		}
 		rprintf("\nDu har %d oläst%s inlägg i %d möte%s.\n",
 		        unr_texts, unr_texts>1?"a":"",
@@ -251,7 +242,6 @@ list_subject()
 	rprintf("Inlägg\tDatum\t  Författare           Ärende\n");
 	high = conf->rc_no_of_texts + conf->rc_first_local_no - 1;
 	low = conf->rc_first_local_no;
-	free(conf);
 	rows = 4;
 	for (i = high; i >= low; i--) {
 		nr = rk_local_to_global(curconf, i);
@@ -289,7 +279,6 @@ list_unread()
 	conf = rk_confinfo(curconf);
 	if (conf->rc_retval) {
 		rprintf("rk_confinfo sket sej: %s\n", error(conf->rc_retval));
-		free(conf);
 		return;
 	}
 	rprintf("Lista olästa (ärenden)\n");
@@ -297,14 +286,10 @@ list_unread()
 	rm = rk_membership(myuid, curconf);
 	if (rm->rm_retval) {
 		rprintf("rk_membership sket sej: %s\n", error(rm->rm_retval));
-		free(conf);
-		free(rm);
 		return;
 	}
 	high = conf->rc_no_of_texts + conf->rc_first_local_no - 1;
 	low = rm->rm_last_text_read + 1;
-	free(conf);
-	free(rm);
 	rows = 4;
 	for (i = high; i >= low; i--) {
 		nr = rk_local_to_global(curconf, i);

@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.51 2003/09/17 10:52:03 ragge Exp $ */
+/* $Id: rkom.c,v 1.52 2003/09/17 12:15:44 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -245,7 +245,6 @@ async_collect()
 				rprintf("\n%s har just loggat %s.",
 				    sender->rc_name,
 				    (ra->ra_type == 13 ? "ut" : "in"));
-				free(sender);
 				retval = 0;
 			}
 		}
@@ -275,11 +274,9 @@ rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 				rcpt = rk_confinfo(ra->ra_conf);
 				rprintf("Meddelande till %s från %s",
 				    rcpt->rc_name, sender->rc_name);
-				free(rcpt);
 			}
 			tm = rk_time();
 			rprintf(" (%s):\n\n", get_date_string(tm));
-			free(tm);
 			rprintf("%s\n", ra->ra_message);
 rprintf("----------------------------------------------------------------\n");
 			retval = 0;

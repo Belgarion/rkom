@@ -36,8 +36,6 @@ next_prompt()
 	hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
 	m = rk_membership(myuid, curconf);
 	mr = m->rm_last_text_read;
-	free(rkc);
-	free(m);
 	if (hln - mr > 0) {
 		prompt = PROMPT_NEXT_TEXT;
 		return;
@@ -183,8 +181,6 @@ next_conf(char *str)
 	    conf->rc_no_of_texts - member->rm_last_text_read - 1 -
 	    member->rm_read_texts.rm_read_texts_len);
 	prompt = PROMPT_NEXT_TEXT;
-	free(conf);
-	free(member);
 }
 
 void
@@ -455,7 +451,6 @@ next_resee_presentation(char *name)
 	lastlasttext = lasttext;
 	lasttext = rc->rc_presentation;
 	free(rv);
-	free(rc);
 }
 
 void
@@ -491,5 +486,4 @@ next_resee_faq(char *name)
 	lastlasttext = lasttext;
 	lasttext = rc->rc_presentation;
 	free(rv);
-	free(rc);
 }

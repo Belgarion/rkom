@@ -49,7 +49,6 @@ vem(int num)
 		ret = buf;
 	} else
 		ret = strdup(conf->rc_name);
-	free(conf);
 	return ret;
 }
 
@@ -161,7 +160,6 @@ show_text(int nr, int format)
 	rprintf("\n(%d) %s /%d rad%s/ %s", nr,
 	    get_date_string(&ts->rt_time), ts->rt_no_of_lines,
 	    ts->rt_no_of_lines > 1 ? "er" : "", namn);
-	free(conf);
 
 	mi = ts->rt_misc_info.rt_misc_info_val;
 	len = ts->rt_misc_info.rt_misc_info_len;
