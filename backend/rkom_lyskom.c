@@ -1,6 +1,10 @@
 
 #include <sys/time.h>
+#ifdef POLL_EMUL
+#include "poll_emul.h"
+#else
 #include <sys/poll.h>
+#endif
 
 #include <unistd.h>
 #include <string.h>
