@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.48 2002/08/31 12:59:21 ragge Exp $	*/
+/*	$Id: write.c,v 1.49 2002/09/01 10:22:56 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -691,6 +691,7 @@ void
 write_change_presentation(char *str)
 {
         struct rk_confinfo_retval *retval;
+	struct rk_conference *rc;
 	char *c = NULL;
 
         if ((retval = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF)) == 0)
@@ -699,9 +700,16 @@ write_change_presentation(char *str)
 	ispres = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	rprintf("Ändra presentation (för) %s\n",
 	    retval->rcr_ci.rcr_ci_val[0].rc_name);
+	rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
 	is_writing = 1;
-	mi = calloc(sizeof(struct rk_misc_info), 2);
+	mi = calloc(sizeof(struct rk_misc_info), 3);
 	nmi = 0;
+	if (rc->rc_presentation) {
+		mi[0].rmi_type = comm_to;
+		mi[0].rmi_numeric = rc->rc_presentation;
+		nmi++;
+	}
+
 	if (isneq("use-editor", "0")) { /* Extern editor, edit old text */
 		struct rk_conference *rc;
 

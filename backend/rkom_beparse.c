@@ -638,9 +638,10 @@ int32_t
 rk_set_presentation_server(u_int32_t conf, struct rk_text_info *rti)
 {
 	struct rk_text_retval *rtr;
+	struct rk_misc_info *rkm;
 	struct rk_conference *c;
 	char buf[30];
-	int i, presconf, oldn;
+	int i, presconf, oldn, nrkm;
 	void *old;
 
 	/* Get conference info (pers/conf) */
@@ -662,10 +663,16 @@ rk_set_presentation_server(u_int32_t conf, struct rk_text_info *rti)
 	/* Add receiving conference */
 	old = rti->rti_misc.rti_misc_val;
 	oldn = rti->rti_misc.rti_misc_len;
-	rti->rti_misc.rti_misc_val = alloca(sizeof(struct rk_misc_info));
-	rti->rti_misc.rti_misc_val->rmi_type = recpt;
-	rti->rti_misc.rti_misc_val->rmi_numeric = presconf;
-	rti->rti_misc.rti_misc_len = 1;
+
+	nrkm = rti->rti_misc.rti_misc_len + 1;
+	rkm = alloca(sizeof(struct rk_misc_info) * nrkm);
+	if (rti->rti_misc.rti_misc_len)
+		memcpy(rkm, rti->rti_misc.rti_misc_val,
+		    sizeof(struct rk_misc_info) * rti->rti_misc.rti_misc_len);
+	rkm[nrkm-1].rmi_type = recpt;
+	rkm[nrkm-1].rmi_numeric = presconf;
+	rti->rti_misc.rti_misc_val = rkm;
+	rti->rti_misc.rti_misc_len = nrkm;
 
 	/* create text */
 	rtr = rk_create_text_server(rti);
