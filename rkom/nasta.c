@@ -21,6 +21,34 @@ int lasttext;
 static struct keeptrack *pole;
 
 /*
+ * Set prompt to one suitable for now.
+ */
+void
+next_prompt()
+{
+	struct rk_unreadconfval *conf;
+	struct rk_conference *rkc;
+	struct rk_membership *m;
+	int hln, mr;
+
+	rkc = rk_confinfo(curconf);
+	hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
+	m = rk_membership(myuid, curconf);
+	mr = m->rm_last_text_read;
+	free(rkc);
+	free(m);
+	if (hln - mr > 0) {
+		prompt = PROMPT_NEXT_TEXT;
+		return;
+	}
+	conf = rk_unreadconf(myuid);
+	if (conf->ru_confs.ru_confs_len)
+		prompt = PROMPT_NEXT_CONF;
+	else
+		prompt = PROMPT_SEE_TIME;
+	free(conf);
+}
+/*
  * Next action: decide what to do next is. Choose between:
  *	- Nästa kommentar
  *	- Nästa fotnot
@@ -58,27 +86,7 @@ next_action(int nr)
 	if (i == len) { /* No, nothing followed */
 again:		free(ts); /* Forget last text */
 		if (pole == 0) { /* Nothing to do at all */
-			struct rk_unreadconfval *conf;
-			struct rk_conference *rkc;
-			struct rk_membership *m;
-			int hln, mr;
-
-			rkc = rk_confinfo(curconf);
-			hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
-			m = rk_membership(myuid, curconf);
-			mr = m->rm_last_text_read;
-			free(rkc);
-			free(m);
-			if (hln - mr > 0) {
-				prompt = PROMPT_NEXT_TEXT;
-				return;
-			}
-			conf = rk_unreadconf(myuid);
-			if (conf->ru_confs.ru_confs_len)
-				prompt = PROMPT_NEXT_CONF;
-			else
-				prompt = PROMPT_SEE_TIME;
-			free(conf);
+			next_prompt();
 			return;
 		}
 		ts = rk_textstat(pole->textnr);
@@ -93,7 +101,6 @@ again:		free(ts); /* Forget last text */
 
 				ts2 = rk_textstat(mi[i].rmi_numeric);
 				r = ts2->rt_retval;
-//printf("Textstatta %d retval %d\n", mi[i].rmi_numeric, r);
 				free(ts2);
 				if (r)
 					continue;
@@ -134,7 +141,7 @@ next_resetchain()
 		free(pole);
 		pole = kt;
 	}
-	prompt = PROMPT_NEXT_TEXT;
+	next_prompt();
 }
 
 void
@@ -201,7 +208,7 @@ next_text(char *str)
 	local = rk_next_unread(curconf, myuid);
 	if (local == 0) {
 		printf("Du har inga mer olästa inlägg.\n");
-		prompt = PROMPT_NEXT_CONF;
+		next_prompt();
 		return;
 	}
 	global = rk_local_to_global(curconf, local);
@@ -251,6 +258,27 @@ next_resee(char *str)
 		printf("Du måste get ett argument till \"återse\"\n");
 		return;
 	}
+	if (bcmp(str, "kommenterade", strlen(str)) == 0) {
+		struct rk_text_stat *ts;
+		struct rk_misc_info *mi;
+		int i, len;
+
+		ts = rk_textstat(lasttext);
+		mi = ts->rt_misc_info.rt_misc_info_val;
+		len = ts->rt_misc_info.rt_misc_info_len;
+		for (i = 0; i < len; i++)
+			if (mi[i].rmi_type == comm_to)
+				break;
+		if (i == len) {
+			printf("Föregående inlägg har inga kommentarer.\n");
+			free(ts);
+			return;
+		}
+		show_text(mi[i].rmi_numeric);
+		lasttext = mi[i].rmi_numeric;
+		free(ts);
+		return;
+	}
 	num = atoi(str);
 	if (num == 0) {
 		printf("\"%s\" är ett dåligt inläggsnunmmer.\n", str);
@@ -260,4 +288,8 @@ next_resee(char *str)
 	lasttext = num;
 }
 
-
+void
+next_again(char *str)
+{
+	show_text(lasttext);
+}

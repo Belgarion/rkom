@@ -346,12 +346,33 @@ write_cmnt(char *str)
 		return;
 	}
 
-	if (str == 0)
+	if (str == 0) {
 		text = lasttext;
-	else if ((text = atoi(str)) == 0) {
+		printf("Kommentera (inlägget) (%d)\n", text);
+	} else if (bcmp(str, "föregående", strlen(str)) == 0) {
+		struct rk_text_stat *ts;
+		struct rk_misc_info *mi;
+		int i, len;
+
+		ts = rk_textstat(lasttext);
+		mi = ts->rt_misc_info.rt_misc_info_val;
+		len = ts->rt_misc_info.rt_misc_info_len;
+		for (i = 0; i < len; i++)
+			if (mi[i].rmi_type == comm_to)
+				break;
+		if (i == len) {
+			printf("Senaste inlägget är inte en kommentar.\n");
+			free(ts);
+			return;
+		}
+		text = mi[i].rmi_numeric;
+		free(ts);
+		printf("Kommentera föregående (inlägg) (%d)\n", text);
+	} else if ((text = atoi(str)) == 0) {
 		printf("'%s' är ett jättedåligt textnummer.\n", str);
 		return;
-	}
+	} else
+		printf("Kommentera (inlägg %d)\n", text);
 	ts = rk_textstat(text);
 	if (ts->rt_retval) {
 		free(ts);

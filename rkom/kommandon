@@ -5,14 +5,15 @@ Kommandon med en '*' framför är inte implementerade ännu.
   Kommandon för läsning:
     (Läsa) nästa inlägg
     (Läsa) nästa kommentar
-*   Återse (det) kommenterade
+    Återse (det) kommenterade
     Lista (alla) nyheter
     Endast (läsa senaste)
+    (Se inlägget) igen
 
   Kommandon för skrivning:
     (Skriva eget) inlägg
     Kommentera (inlägget)
-*   Kommentera föregående (inlägg)
+    Kommentera föregående (inlägg)
 
   Kommandon för möten:
     Var (är jag)
@@ -26,7 +27,7 @@ Kommandon med en '*' framför är inte implementerade ännu.
     Ärende:
     Kommentar till:
     Glöm (bort texten du skriver)
-    (Visa) hela (texten jag skriver)
+    (Visa) hela (texten du skriver)
 
   Kommandon för onlinekommunikation:
     Vilka (är inloggade)

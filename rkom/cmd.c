@@ -28,6 +28,7 @@ struct cmnd cmds[] = {
 	{"gå", 0, cmd_goto },
 	{"glöm", 0, write_forget },
 	{"hela", 0, write_whole },
+	{"igen", 0, next_again },
 	{"inlägg", 0, write_new },
 	{"kommentera", 0, write_cmnt },
 	{"kommentar", "till:", write_comment },
@@ -79,7 +80,8 @@ cmd_parse(str)
 			/* Do special matching for some commands. */
 
 			if (bcmp(arg1, "kommentera", strlen(arg1)) == 0 &&
-			    (str == 0 || atoi(str) > 0))
+			    ((str == 0) || (atoi(str) > 0) ||
+			    (str && bcmp(str, "föregående", strlen(str)) == 0)))
 				break; /* Match on only 'k' if necessary */
 
 			/* END QUIRK QUIRK QUIRK */
@@ -450,10 +452,8 @@ cmd_goto(char *str)
 	    m->rm_last_text_read;
 	if (ret) {
 		printf("\nDu har %d olästa inlägg.\n", ret);
-		prompt = PROMPT_NEXT_TEXT;
 	} else {
 		printf("\nDu har inga olästa inlägg.\n");
-		prompt = PROMPT_NEXT_CONF;
 	}
 	next_resetchain();
 }
@@ -481,8 +481,5 @@ cmd_only(char *str)
 	high = conf->rc_first_local_no + conf->rc_no_of_texts - 1;
 	rk_set_last_read(curconf, high - only);
 	next_resetchain();
-	if (only == 0)
-		prompt = PROMPT_NEXT_CONF;
-	else
-		prompt = PROMPT_NEXT_TEXT;
+	next_prompt();
 }

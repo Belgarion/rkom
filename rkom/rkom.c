@@ -19,6 +19,7 @@
 #include "rkom_proto.h"
 #include "exported.h"
 #include "rkom.h"
+#include "next.h"
 #include "set.h"
 
 int	main(int, char **);
@@ -112,7 +113,7 @@ async_collect()
 			return;
 
 		case 15: /* New text created */
-			prompt = PROMPT_NEXT_CONF;
+			next_prompt();
 			break;
 
 		default:
