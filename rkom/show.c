@@ -116,10 +116,8 @@ show_formatted(char *cc)
 	if (*cc) {
 		while (strlen(cc) > wcols) {
 			nncc = rxindex(cc, wcols-8, ' ');
-			if (nncc == NULL) {	
-				rprintf("%s\n", cc);
+			if (nncc == NULL)
 				break;
-			}
 			*nncc++ = 0;
 			rprintf("%s\n", cc);
 			cc = nncc;
