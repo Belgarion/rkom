@@ -7,7 +7,7 @@
 
 /* Begin verbatim code */
 
-int rkom_connect(char *server, char *frontend, char *os_username);
+int rkom_fork(void);
 void rkom_logout(void);
 enum Misc_Info_types {
 	recpt, cc_recpt, comm_to, comm_in, footn_to, footn_in,
@@ -248,6 +248,13 @@ struct rk_uarea {
 	} ru_val;
 };
 
+struct rk_server {
+		int32_t	rs_retval;
+		int32_t	rs_proto;
+		char *	rs_servtype;
+		char *	rs_version;
+};
+
 
 
 /* Declaration of get_size_encoded_XXX functions */
@@ -284,6 +291,7 @@ size_t get_size_encoded_rk_marks(struct rk_marks* var);
 size_t get_size_encoded_rk_mark_retval(struct rk_mark_retval* var);
 size_t get_size_encoded_rk_val(struct rk_val* var);
 size_t get_size_encoded_rk_uarea(struct rk_uarea* var);
+size_t get_size_encoded_rk_server(struct rk_server* var);
 
 
 /* Declaration of get_size_decoded_XXX functions */
@@ -352,6 +360,8 @@ size_t get_size_decoded_rk_val(char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
 size_t get_size_decoded_rk_uarea(char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
+size_t get_size_decoded_rk_server(char **enc_buf,
+			size_t *dyn_len, size_t *stat_len);
 
 
 /* Declaration of encode_XXX functions */
@@ -388,6 +398,7 @@ size_t encode_rk_marks(struct rk_marks* var, char ** enc_buf);
 size_t encode_rk_mark_retval(struct rk_mark_retval* var, char ** enc_buf);
 size_t encode_rk_val(struct rk_val* var, char ** enc_buf);
 size_t encode_rk_uarea(struct rk_uarea* var, char ** enc_buf);
+size_t encode_rk_server(struct rk_server* var, char ** enc_buf);
 
 
 /* Declaration of decode_XXX functions */
@@ -456,10 +467,14 @@ size_t decode_rk_val(struct rk_val * var, char **dyn_buf, char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
 size_t decode_rk_uarea(struct rk_uarea * var, char **dyn_buf, char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
+size_t decode_rk_server(struct rk_server * var, char **dyn_buf, char **enc_buf,
+			size_t *dyn_len, size_t *stat_len);
 
 
 /* Declaration of client and server functions */
 
+struct rk_server * rk_connect(char * arg0, char * arg1, char * arg2, char * arg3);
+struct rk_server * rk_connect_server(char * arg0, char * arg1, char * arg2, char * arg3);
 int32_t rk_login(u_int32_t arg0, char * arg1);
 int32_t rk_login_server(u_int32_t arg0, char * arg1);
 int32_t rk_whatido(char * arg0);

@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.15 2001/11/20 02:38:34 offe Exp $	*/
+/*	$Id: rkom_subr.c,v 1.16 2001/11/24 12:33:24 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -26,35 +26,36 @@
 #include "backend.h"
 
 int sockfd, readfd=-1, writefd, asyncfd, fepid;
-static char *version = "ett.två.beta";
 static int childpid;
 /*
  * First connect to the server, then fork away the backend after informing
  * about our existance.
  */
-int
-rkom_connect(char *server, char *frontend, char *os_username)
+struct rk_server *
+rk_connect_server(char *server, char *frontend, char *os_username, char *fevers)
 {
+	struct rk_server *rs;
 	struct sockaddr_in sin;
 	struct hostent *hp;
-	int toback[2], fromback[2], asyncio[2];
 	char *buf, *buf2;
-	int ver;
+
+	rs = malloc(sizeof(struct rk_server));
+	rs->rs_retval = -1;
 
 	/* Locate our KOM server */
 	if ((hp = gethostbyname(server)) == NULL)
-		return -1;
+		return rs;
 
 	/* Create a socket to play with */
 	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-		return -1;
+		return rs;
 
 	/* Connect to the server we want to talk with */
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(4894); /* XXX should be configureable */
 	bcopy(hp->h_addr, &sin.sin_addr, hp->h_length);
 	if (connect(sockfd, (struct sockaddr *)&sin, sizeof(sin)) < 0)
-		return -1;
+		return rs;
 
 	put_char('A');
 	put_string(os_username);
@@ -63,46 +64,42 @@ rkom_connect(char *server, char *frontend, char *os_username)
 	bzero(buf2, 8);
 	read(sockfd, buf2, 7);
 	if (bcmp(buf2, "LysKOM\n", 7))
-		return -1;
+		return rs;
 
-	if (frontend == NULL) {
-		buf2 = malloc(20);
+	if (*frontend == 0) {
+		buf2 = alloca(20);
 		sprintf(buf2, "%s", "raggkom");
 	} else {
-		buf2 = malloc(strlen(frontend) + 30);
+		buf2 = alloca(strlen(frontend) + 30);
 		sprintf(buf2, "%s (rkom backend)", frontend);
 	}
-	buf = malloc(strlen(buf2)+strlen(version)+30);
+	buf = alloca(strlen(buf2)+strlen(fevers)+30);
 	sprintf(buf, "69 %ldH%s %ldH%s\n", (long)strlen(buf2), buf2,
-	    (long)strlen(version), version);
+	    (long)strlen(fevers), fevers);
 	send_reply(buf);
 	get_accept('\n');
-	free(buf);
-	free(buf2);
 
 	/* Check what the server is running */
 	send_reply("75\n");
-	ver = get_int();
-	buf = get_string();
-	buf2 = get_string();
+	rs->rs_proto = get_int();
+	rs->rs_servtype = get_string();
+	rs->rs_version = get_string();
+	rs->rs_retval = 0;
 	get_accept('\n');
-
-	printf("Välkommen till raggkom kopplad till server %s.\n", server);
-	printf("Servern kör %s, version %s. Protokollversion %d.\n", 
-	    buf, buf2, ver);
-	free(buf);free(buf2);
-	if (ver < 10) {
-		printf("\nVARNING: Protokollversionen bör vara minst 10.\n");
-		printf("VARNING: Vissa saker kan ofungera.\n");
-	}
 
 	/* Set what async messages we want */
 	send_reply("80 10 { 5 8 9 12 13 14 15 16 17 18 }\n");
 	get_accept('\n');
+	return rs;
+}
 
-	pipe(toback);
-	pipe(fromback);
-	pipe(asyncio);
+int
+rkom_fork()
+{
+	int toback[2], fromback[2], asyncio[2];
+
+	if (pipe(toback) || pipe(fromback) || pipe(asyncio))
+		return -1;
 	fepid = getpid();
 
 	/* Ok, now fork the backend process */
@@ -117,7 +114,8 @@ rkom_connect(char *server, char *frontend, char *os_username)
 		readfd = toback[0];
 		asyncfd = asyncio[1];
 		rkom_loop(); /* Backend main loop */
-	}
+	} else if (childpid < 1)
+		return -1;
 
 	spc_set_write_fd(toback[1]);
 	spc_set_read_fd(fromback[0]);
@@ -128,7 +126,6 @@ rkom_connect(char *server, char *frontend, char *os_username)
 	close(toback[0]);
 	close(fromback[1]);
 	close(asyncio[1]);
-	close(sockfd);
 	return 0;
 }
 

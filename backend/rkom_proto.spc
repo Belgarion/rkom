@@ -1,8 +1,8 @@
-/* $Id: rkom_proto.spc,v 1.27 2001/02/12 20:23:47 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.28 2001/11/24 12:33:24 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
-int rkom_connect(char *server, char *frontend, char *os_username);
+int rkom_fork(void);
 void rkom_logout(void);
 %end
 /*
@@ -218,6 +218,19 @@ struct rk_uarea {
 	int32_t		ru_retval;
 	struct rk_val	ru_val<>;
 };
+
+struct rk_server {
+	int32_t		rs_retval;
+	int32_t		rs_proto;
+	string		rs_servtype;
+	string		rs_version;
+};
+
+/*
+ * Connect backend to a server.
+ * Arguments are (server, frontend name, OS username, client version)
+ */
+struct rk_server rk_connect(string, string, string, string);
 
 /*
  * Login a user to the system.

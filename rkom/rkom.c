@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.35 2001/11/23 22:24:35 ragge Exp $ */
+/* $Id: rkom.c,v 1.36 2001/11/24 12:33:28 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -52,6 +52,7 @@ char *p_next_text = "(Läsa) nästa inlägg";
 char *p_see_time  = "(Se) tiden";
 char *p_next_comment = "(Läsa) nästa kommentar";
 char *prompt;
+char *client_version = "ett.ett.beta";
 int wrows, wcols, swascii;
 
 #ifndef INFTIM
@@ -87,6 +88,7 @@ main(int argc, char *argv[])
 	struct timeval	tp;
 	int ch, noprompt;
 	char *server, *uname, *confile;
+	struct rk_server *rs;
 
 #if defined(SOLARIS) || defined(SUNOS4)
 	__progname  = strrchr(argv[0], '/');
@@ -131,8 +133,21 @@ main(int argc, char *argv[])
 	/* Attach to the KOM server */
 	if ((uname = getenv("USER")) == NULL)
 		uname = "amnesia";
-	if (rkom_connect(server, NULL, uname))
-		err(1, "misslyckades koppla upp...");
+	if (rkom_fork())
+		err(1, "kunde inte starta backend");
+
+	rs = rk_connect(server, "", uname, client_version);
+	if (rs->rs_retval)
+		errx(1, "misslyckades koppla upp, error %d", rs->rs_retval);
+
+	rprintf("Välkommen till raggkom kopplad till server %s.\n", server);
+	rprintf("Servern kör %s, version %s. Protokollversion %d.\n",
+	    rs->rs_servtype, rs->rs_version, rs->rs_proto);
+	if (rs->rs_proto < 10) {
+		rprintf("\nVARNING: Protokollversionen bör vara minst 10.\n");
+		rprintf("VARNING: Vissa saker kan ofungera.\n");
+	}
+	free(rs);
 
 	pfd[0].fd = 0;
 	pfd[0].events = POLLIN|POLLPRI;
