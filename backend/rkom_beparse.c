@@ -212,11 +212,38 @@ rk_vilka_server(u_int32_t secs, u_int32_t flags)
 	return pp;
 }
 
+struct text_stat_store {
+	struct text_stat_store *next;
+	int nummer;
+	struct rk_text_stat *rts;
+	char *text;
+};
+
+struct text_stat_store *pole;
+
+static struct text_stat_store *
+findtxt(int nr)
+{
+	struct text_stat_store *walker;
+
+	walker = pole;
+	while (walker) {
+		if (walker->nummer == nr)
+			return walker;
+		walker = walker->next;
+	}
+	return 0;
+}
+
 char *
 rk_gettext_server(u_int32_t nr)
 {
+	struct text_stat_store *tss;
 	char buf[50], *c;
 	int i;
+
+	if ((tss = findtxt(nr)) && (tss->text))
+		return strdup(tss->text);
 
 	sprintf(buf, "25 %d 0 2000000\n", nr);
 	if (send_reply(buf)) {
@@ -227,19 +254,30 @@ rk_gettext_server(u_int32_t nr)
 	}
 	c = get_string();
 	get_accept('\n');
+	if (tss == 0) {
+		tss = calloc(sizeof(*tss), 1);
+		tss->nummer = nr;
+		tss->next = pole;
+		pole = tss;
+	}
+	tss->text = strdup(c);
 	return c;
 }
-
-static struct rk_misc_info *pmi;
-//static struct rk_aux_item *pai;
 
 struct rk_text_stat *
 rk_textstat_server(u_int32_t nr)
 {
+	struct text_stat_store *tss;
 	struct rk_text_stat *ts;
+	struct rk_misc_info *pmi;
 	char buf[30];
 	int len, i;
 
+	if ((tss = findtxt(nr)) && (tss->rts)) {
+back:		ts = malloc(sizeof(*ts));
+		bcopy(tss->rts, ts, sizeof(*ts));
+		return ts;
+	}
 	ts = calloc(sizeof(struct rk_text_stat), 1);
 	sprintf(buf, "90 %d\n", nr);
 	if (send_reply(buf)) {
@@ -254,8 +292,6 @@ rk_textstat_server(u_int32_t nr)
 	ts->rt_no_of_marks = get_int();
 	len = ts->rt_misc_info.rt_misc_info_len = get_int();
 	if (len) {
-		if (pmi)
-			free(pmi);
 		pmi = calloc(sizeof(struct rk_misc_info), len);
 		ts->rt_misc_info.rt_misc_info_val = pmi;
 		get_accept('{');
@@ -272,7 +308,13 @@ rk_textstat_server(u_int32_t nr)
 		get_accept('*');
 
 	get_eat('\n'); /* XXX */
-	return ts;
+	tss = calloc(sizeof(*tss), 1);
+	tss->nummer = nr;
+	tss->next = pole;
+	pole = tss;
+	tss->rts = ts;
+	goto back;
+
 }
 
 /*
@@ -354,6 +396,13 @@ rk_setmark_server(u_int32_t text, u_int8_t type)
 	if (send_reply(buf))
 		retval = get_int();
 	get_eat('\n');
+	if (retval == 0) {
+		struct text_stat_store *tss;
+
+		tss = findtxt(text);
+		if (tss && tss->rts)
+			tss->rts->rt_no_of_marks++;
+	}
 	return retval;
 }
 
@@ -368,6 +417,13 @@ rk_unmark_server(u_int32_t text)
 	if (send_reply(buf))
 		retval = get_int();
 	get_eat('\n');
+	if (retval == 0) {
+		struct text_stat_store *tss;
+
+		tss = findtxt(text);
+		if (tss && tss->rts)
+			tss->rts->rt_no_of_marks--;
+	}
 	return retval;
 }
 
