@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.22 2001/01/04 11:04:21 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.23 2001/01/07 11:48:32 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -411,3 +411,10 @@ int32_t	rk_setpass(u_int32_t, string, string);
  * Returns a normal Lyskom error code.
  */
 int32_t rk_change_name(u_int32_t, string);
+
+/*
+ * Set text to presentation for conf.
+ * Args are (conf, rk_text_info).
+ * Returns a normal Lyskom error code.
+ */
+int32_t rk_set_presentation(u_int32_t, struct rk_text_info);

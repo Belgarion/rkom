@@ -626,3 +626,54 @@ rk_change_name_server(u_int32_t uid, char *newname)
 	get_accept('\n');
 	return 0;
 }
+
+int32_t
+rk_set_presentation_server(u_int32_t conf, struct rk_text_info *rti)
+{
+	struct rk_text_retval *rtr;
+	struct rk_conference *c;
+	char buf[30];
+	int i, presconf, oldn;
+	void *old;
+
+	/* Get conference info (pers/conf) */
+	if (get_conf_stat(conf, &c))
+		return 9;
+
+	/* Get presentation conference number */
+	sprintf(buf, "94\n");
+	send_reply(buf);
+	get_int();
+	presconf = get_int();
+	if (c->rc_type & (RK_CONF_TYPE_LETTERBOX << 4)) /* XXX */
+		presconf = get_int();
+	else
+		get_int();
+	get_int();get_int();get_int();
+	get_eat('\n'); /* XXX */
+
+	/* Add receiving conference */
+	old = rti->rti_misc.rti_misc_val;
+	oldn = rti->rti_misc.rti_misc_len;
+	rti->rti_misc.rti_misc_val = alloca(sizeof(struct rk_misc_info));
+	rti->rti_misc.rti_misc_val->rmi_type = recpt;
+	rti->rti_misc.rti_misc_val->rmi_numeric = presconf;
+	rti->rti_misc.rti_misc_len = 1;
+
+	/* create text */
+	rtr = rk_create_text_server(rti);
+	if (rtr->rtr_status)
+		return rtr->rtr_status;
+
+	rti->rti_misc.rti_misc_len = oldn;
+	rti->rti_misc.rti_misc_val = old;
+	/* Set text as presentation */
+	sprintf(buf, "16 %d %d\n", conf, rtr->rtr_textnr);
+	if (send_reply(buf)) {
+		i = get_int();
+		get_eat('\n');
+		return i;
+	}
+	get_accept('\n');
+	return 0;
+}
