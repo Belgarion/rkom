@@ -43,6 +43,13 @@ cmd_tiden(char *str)
 
 	tm = rk_time();
 
+	if(iseql("short-time-format","1")) {
+		rprintf("Det är %sdag %s\n", dindx[tm->rt_day_of_week],
+			get_date_string(tm));
+		free(tm);
+		return;
+	}
+
 	rprintf("Klockan är ");
 	if (tm->rt_minutes > 30)
 		rprintf("%d minut%s i %s",  60 - tm->rt_minutes,
@@ -61,6 +68,7 @@ cmd_tiden(char *str)
 	if (tm->rt_is_dst)
 		rprintf(" (sommartid)");
 	rprintf(" (enligt servern)\n");
+	free(tm);
 }
 
 static char *

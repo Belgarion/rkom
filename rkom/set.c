@@ -108,6 +108,7 @@ static struct rk_val rkomvars[] = {
 	{ "idle-hide-in-who-list", "30" },
 	{ "kom-mercial", "Kör raggeklienten!" },
 	{ "unread-long-format", "1" },
+	{ "short-time-format", "0" },
 };
 static int nrkomvars = sizeof(rkomvars)/sizeof(rkomvars[0]);
 
