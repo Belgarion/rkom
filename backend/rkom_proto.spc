@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.18 2000/12/03 20:30:40 jens Exp $ */
+/* $Id: rkom_proto.spc,v 1.19 2000/12/10 15:11:11 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -45,6 +45,18 @@ struct rk_aux_item {
 	u_int32_t	rai_flags;
 	u_int32_t	inherit_limit;
 	string		rai_data;
+};
+
+%hfile
+#define	RAI_TAG_CONTENT_TYPE	1
+#define RAI_TAG_FAST_REPLY	2
+#define RAI_TAG_CREATING_SW	15
+%end
+struct rk_aux_item_input {
+	u_int32_t	raii_tag;
+	u_int32_t	raii_flags;
+	u_int32_t	inherit_limit;
+	string		raii_data;
 };
 
 /*
@@ -174,6 +186,7 @@ struct rk_text_retval {
 struct rk_text_info {
 	string		rti_text;
 	struct rk_misc_info rti_misc<>;
+	struct rk_aux_item_input rti_input<>;
 };
 
 /* Async message info struct */
