@@ -437,7 +437,7 @@ skip(u_int32_t nr)
 			skip(mi[i].rmi_numeric);
 		}
 	}
-	if (checkifread(mi[i].rmi_numeric) == 0) {
+	if (checkifread(nr) == 0) {
 		hoppade++;
 		mark_read(nr);
 	}
