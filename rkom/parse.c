@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.4 2000/11/19 15:49:04 ragge Exp $ */
+/* $Id: parse.c,v 1.5 2000/11/19 18:21:34 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -99,6 +99,7 @@ DCMD(other_set);
 DCMD(other_login);
 DCMD(other_logout);
 DCMD(other_quit);
+DCMD(cmd_password);
 
 struct command_list {
 	char	*cl_str;
@@ -172,6 +173,7 @@ DROW("sätt",					0,PE_STR_ARG,other_set)
 DROW("login",					0,PE_STR_ARG,other_login)
 DROW("logout",					0,PE_NO_ARG,other_logout)
 DROW("sluta",					0,PE_NO_ARG,other_quit)
+DROW("ändra",					0,PE_NO_ARG,cmd_password)
 
 /* Terminate list */
 {NULL,0,0,NULL}
@@ -673,4 +675,10 @@ exec_other_quit(int argc, char *argv[])
 	return 0;
 }
 
-
+static int
+exec_cmd_password(int argc, char *argv[])
+{
+	LF;
+	cmd_password();
+	return 0;
+}

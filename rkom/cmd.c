@@ -403,3 +403,26 @@ cmd_leave(char *str)
 		printf("Det sket sej: %s\n", error(ret));
 	free(retval);
 }
+
+void
+cmd_password()
+{
+	char *opass, *npass1, *npass2;
+	int rv;
+
+	printf("Ändra lösenord\n");
+	opass = strdup(getpass("Ange gamla lösenordet: "));
+	npass1 = strdup(getpass("Ange nya lösenordet: "));
+	npass2 = strdup(getpass("Ange nya lösenordet igen: "));
+
+	if (strcmp(npass1, npass2)) {
+		printf("Du skrev olika nya lösenord, försök igen.\n");
+	} else {
+		rv = rk_setpass(myuid, opass, npass1);
+		if (rv)
+			printf("Det sket sej: %s\n", error(rv));
+	}
+	free(opass);
+	free(npass1);
+	free(npass2);
+}

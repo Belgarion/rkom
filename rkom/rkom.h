@@ -19,6 +19,7 @@ char *	get_input_string(int, int);
 /* cmd.c */
 void	cmd_parse(char *);
 void	cmd_only(char *);
+void	cmd_password(void);
 
 /* error.c */
 char *	error(int);
