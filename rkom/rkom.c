@@ -1,4 +1,8 @@
-/* $Id: rkom.c,v 1.31 2001/11/18 14:27:27 ragge Exp $ */
+/* $Id: rkom.c,v 1.32 2001/11/18 18:05:30 ragge Exp $ */
+
+#ifdef SOLARIS
+#undef _XPG4_2
+#endif
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -19,6 +23,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "rkom.h"
 #include "next.h"
@@ -61,6 +66,10 @@ prompt_fun(EditLine *el)
 	return buf;
 }
 
+#if defined(SOLARIS)
+char * __progname;
+#endif
+
 int
 main(int argc, char *argv[])
 {
@@ -78,6 +87,13 @@ main(int argc, char *argv[])
 	int ch, noprompt;
 	char *server, *uname, *confile;
 
+#if defined(SOLARIS)
+	__progname  = strrchr(argv[0], '/');
+	if (__progname == NULL)
+		__progname = argv[0];
+	else
+		__progname++;
+#endif
 	confile = 0;
 	prompt = p_see_time;
 	while ((ch = getopt(argc, argv, "sf:")) != -1)
@@ -204,6 +220,7 @@ main(int argc, char *argv[])
 void
 sigio(int arg)
 {
+	signal(SIGIO, sigio);
 }
 
 void

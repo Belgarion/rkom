@@ -1,4 +1,4 @@
-/*	$Id: strvis.c,v 1.1 2001/11/18 15:58:36 ragge Exp $	*/
+/*	$Id: strvis.c,v 1.2 2001/11/18 18:05:30 ragge Exp $	*/
 /*	$NetBSD: vis.c,v 1.13 1999/09/20 04:39:07 lukem Exp $	*/
 
 /*-
@@ -34,7 +34,12 @@
  * SUCH DAMAGE.
  */
 
-#include "lukemftp.h"
+#ifdef SOLARIS
+
+#include "sys.h"
+
+#include <limits.h>
+#include <ctype.h>
 
 #define	isoctal(c)	(((u_char)(c)) >= '0' && ((u_char)(c)) <= '7')
 
@@ -167,3 +172,4 @@ strvisx(char *dst, const char *src, size_t len, int flag)
 
 	return (dst - start);
 }
+#endif

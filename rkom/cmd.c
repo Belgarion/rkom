@@ -1,6 +1,10 @@
-/*	$Id: cmd.c,v 1.51 2001/11/18 14:27:27 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.52 2001/11/18 18:05:30 ragge Exp $	*/
 
-#include <string.h>
+#if defined(SOLARIS)
+#undef _XPG4_2
+#endif
+
+#include <strings.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -8,6 +12,7 @@
 #include <pwd.h>
 #include <signal.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "rkom.h"
 #include "next.h"
@@ -82,12 +87,12 @@ nxtcmd(char **str)
 	g = *str;
 	if (g == 0)
 		return 0;
-	while (isspace(*g))
+	while (isspace((int)*g))
 		g++;
 	if (*g == 0)
 		return 0;
 	h = g;
-	while (isalpha(*h) || isdigit(*h))
+	while (isalpha((int)*h) || isdigit((int)*h))
 		h++;
 	if (*h == 0) {
 		*str = 0;
@@ -228,6 +233,10 @@ cmd_login(char *str)
 	if (iseql("print-number-of-unread-on-entrance", "1"))
 		list_news(0);
 
+#if defined(SOLARIS)
+#undef SIG_IGN
+#define SIG_IGN (void(*)(int))1
+#endif
 	/* Check ctrl-c flag */
 	if (isneq("ignore-ctrl-c", "0"))
 		signal(SIGQUIT, SIG_IGN);

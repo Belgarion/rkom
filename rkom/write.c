@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.34 2001/11/18 14:27:27 ragge Exp $	*/
+/*	$Id: write.c,v 1.35 2001/11/18 18:05:31 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -6,12 +6,18 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <unistd.h>
+#ifdef STAR_BSD
 #include <paths.h>
+#else
+#define	_PATH_VI	"/usr/bin/vi"
+#endif
 #include <errno.h>
 #include <fcntl.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 
 #include "rkom.h"
@@ -321,7 +327,7 @@ write_rcpt(char *str, int type)
 static void
 wfotnot(char *str)
 {
-	int nr, i;
+	int nr = 0, i;
 	char *p;
 
 	TW;

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <err.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "backend.h"
 
@@ -206,7 +207,7 @@ get_int()
 		c = get_char();
 	while (c == ' ');
 
-	while (isdigit(c)) {
+	while (isdigit((int)c)) {
 		ret *= 10;
 		ret += (c - 48);
 		c = get_char();
@@ -243,7 +244,8 @@ put_string(char *str)
 	char *buf;
 	int len = strlen(str), totlen;
 
-	totlen = asprintf(&buf, " %dH%s ", len, str);
+	buf = malloc(len+20);
+	totlen = sprintf(buf, " %dH%s ", len, str);
 	write(sockfd, buf, totlen);
 }
 

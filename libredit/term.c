@@ -45,8 +45,12 @@
 #include "el.h"
 
 #include <sys/ioctl.h>
-#include <signal.h>
 #include <termcap.h>
+#ifdef SOLARIS
+#undef _XPG4_2
+#include <unistd.h>
+#endif
+#include <signal.h>
 
 /*
  * IMPORTANT NOTE: these routines are allowed to look at the current screen

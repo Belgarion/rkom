@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "rkom.h"
 #include "set.h"

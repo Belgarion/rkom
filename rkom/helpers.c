@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "rkom.h"
 

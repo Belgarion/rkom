@@ -1,7 +1,10 @@
-/*	$Id: rkom_subr.c,v 1.13 2001/04/24 08:51:35 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.14 2001/11/18 18:05:30 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
+#ifdef SOLARIS
+#undef _XPG4_2
+#endif
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -12,11 +15,13 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
 #include <err.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "backend.h"
 
@@ -60,11 +65,15 @@ rkom_connect(char *server, char *frontend, char *os_username)
 	if (bcmp(buf2, "LysKOM\n", 7))
 		return -1;
 
-	if (frontend == NULL)
-		asprintf(&buf2, "%s", "raggkom");
-	else
-		asprintf(&buf2, "%s (rkom backend)", frontend);
-	asprintf(&buf, "69 %ldH%s %ldH%s\n", (long)strlen(buf2), buf2,
+	if (frontend == NULL) {
+		buf2 = malloc(20);
+		sprintf(buf2, "%s", "raggkom");
+	} else {
+		buf2 = malloc(strlen(frontend) + 30);
+		sprintf(buf2, "%s (rkom backend)", frontend);
+	}
+	buf = malloc(strlen(buf2)+strlen(version)+30);
+	sprintf(buf, "69 %ldH%s %ldH%s\n", (long)strlen(buf2), buf2,
 	    (long)strlen(version), version);
 	send_reply(buf);
 	get_accept('\n');

@@ -1,4 +1,4 @@
-/*	$Id: strsep.c,v 1.1 2001/11/18 16:57:32 ragge Exp $	*/
+/*	$Id: strsep.c,v 1.2 2001/11/18 18:05:30 ragge Exp $	*/
 /*	$NetBSD: strsep.c,v 1.10 1999/09/20 04:39:48 lukem Exp $	*/
 
 /*-
@@ -34,7 +34,11 @@
  * SUCH DAMAGE.
  */
 
-#include "lukemftp.h"
+#ifdef SOLARIS
+
+#include <stdio.h>
+
+#include "rkomsupport.h"
 
 /*
  * Get next token from string *stringp, where tokens are possibly-empty
@@ -73,3 +77,4 @@ strsep(char **stringp, const char *delim)
 	}
 	/* NOTREACHED */
 }
+#endif

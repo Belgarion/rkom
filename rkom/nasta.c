@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <strings.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 
 #include "rkom.h"

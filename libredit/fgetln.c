@@ -1,4 +1,4 @@
-/*	$Id: fgetln.c,v 1.1 2001/11/18 15:29:01 ragge Exp $	*/
+/*	$Id: fgetln.c,v 1.2 2001/11/18 18:05:30 ragge Exp $	*/
 
 /*
  * Copyright 1999 Luke Mewburn <lukem@netbsd.org>.
@@ -28,6 +28,10 @@
  */
 
 #ifdef SOLARIS
+
+#include <err.h>
+
+#include "sys.h"
 
 #define BUFCHUNKS	BUFSIZ
 

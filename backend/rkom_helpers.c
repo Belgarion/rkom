@@ -3,6 +3,7 @@
 
 #include <time.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "backend.h"
 

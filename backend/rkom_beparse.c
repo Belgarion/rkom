@@ -4,10 +4,12 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "backend.h"
 

@@ -2,6 +2,10 @@
 #include <sys/types.h>
 
 #include <stdio.h>
+#include <stdarg.h>
+#include <errno.h>
+#include <string.h>
+#include <err.h>
 
 #include "rkom.h"
 
@@ -45,3 +49,67 @@ error(int code)
 	}
 	return fel[code];
 }
+
+#if defined(SOLARIS)
+extern char * __progname;
+
+void
+err(int eval, const char *fmt, ...)
+{
+	va_list ap;
+	int	sverrno;
+
+	sverrno = errno;
+	(void)fprintf(stderr, "%s: ", __progname);
+	va_start(ap, fmt);
+	if (fmt != NULL) {
+		(void)vfprintf(stderr, fmt, ap);
+		(void)fprintf(stderr, ": ");
+	}
+	va_end(ap);
+	(void)fprintf(stderr, "%s\n", strerror(sverrno));
+	exit(eval);
+}
+void
+errx(int eval, const char *fmt, ...)
+{
+	va_list ap;
+
+	(void)fprintf(stderr, "%s: ", __progname);
+	va_start(ap, fmt);
+	if (fmt != NULL)
+		(void)vfprintf(stderr, fmt, ap);
+	va_end(ap);
+	(void)fprintf(stderr, "\n");
+	exit(eval);
+}
+
+void
+warn(const char *fmt, ...)
+{
+	va_list ap;
+	int	sverrno;
+
+	sverrno = errno;
+	(void)fprintf(stderr, "%s: ", __progname);
+	va_start(ap, fmt);
+	if (fmt != NULL) {
+		(void)vfprintf(stderr, fmt, ap);
+		(void)fprintf(stderr, ": ");
+	}
+	va_end(ap);
+	(void)fprintf(stderr, "%s\n", strerror(sverrno));
+}
+void
+warnx(const char *fmt, ...)
+{
+	va_list ap;
+
+	(void)fprintf(stderr, "%s: ", __progname);
+	va_start(ap, fmt);
+	if (fmt != NULL)
+		(void)vfprintf(stderr, fmt, ap);
+	va_end(ap);
+	(void)fprintf(stderr, "\n");
+}
+#endif

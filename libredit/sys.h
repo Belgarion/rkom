@@ -50,6 +50,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifndef public
 # define public		/* Externally visible functions/variables */
@@ -72,6 +73,41 @@ typedef void	*ptr_t;
 #ifndef _IOCTL_T
 # define _IOCTL_T
 typedef void	*ioctl_t;
+#endif
+
+#ifdef SOLARIS
+/* fgetln() stdio routine missing */
+char	*fgetln(FILE *, size_t *);
+#endif
+
+#ifdef SOLARIS
+/* vis() soutines missing */
+#define VIS_SP          0x04    /* also encode space */
+#define VIS_TAB         0x08    /* also encode tab */
+#define VIS_NL          0x10    /* also encode newline */
+#define VIS_WHITE       (VIS_SP | VIS_TAB | VIS_NL)
+#define VIS_SAFE        0x20    /* only encode "unsafe" characters */
+
+#define	VIS_WHITE	(VIS_SP | VIS_TAB | VIS_NL)
+
+#define VIS_NOSLASH     0x40    /* inhibit printing '\' */
+#define VIS_OCTAL       0x01    /* use octal \ddd format */
+#define VIS_CSTYLE      0x02    /* use \[nrft0..] where appropiate */
+
+/*
+ * unvis return codes
+ */
+#define UNVIS_VALID      1      /* character valid */
+#define UNVIS_VALIDPUSH  2      /* character valid, push back passed char */
+#define UNVIS_NOCHAR     3      /* valid sequence, no character produced */
+#define UNVIS_SYNBAD    -1      /* unrecognized escape sequence */
+#define UNVIS_ERROR     -2      /* decoder in unknown state (unrecoverable) */
+#define UNVIS_END       1       /* no more characters */
+char    *vis(char *, int, int, int);
+int     strvis(char *, const char *, int);
+int     strvisx(char *, const char *, size_t, int);
+int     strunvis(char *, const char *);
+int     unvis(char *, int, int *, int);
 #endif
 
 #endif /* _h_sys */

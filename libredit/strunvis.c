@@ -1,4 +1,4 @@
-/*	$Id: strunvis.c,v 1.1 2001/11/18 15:58:36 ragge Exp $	*/
+/*	$Id: strunvis.c,v 1.2 2001/11/18 18:05:30 ragge Exp $	*/
 /*	$NetBSD: unvis.c,v 1.16 1999/09/20 04:39:06 lukem Exp $	*/
 
 /*-
@@ -34,7 +34,9 @@
  * SUCH DAMAGE.
  */
 
-#include "lukemftp.h"
+#ifdef SOLARIS
+
+#include "sys.h"
 
 /*
  * decode driven by state machine
@@ -239,3 +241,4 @@ strunvis(char *dst, const char *src)
 	*dst = '\0';
 	return (dst - start);
 }
+#endif

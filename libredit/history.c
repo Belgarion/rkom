@@ -43,9 +43,11 @@
 
 static const char hist_cookie[] = "_HiStOrY_V2_\n";
 
-#include "histedit.h"
+#include "rhistedit.h"
 
+#ifdef STAR_BSD
 #include <vis.h>
+#endif
 #include <stdarg.h>
 
 typedef int (*history_gfun_t)(ptr_t, HistEvent *);

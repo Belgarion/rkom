@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.31 2001/07/03 14:53:05 ragge Exp $ */
+/* $Id: parse.c,v 1.32 2001/11/18 18:05:30 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "rkomsupport.h"
 #include "next.h"
 #include "write.h"
 

@@ -1,12 +1,16 @@
 
-
+#ifdef SOLARIS
+#undef _XPG4_2
+#endif
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <err.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "rkom.h"
 
@@ -59,7 +63,7 @@ parsefile(char *fname)
 			continue;
 		if ((arg = index(buf, '#'))) {
 			*arg-- = 0;
-			while (isspace(*arg) && arg != &buf[0])
+			while (isspace((int)*arg) && arg != &buf[0])
 				*arg-- = 0;
 		}
 		if (buf[0] == 0)
@@ -243,6 +247,12 @@ set_setflag(char *name, char *val)
 	if (bcmp(name, "kom-mercial", strlen(name)) == 0)
 		if (rk_whatido(val))
 			rprintf("Byta kom-mercial sket sej.\n");
+#ifdef SOLARIS
+#undef SIG_DFL
+#undef SIG_IGN
+#define	SIG_DFL (void(*)(int))0
+#define SIG_IGN (void(*)(int))1
+#endif
 	if (bcmp(name, "ignore-ctrl-c", strlen(name)) == 0) {
 		if (strcmp(val, "0") == 0)
 			signal(SIGINT, SIG_DFL);

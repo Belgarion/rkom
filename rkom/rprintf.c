@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 
 #include "rkom.h"
@@ -13,6 +13,29 @@ int outlines, discard;
 static char *cvtstr[] = {
 	"}å", "]Å", "{ä", "[Ä", "|ö", "\\Ö", 
 };
+
+#ifdef SOLARIS
+/*
+ * Simple and dumb implementation of vasprintf(): loop around and try
+ * bigger and bigger buffer to print result in.
+ */
+static int
+vasprintf(char **ret, const char *format, va_list ap)
+{
+	char *buf;
+	int size, r;
+
+	size = 128;
+	buf = NULL;
+	do {
+		size *= 2;
+		buf = realloc(buf, size);
+		r = vsnprintf(buf, size, format, ap);
+	} while (r >= size);
+	*ret = buf;
+	return r;
+}
+#endif
 
 static void
 chrconvert(char *str)

@@ -44,7 +44,15 @@
 #include "sys.h"
 #include "el.h"
 
+#ifdef SOLARIS
+#undef _XPG4_2
+#endif
 #include <signal.h>
+
+#ifdef SOLARIS
+#undef SIG_ERR  /* XXX - bad system headers */
+#define SIG_ERR (void(*)(int))-1
+#endif
 
 private EditLine *sel = NULL;
 

@@ -2,10 +2,15 @@
 #include <sys/types.h>
 
 #include <stdio.h>
+#ifdef SOLARIS
+#undef _XPG4_2
+#endif
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "backend.h"
 

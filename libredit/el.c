@@ -43,6 +43,9 @@
 #include "el.h"
 
 #include <stdarg.h>
+#ifdef SOLARIS
+#undef _XPG4_2
+#endif
 #include <signal.h>
 
 /* el_init():

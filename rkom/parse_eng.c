@@ -1,7 +1,5 @@
-/* $Id: parse_eng.c,v 1.9 2001/01/20 15:55:45 jens Exp $ */
+/* $Id: parse_eng.c,v 1.10 2001/11/18 18:05:30 ragge Exp $ */
 
-#include <sys/cdefs.h>
-#include <sys/types.h>
 #include <sys/param.h>
 
 #include <ctype.h>
@@ -12,10 +10,15 @@
 #include <unistd.h>
 #include <err.h>
 
+#include "rkomsupport.h"
 #include "container.h"
 
 #include "parse_eng.h"
 #include "rkom.h"
+
+#if !defined(MIN)
+#define	MIN(a,b)	(((a)<(b))?(a):(b))
+#endif
 
 #include <assert.h>
 
@@ -412,7 +415,7 @@ parse_exec(cmds_t *c, const char *str)
 				goto skip;
 			case PE_NUM_ARG:
 				/* Only accept arguemnts starting with a number */
-				if (!isdigit(argv[ce->ce_argc][0]))
+				if (!isdigit((int)argv[ce->ce_argc][0]))
 					goto skip;
 				break;
 			case PE_STR_ARG:

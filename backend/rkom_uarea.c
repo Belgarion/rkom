@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
+#include "rkomsupport.h"
 #include "rkom_proto.h"
 #include "backend.h"
 
@@ -27,7 +28,7 @@ getstr(char *str)
 {
 	int i, num = atoi(str);
 
-	while (isspace(*str) || isdigit(*str))
+	while (isspace((int)*str) || isdigit((int)*str))
 		str++;
 	if (*str++ != 'H')
 		return NULL;

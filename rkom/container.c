@@ -1,4 +1,4 @@
-/* $Id: container.c,v 1.1 2000/11/05 16:26:19 jens Exp $ */
+/* $Id: container.c,v 1.2 2001/11/18 18:05:30 ragge Exp $ */
 /*
  * Copyright (c) 1999, 2000
  *      Jens A. Nilsson, jnilsson@ludd.luth.se. All rights reserved.
@@ -25,14 +25,15 @@
  * SUCH DAMAGE.
  */
 #ifndef lint
-static char const cvsid[] = "$Id: container.c,v 1.1 2000/11/05 16:26:19 jens Exp $";
+static char const cvsid[] = "$Id: container.c,v 1.2 2001/11/18 18:05:30 ragge Exp $";
 #endif
 
 #include <sys/errno.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <string.h>
+#include <strings.h>
 
+#include "rkomsupport.h"
 #include "container.h"
 
 #ifdef USE_E_ERR
