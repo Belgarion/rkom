@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.51 2003/10/10 14:08:16 ragge Exp $ */
+/* $Id: parse.c,v 1.52 2003/10/13 20:25:05 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -106,6 +106,7 @@ DCMD(text_list_unread);
 DCMD(text_delete);
 DCMD(text_copy);
 DCMD(text_move);
+DCMD(text_move_chain);
 DCMD(text_from_swascii);
 DCMD(text_be_anonym);
 DCMD(text_be_unanonym);
@@ -235,6 +236,7 @@ DROW("lista olästa",			0,PE_NO_ARG,text_list_unread)
 DROW("radera",					0,PE_NUM_ARG,text_delete)
 DROW("kopia",					0,PE_NO_ARG,text_copy)
 DROW("flytta",					0,PE_NO_ARG,text_move)
+DROW("flytta inläggskedja",			0,PE_NO_ARG,text_move_chain)
 DROW("konvertera",				0,PE_NO_ARG,text_from_swascii)
 
 /* Commands for online communication */
@@ -1140,6 +1142,16 @@ exec_info_remove_motd(int argc, char *argv[])
 	NWA;
 	TT(argc == 0, "Du måste ange vem du vill ta bort lapp för.\n");
 	write_remove_motd(re_concat(argc, argv));
+	return 0;
+}
+
+static int
+exec_text_move_chain(int argc, char *argv[])
+{
+	LF;
+	NWA;
+	TT(argc != 0, "Flytta inläggskedja tar inga argument.\n");
+	cmd_move_text_chain();
 	return 0;
 }
 

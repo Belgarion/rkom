@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.74 2003/10/01 18:30:38 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.75 2003/10/13 20:25:05 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -741,6 +741,101 @@ cmd_move_text()
 		    retval[0].rc_name, error(rv));
 	else
 		rprintf("Texten nu flyttad till %s.\n", retval[0].rc_name);
+}
+
+static int flyttade;
+
+static void
+addrmchain(textno nr, confno fromconf, confno toconf)
+{
+	struct rk_text_stat *ts;
+	struct rk_misc_info *mi;
+	int rv, i, len;
+
+	if ((rv = rk_sub_rcpt(nr, fromconf)))
+		return; /* not posted here, don't move it */
+
+	if ((rv = rk_add_rcpt(nr, toconf, recpt)))
+		return rprintf("Kunde ej flytta texten: %s\n", error(rv));
+	if ((ts = rk_textstat(nr)) == NULL)
+		return; /* Can't do anything */
+	mi = ts->rt_misc_info.rt_misc_info_val;
+	len = ts->rt_misc_info.rt_misc_info_len;
+
+	for (i = 0; i < len; i++) {
+		if (mi[i].rmi_type == footn_in ||
+		    mi[i].rmi_type == comm_in)
+			addrmchain(mi[i].rmi_numeric, fromconf, toconf);
+	}
+	flyttade++;
+}
+
+void
+cmd_move_text_chain()
+{
+	struct rk_confinfo *retval;
+	struct rk_text_stat *ts;
+	struct rk_misc_info *mi;
+	char *text, buf[100];
+	int i, nr, cm, nm;
+	int fromconf, toconf;
+
+	rprintf("Flytta inläggskedja\n\n");
+
+	sprintf(buf, "Vilken är första texten i kedjan (%d)? ", lasttext);
+	text = getstr(buf);
+	if (*text)
+		nr = atoi(text);
+	else
+		nr = lasttext;
+	if (nr == 0) {
+		rprintf("Du måste ange ett giltigt textnummer.\n\n");
+		return;
+	}
+	if ((ts = rk_textstat(nr)) == NULL) {
+		rprintf("Text %d är inte en giltig text.\n", nr);
+		return;
+	}
+	mi = ts->rt_misc_info.rt_misc_info_val;
+	for (cm = nm = i = 0; i < ts->rt_misc_info.rt_misc_info_len; i++) {
+		if (mi[i].rmi_type != recpt)
+			continue;
+		cm = mi[i].rmi_numeric;
+		nm++;
+	}
+	if (nm > 1) {
+		rprintf("Texten tillhör mer än ett möte.\n");
+		text = getstr("Från vilket möte vill du subtrahera kedjan? ");
+		if (*text == 0)
+			return rprintf("Nähej.\n");
+		retval = match_complain(text, MATCHCONF_CONF|MATCHCONF_PERSON);
+		if (retval == NULL)
+			return;
+		rprintf("Från %s\n", retval[0].rc_name);
+		fromconf = retval[0].rc_conf_no;
+	} else {
+		struct rk_conference *rkc = rk_confinfo(cm);
+		if (rkc == NULL)
+			return rprintf("Det sket sej: %s\n", error(komerr));
+		rprintf("Från %s\n", rkc->rc_name);
+		fromconf = cm;
+	}
+	text = getstr("Till vilket möte? ");
+	if (*text == 0)
+		return rprintf("Nähej.\n"); 
+	retval = match_complain(text, MATCHCONF_CONF|MATCHCONF_PERSON);
+	if (retval == NULL)
+		return;
+	rprintf("Till %s\n", retval[0].rc_name);
+	toconf = retval[0].rc_conf_no;
+
+	flyttade = 0;
+	addrmchain(nr, fromconf, toconf);
+
+	if (flyttade)
+		rprintf("Du flyttade %d inlägg.\n", flyttade);
+	else
+		rprintf("Du flyttade inga inlägg.\n");
 }
 
 void 
