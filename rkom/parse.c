@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.28 2001/01/27 12:00:15 ragge Exp $ */
+/* $Id: parse.c,v 1.29 2001/02/12 20:23:26 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -104,6 +104,8 @@ DCMD(info_time);
 DCMD(info_saveflags);
 DCMD(info_status);
 DCMD(info_extra);
+DCMD(info_set_motd);
+DCMD(info_remove_motd);
 
 /* Commands for aliases */
 DCMD(alias_add);
@@ -207,6 +209,8 @@ DROW("hjälp",					0,PE_NO_ARG,info_list_commands)
 DROW("?",					0,PE_NO_ARG,info_list_commands)
 DROW("status",					0,PE_STR_ARG,info_status)
 DROW("tillägsinformation",			0,PE_NUM_ARG,info_extra)
+DROW("lapp", 					0,PE_STR_ARG,info_set_motd)
+DROW("ta",					0,PE_STR_ARG,info_remove_motd)
 
 /* Commands for aliases */
 DROW("alias",					0,PE_STR_ARG,alias_add)
@@ -269,11 +273,16 @@ chrconvert(char *str)
 	int i, j;
 
 	for (i = 0; i < len; i++) {
-		for (j = 0; j < sizeof(cvtstr)/sizeof(char *); j++)
-			if (index(cvtstr[j], str[i]))
+		for (j = 0; j < sizeof(cvtstr)/sizeof(char *); j++) {
+			if (cvtstr[j][2] == str[i])
 				str[i] = cvtstr[j][0];
+			else if (cvtstr[j][3] == str[i])
+				str[i] = cvtstr[j][1];
+		}
+#if 0
 		if (str[i] > 0)
 			str[i] = tolower(str[i]);
+#endif
 	}
 }
 
@@ -932,3 +941,24 @@ exec_other_exec(int argc, char *argv[])
 		system(re_concat(argc, argv));
 	return 0;
 }
+
+static int
+exec_info_set_motd(int argc, char *argv[])
+{
+	LF;
+	NWA;
+	TT(argc == 0, "Du måste ange vem du vill sätta lapp för.\n");
+	write_set_motd(re_concat(argc, argv));
+	return 0;
+}
+
+static int
+exec_info_remove_motd(int argc, char *argv[])
+{
+	LF;
+	NWA;
+	TT(argc == 0, "Du måste ange vem du vill sätta lapp för.\n");
+	write_remove_motd(re_concat(argc, argv));
+	return 0;
+}
+

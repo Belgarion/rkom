@@ -192,6 +192,7 @@ cmd_login(char *str)
 {
 	struct rk_confinfo_retval *retval;
 	struct rk_unreadconfval *conf;
+	struct rk_conference *rc;
 	int nconf, userid;
 	char *passwd;
 
@@ -224,6 +225,13 @@ cmd_login(char *str)
 	/* Show where we have unread texts. */
 	if (iseql("print-number-of-unread-on-entrance", "1"))
 		list_news(0);
+
+	rc = rk_confinfo(myuid);
+	if (rc->rc_msg_of_day) {
+		rprintf("Du har en lapp på dörren.\n");
+		show_text(rc->rc_msg_of_day);
+	}
+	free(rc);
 
 	conf = rk_unreadconf(myuid);
 	nconf = conf->ru_confs.ru_confs_len;

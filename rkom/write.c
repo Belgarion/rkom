@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.27 2001/01/27 11:08:42 ragge Exp $	*/
+/*	$Id: write.c,v 1.28 2001/02/12 20:23:26 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -28,7 +28,7 @@ static char *show_format(void);
 static void wfotnot(char *str);
 
 static struct rk_misc_info *mi;
-static int nmi = 0, ispres = 0;
+static int nmi = 0, ispres = 0, islapp = 0;
 static char *ctext = 0;
 
 #define	TW if (!is_writing) {rprintf("Du skriver ingen text just nu.\n");return;}
@@ -58,12 +58,6 @@ write_brev(char *str)
 {
 	struct rk_confinfo_retval *retval;
 
-	IW;
-	LF;
-	if (str == 0) {
-		rprintf("Du måste ange mottagare.\n");
-		return;
-	}
 	if ((retval = match_complain(str, MATCHCONF_PERSON)) == 0)
 		return;
 
@@ -197,10 +191,16 @@ write_put(char *str)
 
 	if (ispres) {
 		if (rk_set_presentation(ispres, rti))
-			printf("Det gick inte.\n");
+			rprintf("Det gick inte.\n");
 		else
-			printf("Presentationen ändrad.\n");
+			rprintf("Presentationen ändrad.\n");
 		ispres = 0;
+	} else if (islapp) {
+		if (rk_set_motd(islapp, rti))
+			rprintf("Det gick inte.\n");
+		else
+			rprintf("Lappen ditsatt.\n");
+		islapp = 0;
 	} else {
 		rtr = rk_create_text(rti);
 		if (rtr->rtr_status)
@@ -593,3 +593,48 @@ write_change_presentation(char *str)
 	free(retval);
 }
 
+void
+write_set_motd(char *str)
+{
+        struct rk_confinfo_retval *rv;
+	char *c;
+
+        if ((rv = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF)) == 0)
+                return;
+
+	islapp = rv->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	rprintf("(Sätt) lapp (på dörren för) %s\n",
+	    rv->rcr_ci.rcr_ci_val[0].rc_name);
+	is_writing = 1;
+	mi = calloc(sizeof(struct rk_misc_info), 2);
+	nmi = 0;
+	if (isneq("use-editor", "0")) { /* Extern editor, edit old text */
+		struct rk_conference *rc;
+
+		rc = rk_confinfo(rv->rcr_ci.rcr_ci_val[0].rc_conf_no);
+		if (rc->rc_retval == 0 && rc->rc_presentation)
+			c = rk_gettext(rc->rc_presentation);
+		free(rc);
+	} else
+		c = strdup(rv->rcr_ci.rcr_ci_val[0].rc_name);
+	doedit(c);
+	free(c);
+	free(rv);
+}
+
+void
+write_remove_motd(char *str)
+{
+	struct rk_confinfo_retval *rv;
+	struct rk_text_info rti;
+
+	if ((rv = match_complain(str, MATCHCONF_PERSON|MATCHCONF_CONF)) == 0)
+		return; 
+
+	bzero(&rti, sizeof(struct rk_text_info));
+	rti.rti_text = "";
+	if (rk_set_motd(rv->rcr_ci.rcr_ci_val[0].rc_conf_no, &rti))
+		rprintf("Det gick inte.\n");
+	else
+		rprintf("Lappen nu borttagen.\n");
+}
