@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.39 2001/11/25 20:07:48 jens Exp $ */
+/* $Id: rkom.c,v 1.40 2001/11/30 22:49:33 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -180,6 +180,7 @@ main(int argc, char *argv[])
 		fflush(stdout);
 
 		setup_tty(0);
+		pfd[0].revents = 0;
 		rv = poll(pfd, 1, INFTIM);
 		if (rv == 0)
 			continue;

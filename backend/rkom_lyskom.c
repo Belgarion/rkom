@@ -76,7 +76,7 @@ rkom_loop()
 				warn("poll");
 			continue;
 		}
-		if (pfd[0].revents)
+		if (pfd[0].revents & (POLLIN|POLLPRI))
 			spc_process_request();
 		if (pfd[1].revents & (POLLIN|POLLPRI)) {
 			int i;
@@ -86,7 +86,7 @@ rkom_loop()
 			if (fcntl(sockfd, F_SETFL, O_NONBLOCK) == -1)
 				err(1, "fcntl");
 			if (read(sockfd, &c, 1) != 1) {
-				warn("read sockfd");
+				err(1, "read sockfd: säg till ragge");
 				continue;
 			}
 			unget = c;

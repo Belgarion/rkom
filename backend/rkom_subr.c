@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.17 2001/11/25 16:17:11 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.18 2001/11/30 22:49:36 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -25,7 +25,7 @@
 #include "rkom_proto.h"
 #include "backend.h"
 
-int sockfd, readfd=-1, writefd, asyncfd, fepid;
+int sockfd, readfd=-1, writefd, fepid;
 static int childpid;
 /*
  * First connect to the server, then fork away the backend after informing
@@ -97,9 +97,9 @@ rk_connect_server(char *server, char *frontend, char *os_username, char *fevers)
 int
 rkom_fork()
 {
-	int toback[2], fromback[2], asyncio[2];
+	int toback[2], fromback[2];
 
-	if (pipe(toback) || pipe(fromback) || pipe(asyncio))
+	if (pipe(toback) || pipe(fromback))
 		return -1;
 	fepid = getpid();
 
@@ -108,12 +108,10 @@ rkom_fork()
 		close(0);
 		close(toback[1]);
 		close(fromback[0]);
-		close(asyncio[0]);
 		spc_set_write_fd(fromback[1]);
 		spc_set_read_fd(toback[0]);
 		writefd = fromback[1];
 		readfd = toback[0];
-		asyncfd = asyncio[1];
 		rkom_loop(); /* Backend main loop */
 	} else if (childpid < 1)
 		return -1;
@@ -123,10 +121,8 @@ rkom_fork()
 
 	writefd = toback[1];
 	readfd = fromback[0];
-	asyncfd = asyncio[0];
 	close(toback[0]);
 	close(fromback[1]);
-	close(asyncio[1]);
 	return 0;
 }
 
