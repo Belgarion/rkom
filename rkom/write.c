@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.55 2003/09/17 18:33:03 ragge Exp $	*/
+/*	$Id: write.c,v 1.56 2003/09/17 19:54:20 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -99,7 +99,7 @@ write_private(int textno)
 	nmi = 3;
 
 	/* Get the subject line from commented text */
-	s = rk_gettext(textno);
+	s = strdup(rk_gettext(textno));
 	t = index(s, '\n');
 	if (t)
 		t[1] = 0;
@@ -589,7 +589,7 @@ write_internal(int text, int ktyp)
 	nmi++;
 
 	/* Get the subject line from commented text */
-	s = rk_gettext(text);
+	s = strdup(rk_gettext(text));
 	t = index(s, '\n');
 	if (t)
 		t[1] = 0;
@@ -704,7 +704,7 @@ write_change_faq(char *str)
 
 		rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
 		if (rc->rc_retval == 0 && rc->rc_presentation)
-			c = rk_gettext(rc->rc_presentation);
+			c = strdup(rk_gettext(rc->rc_presentation));
 	}
 	if (c == NULL)
 		c = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);
@@ -739,7 +739,7 @@ write_change_presentation(char *str)
 
 		rc = rk_confinfo(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
 		if (rc->rc_retval == 0 && rc->rc_presentation)
-			c = rk_gettext(rc->rc_presentation);
+			c = strdup(rk_gettext(rc->rc_presentation));
 	}
 	if (c == NULL)
 		c = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);

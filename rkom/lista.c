@@ -244,7 +244,7 @@ list_subject()
 		if (nr == 0)
 			continue;
 		ts = rk_textstat(nr);
-		text = rk_gettext(nr);
+		text = strdup(rk_gettext(nr));
 		gubbe = vem(ts->rt_author);
 		rprintf("%d\t%d", nr, ts->rt_time.rt_year + 1900);
 		rprintf("%s%d", ts->rt_time.rt_month > 8 ? "" : "0",
@@ -290,7 +290,7 @@ list_unread()
 		if (nr == 0)
 			continue;
 		ts = rk_textstat(nr);
-		text = rk_gettext(nr);
+		text = strdup(rk_gettext(nr));
 		gubbe = vem(ts->rt_author);
 		rprintf("%d\t%d", nr, ts->rt_time.rt_year + 1900);
 		rprintf("%s%d", ts->rt_time.rt_month > 8 ? "" : "0",

@@ -20,15 +20,19 @@ char *supstr;
 void
 show_superhoppa(char *arg)
 {
-	char *c;
+	char *c, *ch;
 
 	if (lasttext == 0) {
 		rprintf("Du måste läsa ett inlägg först.\n");
 		return;
 	}
-	supstr = rk_gettext(lasttext);
-	if ((c = index(supstr, '\n')))
-		*c = 0;
+	ch = rk_gettext(lasttext);
+	c = index(supstr, '\n');
+	if (c != NULL) {
+		supstr = calloc(c - ch + 1, 1);
+		bcopy(ch, supstr, c - ch);
+	} else
+		supstr = strdup(ch);
 	rprintf("Superhoppar över alla inlägg med ärenderad '%s'\n", supstr);
 }
 
@@ -138,7 +142,7 @@ show_text(int nr, int format)
 		rprintf("För din del så finns inte text %d\n", nr);
 		return 0;
 	}
-	c = rk_gettext(nr);
+	c = strdup(rk_gettext(nr));
 	if (supstr) {
 		int l = strlen(supstr);
 		if (strncmp(c, supstr, l) == 0 && (c[l] == 0 || c[l] == '\n')) {
