@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.32 2003/10/12 14:07:42 ragge Exp $	*/
+/*	$Id: backend.h,v 1.33 2003/10/13 20:24:52 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -13,6 +13,9 @@ struct rk_text_stat;
 struct rk_text_info;
 struct rk_aux_item_input;
 struct rk_modifyconfinfo;
+
+/* special types */
+typedef u_int32_t textno, confno;
 
 /* Lyskom protocol helper functions, in rkom_lyskom.c */
 int	send_reply(char *msg, ...);
