@@ -652,6 +652,26 @@ get_size_encoded_rk_text_info(struct rk_text_info* var)
 }
 
 size_t
+get_size_encoded_rk_modifyconfinfo(struct rk_modifyconfinfo* var)
+{
+	size_t	len = 0;
+	int		i = 0;
+
+	i = i; /* silent gcc */
+	len += get_size_encoded_u_int32_t(&var->rkm_conf);
+
+	len += sizeof(var->rkm_delete.rkm_delete_len);
+	for (i = 0; i < var->rkm_delete.rkm_delete_len; i++)
+		len += get_size_encoded_u_int32_t(&var->rkm_delete.rkm_delete_val[i]);
+
+	len += sizeof(var->rkm_add.rkm_add_len);
+	for (i = 0; i < var->rkm_add.rkm_add_len; i++)
+		len += get_size_encoded_rk_aux_item_input(&var->rkm_add.rkm_add_val[i]);
+
+	return len;
+}
+
+size_t
 get_size_encoded_rk_async(struct rk_async* var)
 {
 	size_t	len = 0;
@@ -1418,6 +1438,34 @@ get_size_decoded_rk_text_info(char **enc_buf,
 }
 
 size_t
+get_size_decoded_rk_modifyconfinfo(char **enc_buf,
+			size_t *dyn_len, size_t *stat_len)
+{
+	size_t		d_len, s_len;
+	int			i = 0;
+	u_int32_t	n_elm = 0;
+
+	n_elm = n_elm; i = i; /*silent gcc */
+	*dyn_len = 0;
+	*stat_len = sizeof(struct rk_modifyconfinfo);
+
+	get_size_decoded_u_int32_t(enc_buf, &d_len, &s_len);
+	*dyn_len += d_len;
+
+	/* measure a variable sized array */
+	decode_u_int32_t(&n_elm, NULL, enc_buf, &d_len, &s_len);
+	for (i = 0; i < n_elm; i++)
+		*dyn_len += get_size_decoded_u_int32_t(enc_buf, &d_len, &s_len);
+
+	/* measure a variable sized array */
+	decode_u_int32_t(&n_elm, NULL, enc_buf, &d_len, &s_len);
+	for (i = 0; i < n_elm; i++)
+		*dyn_len += get_size_decoded_rk_aux_item_input(enc_buf, &d_len, &s_len);
+
+	return *dyn_len + *stat_len;
+}
+
+size_t
 get_size_decoded_rk_async(char **enc_buf,
 			size_t *dyn_len, size_t *stat_len)
 {
@@ -1943,6 +1991,25 @@ encode_rk_text_info(struct rk_text_info* var, char ** enc_buf)
 	len += encode_u_int32_t(&var->rti_input.rti_input_len, enc_buf);
 	for (i = 0; i < var->rti_input.rti_input_len; i++)
 		len += encode_rk_aux_item_input(&var->rti_input.rti_input_val[i], enc_buf);
+
+	return len;
+}
+
+size_t
+encode_rk_modifyconfinfo(struct rk_modifyconfinfo* var, char ** enc_buf)
+{
+	size_t	len = 0;
+	int		i = 0;
+
+	i = i; /* silent gcc */
+	len += encode_u_int32_t(&var->rkm_conf, enc_buf);
+	len += encode_u_int32_t(&var->rkm_delete.rkm_delete_len, enc_buf);
+	for (i = 0; i < var->rkm_delete.rkm_delete_len; i++)
+		len += encode_u_int32_t(&var->rkm_delete.rkm_delete_val[i], enc_buf);
+
+	len += encode_u_int32_t(&var->rkm_add.rkm_add_len, enc_buf);
+	for (i = 0; i < var->rkm_add.rkm_add_len; i++)
+		len += encode_rk_aux_item_input(&var->rkm_add.rkm_add_val[i], enc_buf);
 
 	return len;
 }
@@ -2720,6 +2787,44 @@ size_t	decode_rk_text_info(struct rk_text_info * var, char **dyn_buf, char **enc
 	*dyn_buf += var->rti_input.rti_input_len * sizeof(struct rk_aux_item_input);
 	for (i = 0; i < var->rti_input.rti_input_len; i++) {
 		decode_rk_aux_item_input(&var->rti_input.rti_input_val[i], dyn_buf, enc_buf,
+			&d_len, &s_len);
+		*dyn_len += d_len;
+	}
+
+	return *dyn_len + *stat_len;
+}
+
+size_t	decode_rk_modifyconfinfo(struct rk_modifyconfinfo * var, char **dyn_buf, char **enc_buf,
+			size_t *dyn_len, size_t *stat_len)
+{
+	size_t		d_len, s_len;
+	int			i = 0;
+
+	i = i; /* silent gcc */
+	*dyn_len = 0;
+	*stat_len = sizeof(struct rk_modifyconfinfo);
+
+	decode_u_int32_t(&var->rkm_conf, dyn_buf, enc_buf, &d_len, &s_len);
+	*dyn_len += d_len;
+
+	/* Decode an array of variably size */
+	decode_u_int32_t(&var->rkm_delete.rkm_delete_len, NULL, enc_buf,
+			&d_len, &s_len);
+	var->rkm_delete.rkm_delete_val = (void *)*dyn_buf;
+	*dyn_buf += var->rkm_delete.rkm_delete_len * sizeof(u_int32_t);
+	for (i = 0; i < var->rkm_delete.rkm_delete_len; i++) {
+		decode_u_int32_t(&var->rkm_delete.rkm_delete_val[i], dyn_buf, enc_buf,
+			&d_len, &s_len);
+		*dyn_len += d_len;
+	}
+
+	/* Decode an array of variably size */
+	decode_u_int32_t(&var->rkm_add.rkm_add_len, NULL, enc_buf,
+			&d_len, &s_len);
+	var->rkm_add.rkm_add_val = (void *)*dyn_buf;
+	*dyn_buf += var->rkm_add.rkm_add_len * sizeof(struct rk_aux_item_input);
+	for (i = 0; i < var->rkm_add.rkm_add_len; i++) {
+		decode_rk_aux_item_input(&var->rkm_add.rkm_add_val[i], dyn_buf, enc_buf,
 			&d_len, &s_len);
 		*dyn_len += d_len;
 	}
@@ -4411,6 +4516,39 @@ rk_add_text_info(u_int32_t arg0, struct rk_aux_item_input * arg1)
 	return ret_val;
 }
 
+int32_t 
+rk_modify_conf_info(struct rk_modifyconfinfo * arg0)
+{
+	int32_t ret_val;
+	u_int32_t	msglen, fnum;
+	char		*buf_start, *dyn_buf;
+	char		*enc_buf;
+	size_t		d_len, s_len;
+
+	msglen = 0;
+	dyn_buf = dyn_buf; /* silent gcc */
+	msglen += get_size_encoded_rk_modifyconfinfo(arg0);
+	fnum = 44;
+	if ((buf_start = malloc(msglen)) == NULL)
+		err(1, "malloc");
+	enc_buf = buf_start;
+	encode_rk_modifyconfinfo(arg0, &enc_buf);
+	spc_write_fun_call(fnum, buf_start, msglen);
+	free(buf_start);
+
+	msglen = spc_read_msglen();
+	if ((buf_start = malloc(msglen)) == NULL)
+		err(1, "malloc");
+	enc_buf = buf_start;
+
+	spc_read_msg(enc_buf, msglen);
+	enc_buf = buf_start;
+	decode_int32_t(&ret_val, NULL, &enc_buf, &d_len, &s_len);
+	assert(d_len == 0);
+	free(buf_start);
+	return ret_val;
+}
+
 
 
 /* Implementation of server functions */
@@ -5490,6 +5628,28 @@ spc_process_request(void)
 		decode_u_int32_t(&arg0, &dyn_mem, &enc_buf, &d_len, &s_len);
 		decode_rk_aux_item_input(&arg1, &dyn_mem, &enc_buf, &d_len, &s_len);
 		ret_val = rk_add_text_info_server(arg0, &arg1);
+		enc_len = get_size_encoded_int32_t(&ret_val);
+		if ((enc_start = alloca(enc_len + sizeof(msglen))) == NULL)
+			err(1, "alloca");
+		enc_buf = enc_start;
+		msglen = enc_len;
+		encode_int32_t(&ret_val, &enc_buf);
+		enc_buf = enc_start;
+		spc_write_msg(enc_buf, enc_len);
+		break;
+	}
+	case 44: {
+		struct rk_modifyconfinfo arg0;
+		int32_t ret_val;
+
+		dyn_len = 0;
+		get_size_decoded_rk_modifyconfinfo(&enc_buf, &d_len, &s_len);
+		dyn_len += d_len;
+		if ((dyn_mem = alloca(dyn_len)) == NULL)
+			err(1, "alloca");
+		enc_buf = enc_start;
+		decode_rk_modifyconfinfo(&arg0, &dyn_mem, &enc_buf, &d_len, &s_len);
+		ret_val = rk_modify_conf_info_server(&arg0);
 		enc_len = get_size_encoded_int32_t(&ret_val);
 		if ((enc_start = alloca(enc_len + sizeof(msglen))) == NULL)
 			err(1, "alloca");

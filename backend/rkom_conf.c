@@ -777,3 +777,50 @@ rk_delete_conf_server(u_int32_t conf)
 	get_accept('\n');
 	return 0;
 }
+
+int32_t
+rk_modify_conf_info_server(struct rk_modifyconfinfo *rkm)
+{
+	struct rk_aux_item_input *raii;
+	char buf[100];
+	int i, nr;
+
+	/* Send request */
+	sprintf(buf, "93 %d ", rkm->rkm_conf);
+	send_reply(buf);
+
+	/* Send delete items */
+	nr = rkm->rkm_delete.rkm_delete_len;
+	sprintf(buf, " %d { ", nr);
+	send_reply(buf);
+	for (i = 0; i < nr; i++) {
+		sprintf(buf, "%d ", rkm->rkm_delete.rkm_delete_val[i]);
+		send_reply(buf);
+	}
+
+	/* Send add items */
+	nr = rkm->rkm_add.rkm_add_len;
+	raii = rkm->rkm_add.rkm_add_val;
+	sprintf(buf, "} %d { ", nr);
+	send_reply(buf);
+	for (i = 0; i < nr; i++) {
+		char *nbuf;
+
+		sprintf(buf, "%d 00000000 %d ", raii[i].raii_tag,
+		    raii[i].inherit_limit);
+		send_reply(buf);
+		nbuf = alloca(strlen(raii[i].raii_data) + 10);
+		sprintf(nbuf, "%ldH%s ", (long)strlen(raii[i].raii_data),
+		    raii[i].raii_data);
+		send_reply(nbuf);
+	}
+	i = 0;
+	if (send_reply("}\n")) {
+		i = get_int();
+		get_eat('\n');
+		return i;
+	}
+	get_accept('\n');
+	reread_conf_stat_bg(rkm->rkm_conf);
+	return 0;
+}

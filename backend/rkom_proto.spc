@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.31 2002/08/31 10:12:35 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.32 2002/08/31 12:32:25 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -50,6 +50,18 @@ struct rk_aux_item {
 %hfile
 #define	RAI_TAG_CONTENT_TYPE	1
 #define RAI_TAG_FAST_REPLY	2
+#define RAI_TAG_CROSS_REF	3
+#define RAI_TAG_NO_COMMENTS	4
+#define RAI_TAG_PERS_COMMENTS	5
+#define RAI_TAG_REQ_CONF	6
+#define RAI_TAG_READ_CONFIRM	7
+#define RAI_TAG_REDIRECT	8
+#define RAI_TAG_X_FACE		9
+#define RAI_TAG_ALTNAME		10
+#define RAI_TAG_PGP_SIGN	11
+#define RAI_TAG_PGP_PUBLIC_KEY	12
+#define RAI_TAG_EMAIL_ADDRSSS	13
+#define RAI_TAG_FAQ_TEXT	14
 #define RAI_TAG_CREATING_SW	15
 %end
 struct rk_aux_item_input {
@@ -188,6 +200,12 @@ struct rk_text_info {
 	string		rti_text;
 	struct rk_misc_info rti_misc<>;
 	struct rk_aux_item_input rti_input<>;
+};
+
+struct rk_modifyconfinfo {
+	u_int32_t	rkm_conf;
+	u_int32_t	rkm_delete<>;
+	struct rk_aux_item_input rkm_add<>;
 };
 
 /* Async message info struct */
@@ -490,3 +508,8 @@ int32_t rk_set_motd(u_int32_t, struct rk_text_info);
  * Returns a normal Lyskom error code.
  */
 int32_t rk_add_text_info(u_int32_t, struct rk_aux_item_input);
+
+/*
+ * Modify aux-info for a conference.
+ */
+int32_t rk_modify_conf_info(struct rk_modifyconfinfo);

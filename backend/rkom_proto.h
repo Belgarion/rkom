@@ -15,6 +15,18 @@ enum Misc_Info_types {
 };
 #define	RAI_TAG_CONTENT_TYPE	1
 #define RAI_TAG_FAST_REPLY	2
+#define RAI_TAG_CROSS_REF	3
+#define RAI_TAG_NO_COMMENTS	4
+#define RAI_TAG_PERS_COMMENTS	5
+#define RAI_TAG_REQ_CONF	6
+#define RAI_TAG_READ_CONFIRM	7
+#define RAI_TAG_REDIRECT	8
+#define RAI_TAG_X_FACE		9
+#define RAI_TAG_ALTNAME		10
+#define RAI_TAG_PGP_SIGN	11
+#define RAI_TAG_PGP_PUBLIC_KEY	12
+#define RAI_TAG_EMAIL_ADDRSSS	13
+#define RAI_TAG_FAQ_TEXT	14
 #define RAI_TAG_CREATING_SW	15
 #define	RK_CONF_TYPE_RD_PROT	1000
 #define RK_CONF_TYPE_ORIGINAL	100
@@ -217,6 +229,18 @@ struct rk_text_info {
 	} rti_input;
 };
 
+struct rk_modifyconfinfo {
+		u_int32_t	rkm_conf;
+	struct {
+		u_int32_t	rkm_delete_len;
+		u_int32_t	*rkm_delete_val;
+	} rkm_delete;
+	struct {
+		u_int32_t	rkm_add_len;
+		struct rk_aux_item_input	*rkm_add_val;
+	} rkm_add;
+};
+
 struct rk_async {
 		u_int32_t	ra_type;
 		u_int32_t	ra_conf;
@@ -290,6 +314,7 @@ size_t get_size_encoded_rk_unreadconfval(struct rk_unreadconfval* var);
 size_t get_size_encoded_rk_memberconflist(struct rk_memberconflist* var);
 size_t get_size_encoded_rk_text_retval(struct rk_text_retval* var);
 size_t get_size_encoded_rk_text_info(struct rk_text_info* var);
+size_t get_size_encoded_rk_modifyconfinfo(struct rk_modifyconfinfo* var);
 size_t get_size_encoded_rk_async(struct rk_async* var);
 size_t get_size_encoded_rk_marks(struct rk_marks* var);
 size_t get_size_encoded_rk_mark_retval(struct rk_mark_retval* var);
@@ -354,6 +379,8 @@ size_t get_size_decoded_rk_text_retval(char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
 size_t get_size_decoded_rk_text_info(char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
+size_t get_size_decoded_rk_modifyconfinfo(char **enc_buf,
+			size_t *dyn_len, size_t *stat_len);
 size_t get_size_decoded_rk_async(char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
 size_t get_size_decoded_rk_marks(char **enc_buf,
@@ -397,6 +424,7 @@ size_t encode_rk_unreadconfval(struct rk_unreadconfval* var, char ** enc_buf);
 size_t encode_rk_memberconflist(struct rk_memberconflist* var, char ** enc_buf);
 size_t encode_rk_text_retval(struct rk_text_retval* var, char ** enc_buf);
 size_t encode_rk_text_info(struct rk_text_info* var, char ** enc_buf);
+size_t encode_rk_modifyconfinfo(struct rk_modifyconfinfo* var, char ** enc_buf);
 size_t encode_rk_async(struct rk_async* var, char ** enc_buf);
 size_t encode_rk_marks(struct rk_marks* var, char ** enc_buf);
 size_t encode_rk_mark_retval(struct rk_mark_retval* var, char ** enc_buf);
@@ -460,6 +488,8 @@ size_t decode_rk_memberconflist(struct rk_memberconflist * var, char **dyn_buf, 
 size_t decode_rk_text_retval(struct rk_text_retval * var, char **dyn_buf, char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
 size_t decode_rk_text_info(struct rk_text_info * var, char **dyn_buf, char **enc_buf,
+			size_t *dyn_len, size_t *stat_len);
+size_t decode_rk_modifyconfinfo(struct rk_modifyconfinfo * var, char **dyn_buf, char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
 size_t decode_rk_async(struct rk_async * var, char **dyn_buf, char **enc_buf,
 			size_t *dyn_len, size_t *stat_len);
@@ -565,6 +595,8 @@ int32_t rk_set_motd(u_int32_t arg0, struct rk_text_info * arg1);
 int32_t rk_set_motd_server(u_int32_t arg0, struct rk_text_info * arg1);
 int32_t rk_add_text_info(u_int32_t arg0, struct rk_aux_item_input * arg1);
 int32_t rk_add_text_info_server(u_int32_t arg0, struct rk_aux_item_input * arg1);
+int32_t rk_modify_conf_info(struct rk_modifyconfinfo * arg0);
+int32_t rk_modify_conf_info_server(struct rk_modifyconfinfo * arg0);
 
 
 /* Declaration of server functions */
