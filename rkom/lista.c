@@ -159,7 +159,8 @@ void
 list_marked(char *str)
 {
 	struct rk_marks *rm;
-	int i;
+	int i, len;
+	char *c, *c2, buf[50];
 
 	if (myuid == 0) {
 		rprintf("Du måste logga in först.\n");
@@ -170,9 +171,23 @@ list_marked(char *str)
 	if (rm[0].rm_text == 0) {
 		rprintf("Du har inga markerade inlägg.\n");
 	} else {
-		rprintf("Inläggsnummer\tPrioritet\n");
-		for (i = 0; rm[i].rm_text; i++)
-			rprintf("%d\t\t%d\n", rm[i].rm_text, rm[i].rm_type);
+		rprintf("Inläggsnummer\tPrioritet\tÄrenderad\n");
+		for (i = 0; rm[i].rm_text; i++) {
+			rprintf("%d\t\t%d\t\t", rm[i].rm_text, rm[i].rm_type);
+			if ((c = rk_gettext(rm[i].rm_text)) == NULL) {
+				rprintf("(Ärenderaden fick ej läsas)\n");
+				continue;
+			}
+			if ((c2 = strchr(c, '\n')) == NULL)
+				len = strlen(c);
+			else
+				len = c2 - c;
+			if (len > 45)
+				len = 45;
+			memcpy(buf, c, len);
+			buf[len] = 0;
+			rprintf("%s\n", buf);
+		}
 		rprintf("\n");
 	}
 }
