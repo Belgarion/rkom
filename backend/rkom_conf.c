@@ -488,7 +488,6 @@ invalidate_local(struct rk_text_stat *ts)
 			continue;
 		if (local >= g->mapsz)
 			continue;
-printf("Raderar lokal text %d från möte %d\n", local, conf);
 		g->map[local] = 0;
 	}
 }
