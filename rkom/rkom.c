@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.44 2002/05/16 14:01:43 ragge Exp $ */
+/* $Id: rkom.c,v 1.45 2002/08/16 14:27:47 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -62,7 +62,7 @@ char *p_next_text = "(Läsa) nästa inlägg";
 char *p_see_time  = "(Se) tiden";
 char *p_next_comment = "(Läsa) nästa kommentar";
 char *prompt, *server;
-char *client_version = "ett.ett.release";
+char *client_version = "ett.två.alfa";
 int wrows, wcols, swascii;
 
 #ifndef INFTIM
