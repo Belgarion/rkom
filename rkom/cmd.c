@@ -44,15 +44,16 @@ cmd_tiden(char *str)
 
 	printf("Klockan är ");
 	if (tm->rt_minutes > 30)
-		printf("%d minuter i %s", 60 - tm->rt_minutes,
+		printf("%d minut%s i %s",  60 - tm->rt_minutes,
+		    tm->rt_minutes == 59 ? "" : "er",
 		    tindx[((tm->rt_hours + 1)%12)]);
 	else if (tm->rt_minutes == 30)
 		printf("halv %s", tindx[((tm->rt_hours+1)%12)]);
 	else if (tm->rt_minutes == 0)
 		printf("prick %s", tindx[(tm->rt_hours%12)]);
 	else
-		printf("%d minuter över %s", tm->rt_minutes,
-		    tindx[(tm->rt_hours%12)]);
+		printf("%d minut%s över %s", tm->rt_minutes,
+		    tm->rt_minutes == 1 ? "" : "er", tindx[(tm->rt_hours%12)]);
 	printf(" på %s", dyidx[tm->rt_hours/6]);
 	printf(",\n%sdagen den %d %s %d", dindx[tm->rt_day_of_week], tm->rt_day,
 	    mindx[tm->rt_month], tm->rt_year + 1900);
@@ -216,8 +217,6 @@ cmd_login(char *str)
 	nconf = conf->ru_confs.ru_confs_len;
 	if (nconf)
 		prompt = PROMPT_NEXT_CONF;
-	else
-		printf("\nDu har inga olästa inlägg.\n");
 	free(conf);
 }
 
