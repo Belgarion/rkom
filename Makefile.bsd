@@ -1,15 +1,22 @@
-#	$Id: Makefile.bsd,v 1.1 2001/11/18 14:26:52 ragge Exp $
+#	$Id: Makefile.bsd,v 1.2 2001/11/25 20:06:21 jens Exp $
 #
+UNAME!= uname
 
+.if $(UNAME) != Darwin
 FLAGS="XFLAGS=-DSTAR_BSD -DREGEX"
 LIBS="XLIBS=-ltermcap"
+.else
+BACKEND_EXTRA_OBJS="EXTRA_OBJS=poll_emul.o"
+FLAGS="XFLAGS=-DSTAR_BSD -DREGEX -DPOLL_EMUL"
+.endif
+
 
 all:
-	@(cd backend; make $(FLAGS))
-	@(cd libredit; make $(FLAGS))
-	@(cd rkom; make $(FLAGS) $(LIBS))
+	@(cd backend; $(MAKE) $(FLAGS) $(BACKEND_EXTRA_OBJS))
+	@(cd libredit; $(MAKE) $(FLAGS))
+	@(cd rkom; $(MAKE) $(FLAGS) $(LIBS))
 
 clean:
-	@(cd backend; make clean)
-	@(cd libredit; make clean)
-	@(cd rkom; make clean)
+	@(cd backend; $(MAKE) clean)
+	@(cd libredit; $(MAKE) clean)
+	@(cd rkom; $(MAKE) clean)

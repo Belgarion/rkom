@@ -1,9 +1,9 @@
-#	$Id: Makefile,v 1.10 2001/11/24 20:25:53 offe Exp $
+#	$Id: Makefile,v 1.11 2001/11/25 20:06:21 jens Exp $
 #
 all:
-	@if [ `uname` = NetBSD -o `uname` = FreeBSD ]; then \
+	@if [ `uname` = NetBSD -o `uname` = FreeBSD -o `uname` = Darwin ]; then \
 		echo "Using *BSD" ; \
-		make -f Makefile.bsd ; \
+		${MAKE} -f Makefile.bsd ; \
 	elif [ `uname` = SunOS ]; then \
 		if [ `uname -r | sed 's/\.//g'` -gt 400 ]; then \
 			echo "Using SunOS4" ; \
@@ -24,6 +24,6 @@ all:
 	fi
 
 clean:
-	@(cd backend; make clean)
-	@(cd libredit; make clean)
-	@(cd rkom; make clean)
+	@(cd backend; ${MAKE} clean)
+	@(cd libredit; ${MAKE} clean)
+	@(cd rkom; ${MAKE} clean)

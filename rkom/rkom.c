@@ -1,11 +1,15 @@
-/* $Id: rkom.c,v 1.38 2001/11/24 20:26:01 offe Exp $ */
+/* $Id: rkom.c,v 1.39 2001/11/25 20:07:48 jens Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
 #endif
 #include <sys/types.h>
 #include <sys/socket.h>
+#ifdef POLL_EMUL
+#include "poll_emul.h"
+#else
 #include <sys/poll.h>
+#endif
 #include <sys/time.h>
 #ifndef SUNOS4
 #include <sys/ioctl.h>
