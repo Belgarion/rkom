@@ -87,6 +87,7 @@ struct get_conf_stat_store {
 	struct rk_conference confer;
 	int mapsz;	/* Number of element in mapping */
 	int *map;	/* Array of mapped ints */
+	struct rk_member *rkm;
 };
 
 static struct get_conf_stat_store *gcs;
@@ -289,6 +290,44 @@ rk_confinfo(u_int32_t conf)
 	walker->next = gcs;
 	gcs = walker;
 	return c;
+}
+
+/*
+ * Returns an array of rk_member structs.
+ */
+struct rk_member *
+rk_get_membership(u_int32_t conf)
+{
+	struct get_conf_stat_store *walker;
+	struct rk_member *rm;
+	int i, nmembers;
+
+	walker = findconf(conf);
+	if ((walker = findconf(conf)) == NULL) {
+		if (rk_confinfo(conf) == NULL)
+			return NULL; /* Komerr will be set already */
+		walker = findconf(conf); /* Cannot fail */
+	}
+	if (walker->rkm != NULL)
+		return walker->rkm;
+	if (send_reply("101 %d 0 65535\n", conf)) {
+		komerr = get_int();
+		get_eat('\n');
+		return NULL;
+	}
+	nmembers = get_int();
+	rm = calloc(sizeof(struct rk_member), nmembers+1);
+	get_accept('{');
+	for (i = 0; i < nmembers; i++) {
+		rm[i].rm_member = get_int();
+		rm[i].rm_added_by = get_int();
+		read_in_time(&rm[i].rm_added_at);
+		rm[i].rm_type = get_int();
+	}
+	get_accept('}');
+	get_accept('\n');
+	walker->rkm = rm;
+	return rm;
 }
 
 static struct membership_store *

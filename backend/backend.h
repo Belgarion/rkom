@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.24 2003/10/01 13:31:04 ragge Exp $	*/
+/*	$Id: backend.h,v 1.25 2003/10/01 15:06:46 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -170,6 +170,11 @@ void	reread_conf_stat_bg(int conf);
 void	newname(int);
 void	invalidate_local(struct rk_text_stat *ts);
 int32_t rk_change_conference(u_int32_t conf);
+
+/*
+ * Get the membership array struct for a conference.
+ */
+struct rk_member *rk_get_membership(u_int32_t conf);
 
 /*
  * Return 1 if the local number given is read in conference conf
@@ -432,4 +437,11 @@ struct rk_server {
 	int32_t	rs_proto;
 	char *	rs_servtype;
 	char *	rs_version;
+};
+
+struct rk_member {
+	u_int32_t rm_member;
+	u_int32_t rm_added_by;
+	struct rk_time rm_added_at;
+	u_int32_t rm_type;
 };
