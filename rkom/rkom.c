@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.53 2003/09/17 18:33:03 ragge Exp $ */
+/* $Id: rkom.c,v 1.54 2003/09/24 12:13:40 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -259,6 +259,7 @@ async_collect()
 		case 12: {
 			struct rk_conference *sender, *rcpt;
 			struct rk_time *tm;
+			char *name;
 
 			sender = rk_confinfo(ra->ra_pers);
 rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
@@ -269,9 +270,10 @@ rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 				rprintf("Personligt meddelande från %s",
 				    sender->rc_name);
 			else {
+				name = sender->rc_name;
 				rcpt = rk_confinfo(ra->ra_conf);
 				rprintf("Meddelande till %s från %s",
-				    rcpt->rc_name, sender->rc_name);
+				    rcpt->rc_name, name);
 			}
 			tm = rk_time();
 			rprintf(" (%s):\n\n", get_date_string(tm));
