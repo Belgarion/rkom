@@ -177,7 +177,7 @@ spc_write_msg(void *buf, size_t nbytes)
 	u_int32_t	msglen;
 
 	msglen = nbytes;
-	iov[0].iov_base = &msglen;
+	iov[0].iov_base = (void *)&msglen;
 	iov[0].iov_len = sizeof(msglen);
 	iov[1].iov_base = buf;
 	iov[1].iov_len = nbytes;
@@ -195,9 +195,9 @@ spc_write_fun_call(u_int32_t fun_num, void *buf, size_t nbytes)
 	size_t		len;
 
 	msglen = nbytes + sizeof(fun_num);
-	iov[0].iov_base = &msglen;
+	iov[0].iov_base = (void *)&msglen;
 	iov[0].iov_len = sizeof(msglen);
-	iov[1].iov_base = &fun_num;
+	iov[1].iov_base = (void *)&fun_num;
 	iov[1].iov_len = sizeof(fun_num);
 	iov[2].iov_base = buf;
 	iov[2].iov_len = nbytes;
@@ -465,6 +465,10 @@ get_size_encoded_rk_conference(struct rk_conference* var)
 	len += get_size_encoded_u_int32_t(&var->rc_no_of_texts);
 
 	len += get_size_encoded_u_int32_t(&var->rc_expire);
+
+	len += sizeof(var->rc_aux_item.rc_aux_item_len);
+	for (i = 0; i < var->rc_aux_item.rc_aux_item_len; i++)
+		len += get_size_encoded_rk_aux_item(&var->rc_aux_item.rc_aux_item_val[i]);
 
 	return len;
 }
@@ -1144,6 +1148,11 @@ get_size_decoded_rk_conference(char **enc_buf,
 	get_size_decoded_u_int32_t(enc_buf, &d_len, &s_len);
 	*dyn_len += d_len;
 
+	/* measure a variable sized array */
+	decode_u_int32_t(&n_elm, NULL, enc_buf, &d_len, &s_len);
+	for (i = 0; i < n_elm; i++)
+		*dyn_len += get_size_decoded_rk_aux_item(enc_buf, &d_len, &s_len);
+
 	return *dyn_len + *stat_len;
 }
 
@@ -1785,6 +1794,10 @@ encode_rk_conference(struct rk_conference* var, char ** enc_buf)
 	len += encode_u_int32_t(&var->rc_first_local_no, enc_buf);
 	len += encode_u_int32_t(&var->rc_no_of_texts, enc_buf);
 	len += encode_u_int32_t(&var->rc_expire, enc_buf);
+	len += encode_u_int32_t(&var->rc_aux_item.rc_aux_item_len, enc_buf);
+	for (i = 0; i < var->rc_aux_item.rc_aux_item_len; i++)
+		len += encode_rk_aux_item(&var->rc_aux_item.rc_aux_item_val[i], enc_buf);
+
 	return len;
 }
 
@@ -2420,6 +2433,17 @@ size_t	decode_rk_conference(struct rk_conference * var, char **dyn_buf, char **e
 
 	decode_u_int32_t(&var->rc_expire, dyn_buf, enc_buf, &d_len, &s_len);
 	*dyn_len += d_len;
+
+	/* Decode an array of variably size */
+	decode_u_int32_t(&var->rc_aux_item.rc_aux_item_len, NULL, enc_buf,
+			&d_len, &s_len);
+	var->rc_aux_item.rc_aux_item_val = (void *)*dyn_buf;
+	*dyn_buf += var->rc_aux_item.rc_aux_item_len * sizeof(struct rk_aux_item);
+	for (i = 0; i < var->rc_aux_item.rc_aux_item_len; i++) {
+		decode_rk_aux_item(&var->rc_aux_item.rc_aux_item_val[i], dyn_buf, enc_buf,
+			&d_len, &s_len);
+		*dyn_len += d_len;
+	}
 
 	return *dyn_len + *stat_len;
 }

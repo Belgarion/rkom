@@ -21,16 +21,14 @@ read_in_time(struct rk_time *t)
 	t->rt_is_dst = get_int();
 }
 
-#if 0
 void
-read_in_aux_item(struct aux_item *a)
+read_in_aux_item(struct rk_aux_item *a)
 {
-	a->aux_no = get_int();
-	a->tag = get_int();
-	a->creator = get_int();
-	read_in_time(&a->created_at);
-	a->flags = get_int();
+	a->rai_aux_no = get_int();
+	a->rai_tag = get_int();
+	a->rai_creator = get_int();
+	read_in_time(&a->rai_created_at);
+	a->rai_flags = get_int();
 	a->inherit_limit = get_int();
-	a->data = get_string();
+	a->rai_data = get_string();
 }
-#endif

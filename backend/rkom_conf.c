@@ -131,6 +131,9 @@ newname(int uid)
 static void
 readin_conf_stat(struct rk_conference *c)
 {
+	struct rk_aux_item *rai;
+	int i, len;
+
 	c->rc_name = get_string();
 	c->rc_type = get_int();
 	read_in_time(&c->rc_creation_time);
@@ -147,22 +150,18 @@ readin_conf_stat(struct rk_conference *c)
 	c->rc_first_local_no = get_int();
 	c->rc_no_of_texts = get_int();
 	c->rc_expire = get_int();
-#if 0
-	cnt = get_int();
-	if (cnt) {
+
+	c->rc_aux_item.rc_aux_item_len = len = get_int();
+	if (len) {
+		rai = calloc(sizeof(struct rk_aux_item), len);
+		c->rc_aux_item.rc_aux_item_val = rai;
 		get_accept('{');
-		c->aux_items = calloc((cnt+1), sizeof(struct aux_item));
-		for (i = 0; i < cnt; i++)
-			read_in_aux_item(&c->aux_items[i]);
+		for (i = 0; i < len; i++)
+			read_in_aux_item(&rai[i]);
 		get_accept('}');
-	} else {
-		c->aux_items = 0;
+	} else
 		get_accept('*');
-	}
 	get_accept('\n');
-#else
-	get_eat('\n');
-#endif
 }
 
 static void

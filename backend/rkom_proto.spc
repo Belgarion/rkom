@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.30 2002/05/18 21:24:29 offe Exp $ */
+/* $Id: rkom_proto.spc,v 1.31 2002/08/31 10:12:35 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -110,6 +110,7 @@ struct rk_conference {
 	u_int32_t	rc_first_local_no;
 	u_int32_t	rc_no_of_texts;
 	u_int32_t	rc_expire;
+	struct rk_aux_item rc_aux_item<>;
 };
 
 /*

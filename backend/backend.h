@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.9 2000/12/19 16:23:52 ragge Exp $	*/
+/*	$Id: backend.h,v 1.10 2002/08/31 10:12:35 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -8,7 +8,7 @@ struct conference;
 struct person;
 struct membership;
 struct tm;
-struct aux_item;
+struct rk_aux_item;
 
 /* Lyskom protocol helper functions, in rkom_lyskom.c */
 int	send_reply(char *msg);
@@ -45,7 +45,7 @@ void	newname(int);
 
 /* Helper functions, in rkom_helpers.c */
 void	read_in_time(struct rk_time *t);
-void	read_in_aux_item(struct aux_item *a);
+void	read_in_aux_item(struct rk_aux_item *a);
 
 /* Async functions, in rkom_async.c */
 void	async(int);

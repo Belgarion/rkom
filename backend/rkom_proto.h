@@ -128,6 +128,10 @@ struct rk_conference {
 		u_int32_t	rc_first_local_no;
 		u_int32_t	rc_no_of_texts;
 		u_int32_t	rc_expire;
+	struct {
+		u_int32_t	rc_aux_item_len;
+		struct rk_aux_item	*rc_aux_item_val;
+	} rc_aux_item;
 };
 
 struct rk_person {
