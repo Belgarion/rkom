@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.58 2001/12/07 21:10:39 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.59 2002/05/16 14:01:43 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -334,7 +334,8 @@ cmd_where(char *str)
 		rprintf("Du är inte närvarande någonstans.\n");
 	else {
 		conf = rk_confinfo(curconf);
-		rprintf("Du är i möte %s.\n", conf->rc_name);
+		rprintf("Du är i möte %s på server %s\n",
+		    conf->rc_name, server);
 		free(conf);
 	}
 }

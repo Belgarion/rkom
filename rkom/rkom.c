@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.43 2002/02/26 14:18:18 offe Exp $ */
+/* $Id: rkom.c,v 1.44 2002/05/16 14:01:43 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -61,7 +61,7 @@ char *p_next_conf = "(Gå till) nästa möte";
 char *p_next_text = "(Läsa) nästa inlägg";
 char *p_see_time  = "(Se) tiden";
 char *p_next_comment = "(Läsa) nästa kommentar";
-char *prompt;
+char *prompt, *server;
 char *client_version = "ett.ett.release";
 int wrows, wcols, swascii;
 
@@ -96,7 +96,7 @@ main(int argc, char *argv[])
 	struct pollfd	pfd[1];
 	struct timeval	tp;
 	int ch, noprompt;
-	char *server, *uname, *confile, *termtype;
+	char *uname, *confile, *termtype;
 	struct rk_server *rs;
 
 #if defined(SOLARIS) || defined(SUNOS4)
