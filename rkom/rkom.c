@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.26 2001/01/20 13:15:16 ragge Exp $ */
+/* $Id: rkom.c,v 1.27 2001/01/20 17:13:40 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -251,6 +251,7 @@ async_collect()
 
 		case 12: {
 			struct rk_conference *sender, *rcpt;
+			struct rk_time *tm;
 
 			sender = rk_confinfo(ra->ra_pers);
 rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
@@ -266,7 +267,9 @@ rprintf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 				    rcpt->rc_name, sender->rc_name);
 				free(rcpt);
 			}
-			rprintf(" (%s):\n\n", get_date_string(rk_time()));
+			tm = rk_time();
+			rprintf(" (%s):\n\n", get_date_string(tm));
+			free(tm);
 			rprintf("%s\n", ra->ra_message);
 rprintf("----------------------------------------------------------------\n");
 			retval = 0;
