@@ -1,4 +1,4 @@
-# $Id: mkprogmake,v 1.1 2001/01/27 14:22:49 ragge Exp $
+# $Id: mkprogmake,v 1.2 2001/01/27 15:06:41 ragge Exp $
 #
 # Generate an old makefile out of a BSD makefile.
 #
@@ -54,6 +54,10 @@ if [ -z "$noman" ]; then
 	mansrc=$execfile.1
 else
 	manpage=
+fi
+
+if [ ! -z "$warns" ]; then
+	warns="-Wall -Werror -Wmissing-prototypes -Wstrict-prototypes"
 fi
 
 # start writing the actual makefile
