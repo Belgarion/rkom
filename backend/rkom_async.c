@@ -2,6 +2,7 @@
 #include <sys/types.h>
 
 #include <stdio.h>
+#include <signal.h>
 #include <stdlib.h>
 
 #include "rkom_proto.h"
@@ -9,6 +10,13 @@
 #include "backend.h"
 
 static void async_new_text(void);
+
+struct mesg {
+	struct mesg *next;
+	int type;
+};
+static struct mesg *pole;
+
 /*
  * Handle a async message. Put it on a queue; then leave it to
  * async_handler() to do the rest.
@@ -16,6 +24,7 @@ static void async_new_text(void);
 void
 async(int level)
 {
+	struct mesg *m;
 	int narg, type/*, pers, rcpt*/;
 //	char *s, *t;
 
@@ -25,12 +34,10 @@ async(int level)
 	switch (type) {
 	case 15: /* New text created */
 		async_new_text();
-#if 0
-		if (prompt == PROMPT_SEE_TIME)
-			prompt = PROMPT_NEXT_CONF;
-		else
-			return 0;
-#endif
+		m = malloc(sizeof(struct mesg));
+		m->type = type;
+		m->next = pole;
+		pole = m;
 		break;
 
 #if 0
@@ -79,12 +86,32 @@ printf("----------------------------------------------------------------\n");
 		get_eat('\n');
 		return;
 	}
-	return;
+	if (level == 1)
+		async_handle();
 }
 
 void
 async_handle()
 {
+	extern int fepid;
+
+	if (pole)
+		kill(fepid, SIGIO);
+}
+
+struct rk_async *
+rk_async_server(u_int32_t arg)
+{
+	struct mesg *m;
+	struct rk_async *ra = calloc(sizeof(struct rk_async), 1);
+
+	if (pole) {
+		ra->ra_type = pole->type;
+		m = pole;
+		pole = pole->next;
+		free(m);
+	}
+	return ra;
 }
 
 void

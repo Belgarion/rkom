@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.5 2000/10/09 08:33:51 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.6 2000/10/15 10:50:24 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -21,7 +21,7 @@
 #include "exported.h"
 #include "backend.h"
 
-int sockfd, readfd, writefd, asyncfd;
+int sockfd, readfd, writefd, asyncfd, fepid;
 static char *version = "noll";
 static int childpid;
 /*
@@ -78,6 +78,7 @@ rkom_connect(char *server, char *frontend, char *os_username)
 	pipe(toback);
 	pipe(fromback);
 	pipe(asyncio);
+	fepid = getpid();
 
 	/* Ok, now fork the backend process */
 	if ((childpid = fork()) == 0) {

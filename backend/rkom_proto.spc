@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.6 2000/10/13 12:42:51 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.7 2000/10/15 10:50:24 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -153,6 +153,12 @@ struct rk_text_info {
 	string		rti_text;
 	struct rk_misc_info rti_misc<>;
 };
+
+/* Async message info struct */
+struct rk_async {
+	u_int32_t	ra_type;
+};
+
 /*
  * Login a user to the system.
  * Arguments are (userid, password).
@@ -259,3 +265,10 @@ int32_t rk_add_member(u_int32_t, u_int32_t, u_int8_t, u_int16_t, u_int32_t);
  * Arg in rk_text_info and returns a status struct.
  */
 struct	rk_text_retval rk_create_text(struct rk_text_info);
+
+/*
+ * Returns an async message if there is one to get.
+ * XXX - no argument to this one.
+ */
+struct rk_async rk_async(u_int32_t);
+

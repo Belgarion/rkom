@@ -46,7 +46,7 @@ rkom_loop()
 	for (;;) {
 		int rv;
 	
-		if (level == 0)
+		if (level == 1)
 			async_handle();
 		/* Wait for something to happen */
 		rv = poll(pfd, 2, INFTIM);
