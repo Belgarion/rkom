@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.20 2001/01/13 21:52:31 ragge Exp $ */
+/* $Id: parse.c,v 1.21 2001/01/14 13:32:26 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -91,9 +91,6 @@ DCMD(text_delete);
 
 /* Commands for online communication */
 DCMD(com_who);
-DCMD(com_who_visible);
-DCMD(com_who_invisible);
-DCMD(com_who_clients);
 DCMD(com_send);
 DCMD(com_say);
 
@@ -187,10 +184,7 @@ DROW("lista olästa",			0,PE_NO_ARG,text_list_unread)
 DROW("radera",					0,PE_NUM_ARG,text_delete)
 
 /* Commands for online communication */
-DROW("vilka",					0,PE_NO_ARG,com_who)
-DROW("vilka synliga",			0,PE_NO_ARG,com_who_visible)
-DROW("vilka osynliga",			0,PE_NO_ARG,com_who_invisible)
-DROW("vilka klienter",			0,PE_NO_ARG,com_who_clients)
+DROW("vilka",					0,PE_STR_ARG,com_who)
 DROW("sänd",					0,PE_NO_ARG,com_send)
 DROW("säg",						0,PE_STR_ARG,com_say)
 
@@ -642,28 +636,7 @@ exec_text_save(int argc, char *argv[])
 static int
 exec_com_who(int argc, char *argv[])
 {
-	cmd_vilka(NULL);
-	return 0;
-}
-
-static int
-exec_com_who_visible(int argc, char *argv[])
-{
-	cmd_vilka("synliga");
-	return 0;
-}
-
-static int
-exec_com_who_invisible(int argc, char *argv[])
-{
-	cmd_vilka("osynliga");
-	return 0;
-}
-
-static int
-exec_com_who_clients(int argc, char *argv[])
-{
-	cmd_vilka("klienter");
+	cmd_vilka(re_concat(argc, argv));
 	return 0;
 }
 

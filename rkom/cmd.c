@@ -95,7 +95,8 @@ cmd_vilka(char *str)
 	int i, antal, invisible, visible, clients, type, idle;
 	char *s;
 
-	invisible = visible = clients = idle = 0;
+	invisible = visible = clients = 0;
+	idle = atoi(getval("idle-hide-in-who-list"));
 	if (str == 0)
 		visible++;
 	else
@@ -109,6 +110,7 @@ cmd_vilka(char *str)
 			if (atoi(s))
 				idle = atoi(s);
 		}
+	idle *= 60; /* In minutes */
 	type = 0;
 	if (visible)
 		type |= WHO_VISIBLE;

@@ -26,7 +26,6 @@ struct setcmnds {
 	{"user", STRING, &user },
 	{"pass", STRING, &pass },
 	{"server", STRING, &server },
-	{"no_user_active", INT, &no_user_active },
 };
 
 static int ncs = sizeof(setcmnds) / sizeof(setcmnds[0]);
@@ -106,6 +105,7 @@ static int cmod, rmod;
 static struct rk_val rkomvars[] = {
 	{ "use-editor", "0" },
 	{ "show-writer-after-text", "1" },
+	{ "idle-hide-in-who-list", "30" },
 };
 static int nrkomvars = sizeof(rkomvars)/sizeof(rkomvars[0]);
 
@@ -172,6 +172,20 @@ isneq(char *var, char *val)
 		    (strcmp(rkomvars[i].rv_val, val) == 0))
 			return 0;
 	return 1;
+}
+
+char *
+getval(char *var)
+{
+	int i;
+
+	for (i = 0; i < ncommonvars; i++)
+		if (strcmp(commonvars[i].rv_var, var) == 0)
+			return commonvars[i].rv_val;
+	for (i = 0; i < nrkomvars; i++)
+		if (strcmp(rkomvars[i].rv_var, var) == 0)
+			return rkomvars[i].rv_val;
+	return 0;
 }
 
 void
