@@ -1,4 +1,4 @@
-#	$Id: Makefile,v 1.14 2001/11/25 20:05:37 jens Exp $
+#	$Id: Makefile,v 1.15 2001/11/25 21:09:41 ragge Exp $
 #
 # Rkom backend library Makefile
 #
@@ -12,7 +12,7 @@ OBJS=	rkom_subr.o rkom_lyskom.o rkom_beparse.o rkom_conf.o \
 all:	librkom.a
 
 librkom.a: rkom_proto.h $(OBJS)
-	ar cq librkom.a $(OBJS)
+	ar cr librkom.a $(OBJS)
 	ranlib librkom.a
 
 rkom_proto.c rkom_proto.h rkom_proto_stubs.c: rkom_proto.spc

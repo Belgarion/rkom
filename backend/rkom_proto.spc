@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.28 2001/11/24 12:33:24 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.29 2001/11/25 21:09:41 ragge Exp $ */
 
 /* Exported prototypes */
 %hfile
@@ -462,6 +462,19 @@ void rk_sync(void);
  * negative lyskom error number.
  */
 int32_t rk_create_conf(string, u_int32_t);
+
+/*      
+ * Delete a conference/person.
+ * Arg is (confno) and returns 0 or a lyskom error number.
+ */
+int32_t rk_delete_conf(u_int32_t);
+
+/*
+ * Create a new person.
+ * Args are (name, passwd, flags) and returns the new person number or a
+ * negative lyskom error number.
+ */
+int32_t rk_create_person(string, string, u_int32_t);
 
 /*      
  * Set text to motd for conf.

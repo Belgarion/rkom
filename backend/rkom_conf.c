@@ -743,3 +743,38 @@ rk_create_conf_server(char *name, u_int32_t btype)
 	get_accept('\n');
 	return i;
 }
+
+int32_t
+rk_create_person_server(char *name, char *passwd, u_int32_t btype)
+{
+	char *buf;
+	int i;
+
+	buf = alloca(strlen(name) + strlen(passwd) + 100);
+	sprintf(buf, "89 %ldH%s %ldH%s 00000000 0 { }\n",
+	    (long)strlen(name), name, (long)strlen(passwd), passwd);
+	if (send_reply(buf)) {
+		i = get_int();
+		get_eat('\n');
+		return -i;
+	}
+	i = get_int();
+	get_accept('\n');
+	return i;
+}
+
+int32_t 
+rk_delete_conf_server(u_int32_t conf)
+{
+	char buf[40];
+	int i;
+
+	sprintf(buf, "11 %d\n", conf);
+	if (send_reply(buf)) {
+		i = get_int();
+		get_eat('\n');
+		return i;
+	}
+	get_accept('\n');
+	return 0;
+}

@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.34 2001/11/24 14:31:11 ragge Exp $ */
+/* $Id: parse.c,v 1.35 2001/11/25 21:09:43 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -73,6 +73,7 @@ DCMD(conf_list);
 DCMD(conf_leave);
 DCMD(conf_change_presentation);
 DCMD(conf_create);
+DCMD(conf_delete);
 
 /* Commands for texts */
 DCMD(text_add_rcpt_late);
@@ -123,6 +124,7 @@ DCMD(other_password);
 DCMD(other_name);
 DCMD(other_sync);
 DCMD(other_exec);
+DCMD(other_create_person);
 
 #if 1
 /* Debug help */
@@ -177,6 +179,7 @@ DROW("lista möten",				0,PE_NO_ARG,conf_list)
 DROW("utträda",					0,PE_STR_ARG,conf_leave)
 DROW("ändra presentation",		0,PE_STR_ARG,conf_change_presentation)
 DROW("skapa möte",				0,PE_NO_ARG,conf_create)
+DROW("radera möte",				0,PE_STR_ARG,conf_delete)
 
 /* Commands for texts */
 DROW("addera mottagare",			0,PE_NO_ARG,text_add_rcpt_late)
@@ -223,10 +226,12 @@ DROW("lista alias",				0,PE_NO_ARG,alias_list)
 DROW("sätt",					0,PE_STR_ARG,other_set)
 DROW("login",					1,PE_STR_ARG,other_login)
 DROW("logout",					0,PE_NO_ARG,other_logout)
+DROW("radera person",				0,PE_STR_ARG,conf_delete)
+DROW("skapa person",				0,PE_NO_ARG,other_create_person)
 DROW("sluta",					0,PE_NO_ARG,other_quit)
+DROW("synkronisera",				0,PE_NO_ARG,other_sync)
 DROW("ändra lösenord",				0,PE_NO_ARG,other_password)
 DROW("ändra namn",				0,PE_NO_ARG,other_name)
-DROW("synkronisera",				0,PE_NO_ARG,other_sync)
 DROW("!", 					0,PE_STR_ARG,other_exec)
 
 #if 1
@@ -931,6 +936,23 @@ exec_other_sync(int argc, char *argv[])
 {
 	TT(argc > 0, "Synkronisera tar inga argument.\n");
 	rk_sync();
+	return 0;
+}
+
+static int
+exec_other_create_person(int argc, char *argv[])
+{
+	TT(argc > 0, "Skapa person tar inga argument.\n");
+	cmd_create_person();
+	return 0;
+}
+
+static int
+exec_conf_delete(int argc, char *argv[])
+{
+	LF;
+	TT(argc == 0, "Du måste ange namnet.\n");
+	cmd_erase(re_concat(argc, argv));
 	return 0;
 }
 

@@ -4248,6 +4248,76 @@ rk_create_conf(char * arg0, u_int32_t arg1)
 }
 
 int32_t 
+rk_delete_conf(u_int32_t arg0)
+{
+	int32_t ret_val;
+	u_int32_t	msglen, fnum;
+	char		*buf_start, *dyn_buf;
+	char		*enc_buf;
+	size_t		d_len, s_len;
+
+	msglen = 0;
+	dyn_buf = dyn_buf; /* silent gcc */
+	msglen += get_size_encoded_u_int32_t(&arg0);
+	fnum = 40;
+	if ((buf_start = malloc(msglen)) == NULL)
+		err(1, "malloc");
+	enc_buf = buf_start;
+	encode_u_int32_t(&arg0, &enc_buf);
+	spc_write_fun_call(fnum, buf_start, msglen);
+	free(buf_start);
+
+	msglen = spc_read_msglen();
+	if ((buf_start = malloc(msglen)) == NULL)
+		err(1, "malloc");
+	enc_buf = buf_start;
+
+	spc_read_msg(enc_buf, msglen);
+	enc_buf = buf_start;
+	decode_int32_t(&ret_val, NULL, &enc_buf, &d_len, &s_len);
+	assert(d_len == 0);
+	free(buf_start);
+	return ret_val;
+}
+
+int32_t 
+rk_create_person(char * arg0, char * arg1, u_int32_t arg2)
+{
+	int32_t ret_val;
+	u_int32_t	msglen, fnum;
+	char		*buf_start, *dyn_buf;
+	char		*enc_buf;
+	size_t		d_len, s_len;
+
+	msglen = 0;
+	dyn_buf = dyn_buf; /* silent gcc */
+	msglen += get_size_encoded_string(&arg0);
+	msglen += get_size_encoded_string(&arg1);
+	msglen += get_size_encoded_u_int32_t(&arg2);
+	fnum = 41;
+	if ((buf_start = malloc(msglen)) == NULL)
+		err(1, "malloc");
+	enc_buf = buf_start;
+	encode_string(&arg0, &enc_buf);
+	encode_string(&arg1, &enc_buf);
+	encode_u_int32_t(&arg2, &enc_buf);
+	spc_write_fun_call(fnum, buf_start, msglen);
+	free(buf_start);
+
+	msglen = spc_read_msglen();
+	if ((buf_start = malloc(msglen)) == NULL)
+		err(1, "malloc");
+	enc_buf = buf_start;
+
+	spc_read_msg(enc_buf, msglen);
+	enc_buf = buf_start;
+	decode_int32_t(&ret_val, NULL, &enc_buf, &d_len, &s_len);
+	assert(d_len == 0);
+	free(buf_start);
+	return ret_val;
+}
+
+int32_t 
 rk_set_motd(u_int32_t arg0, struct rk_text_info * arg1)
 {
 	int32_t ret_val;
@@ -4260,7 +4330,7 @@ rk_set_motd(u_int32_t arg0, struct rk_text_info * arg1)
 	dyn_buf = dyn_buf; /* silent gcc */
 	msglen += get_size_encoded_u_int32_t(&arg0);
 	msglen += get_size_encoded_rk_text_info(arg1);
-	fnum = 40;
+	fnum = 42;
 	if ((buf_start = malloc(msglen)) == NULL)
 		err(1, "malloc");
 	enc_buf = buf_start;
@@ -5268,6 +5338,58 @@ spc_process_request(void)
 		break;
 	}
 	case 40: {
+		u_int32_t arg0;
+		int32_t ret_val;
+
+		dyn_len = 0;
+		get_size_decoded_u_int32_t(&enc_buf, &d_len, &s_len);
+		dyn_len += d_len;
+		if ((dyn_mem = alloca(dyn_len)) == NULL)
+			err(1, "alloca");
+		enc_buf = enc_start;
+		decode_u_int32_t(&arg0, &dyn_mem, &enc_buf, &d_len, &s_len);
+		ret_val = rk_delete_conf_server(arg0);
+		enc_len = get_size_encoded_int32_t(&ret_val);
+		if ((enc_start = alloca(enc_len + sizeof(msglen))) == NULL)
+			err(1, "alloca");
+		enc_buf = enc_start;
+		msglen = enc_len;
+		encode_int32_t(&ret_val, &enc_buf);
+		enc_buf = enc_start;
+		spc_write_msg(enc_buf, enc_len);
+		break;
+	}
+	case 41: {
+		char *arg0;
+		char *arg1;
+		u_int32_t arg2;
+		int32_t ret_val;
+
+		dyn_len = 0;
+		get_size_decoded_string(&enc_buf, &d_len, &s_len);
+		dyn_len += d_len;
+		get_size_decoded_string(&enc_buf, &d_len, &s_len);
+		dyn_len += d_len;
+		get_size_decoded_u_int32_t(&enc_buf, &d_len, &s_len);
+		dyn_len += d_len;
+		if ((dyn_mem = alloca(dyn_len)) == NULL)
+			err(1, "alloca");
+		enc_buf = enc_start;
+		decode_string(&arg0, &dyn_mem, &enc_buf, &d_len, &s_len);
+		decode_string(&arg1, &dyn_mem, &enc_buf, &d_len, &s_len);
+		decode_u_int32_t(&arg2, &dyn_mem, &enc_buf, &d_len, &s_len);
+		ret_val = rk_create_person_server(arg0, arg1, arg2);
+		enc_len = get_size_encoded_int32_t(&ret_val);
+		if ((enc_start = alloca(enc_len + sizeof(msglen))) == NULL)
+			err(1, "alloca");
+		enc_buf = enc_start;
+		msglen = enc_len;
+		encode_int32_t(&ret_val, &enc_buf);
+		enc_buf = enc_start;
+		spc_write_msg(enc_buf, enc_len);
+		break;
+	}
+	case 42: {
 		u_int32_t arg0;
 		struct rk_text_info arg1;
 		int32_t ret_val;

@@ -42,10 +42,13 @@ getstr(char *m)
 	
 	msg = m;
 	tc = el_gets(el, &len);
-	if (tc)
+	if (tc) {
 		ret = strdup(tc);
-	else
+		ret[len - 1] = 0; /* Forget \n */
+	} else
 		ret = strdup("");
-	ret[len - 1] = 0; /* Forget \n */
+#ifndef MACOSX
+	el_end(el);
+#endif
 	return ret;
 }

@@ -553,6 +553,10 @@ void rk_sync(void);
 void rk_sync_server(void);
 int32_t rk_create_conf(char * arg0, u_int32_t arg1);
 int32_t rk_create_conf_server(char * arg0, u_int32_t arg1);
+int32_t rk_delete_conf(u_int32_t arg0);
+int32_t rk_delete_conf_server(u_int32_t arg0);
+int32_t rk_create_person(char * arg0, char * arg1, u_int32_t arg2);
+int32_t rk_create_person_server(char * arg0, char * arg1, u_int32_t arg2);
 int32_t rk_set_motd(u_int32_t arg0, struct rk_text_info * arg1);
 int32_t rk_set_motd_server(u_int32_t arg0, struct rk_text_info * arg1);
 

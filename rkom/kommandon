@@ -37,7 +37,8 @@ Ord inom parentes ska inte skrivas.\n\
     Gå (till möte)\n\
     (Gå till) nästa möte\n\
     Lista möten\n\
-    Skapa (möte)\n\
+    Skapa möte\n\
+    Radera möte\n\
     Utträda (ur möte)\n\
     Ändra presentation (för)\n\
 \n\
@@ -80,5 +81,7 @@ Ord inom parentes ska inte skrivas.\n\
     Ändra lösenord\n\
     Ändra namn\n\
     Synkronisera (lästa texter med servern)\n\
+    Skapa person\n\
+    Radera person\n\
     ! (kommando)\n\
 "

@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.55 2001/11/24 14:31:11 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.56 2001/11/25 21:09:43 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -811,6 +811,69 @@ cmd_create(void)
 		rprintf("Glöm inte att skriva en presentation för mötet.\n");
 	}
 	free(name);
+}
+
+void
+cmd_create_person(void)
+{
+	struct rk_confinfo_retval *r;
+	char *name, *npass1, *npass2;
+	int i, num, rv;
+
+	name = getstr("Vad skall personen heta? ");
+	if (*name == 0) {
+		rprintf("Nehej.\n");
+		return;
+	}
+	r = rk_matchconf(name, MATCHCONF_PERSON|MATCHCONF_PERSON);
+	num = r->rcr_ci.rcr_ci_len;
+	if (num) for (i = 0; i < num; i++)
+		if (strcasecmp(r->rcr_ci.rcr_ci_val[i].rc_name, name) == 0) {
+			rprintf("Personen finns redan: %s\n",
+			    r->rcr_ci.rcr_ci_val[i].rc_name);
+			free(r);
+			free(name);
+			return;
+		}
+	
+	rprintf("Sätt ett lösenord för %s\n", name);
+	do {
+		npass1 = strdup(getpass("Ange nya lösenordet: "));
+		npass2 = strdup(getpass("Ange nya lösenordet igen: "));
+
+		if (strcmp(npass1, npass2))
+			rprintf("Du skrev olika nya lösenord, försök igen.\n");
+		else
+			break;
+	} while (1);
+	rv = rk_create_person(name, npass1, 0);
+	if (rv < 0) {
+		rprintf("Det sket sej: %s\n", error(-rv));
+	} else {
+		rprintf("Personen \"%s\" är nu skapad.\n", name);
+		rprintf("Glöm inte att skriva en presentation för personen.\n");
+	}
+	free(npass1);
+	free(npass2);
+	free(name);
+	free(r);
+}
+
+void
+cmd_erase(char *name)
+{
+	struct rk_confinfo_retval *retval;
+	int rv;
+
+	retval = match_complain(name, MATCHCONF_CONF|MATCHCONF_PERSON);
+	if (retval == 0)
+		return;
+	rv = rk_delete_conf(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
+	if (rv)
+		rprintf("Det sket sej: %s\n", error(rv));
+	else
+		rprintf("Raderat och klart!\n");
+	free(retval);
 }
 
 void
