@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.46 2003/09/17 10:52:03 ragge Exp $ */
+/* $Id: parse.c,v 1.47 2003/10/01 13:31:06 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -641,6 +641,7 @@ exec_conf_goto(int argc, char *argv[])
 static int
 exec_conf_goto_next(int argc, char *argv[])
 {
+	LF;
 	next_conf(NULL);
 	return 0;
 }

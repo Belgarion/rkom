@@ -82,10 +82,10 @@ list_conf(char *str)
 void
 list_news(char *args)
 {
-	struct rk_unreadconfval *conf;
-	int i, nconf, *confs;
+	int i;
 	int longfmt;
 	int unr_texts, unr_confs;
+	u_int32_t *c;
 
 	if (myuid == 0) {
 		rprintf("Du måste logga in först.\n");
@@ -94,31 +94,28 @@ list_news(char *args)
 	/*
 	 * Get number of unread texts.
 	 */
-	conf = rk_unreadconf(myuid);
+	c = rk_unreadconf(myuid);
 
 	longfmt = iseql("unread-long-format","1");
 	
 	unr_texts = unr_confs = 0;
 
 	/* Show where we have unread texts. */
-	nconf = conf->ru_confs.ru_confs_len;
-	if (nconf) {
-		confs = conf->ru_confs.ru_confs_val;
-
-		for (i = 0; i < nconf; i++) {
+	if (c[0]) {
+		for (i = 0; c[i]; i++) {
 			struct rk_conference *rkc;
 			struct rk_membership *m;
 			int hln, nr;
 
-			if ((rkc = rk_confinfo(confs[i])) == NULL) {
+			if ((rkc = rk_confinfo(c[i])) == NULL) {
 				rprintf("%d sket sej: %s\n",
-				    confs[i], error(komerr));
+				    c[i], error(komerr));
 				continue;
 			}
 			hln = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1;
-			if ((m = rk_membership(myuid, confs[i])) == NULL) {
+			if ((m = rk_membership(myuid, c[i])) == NULL) {
 				rprintf("%d,%d sket sej: %s\n",
-				    confs[i], myuid, error(komerr));
+				    c[i], myuid, error(komerr));
 				continue;
 			}
 			nr = hln - m->rm_last_text_read;
@@ -161,7 +158,6 @@ sanitycheck(char *str)
 void
 list_marked(char *str)
 {
-	struct rk_mark_retval *rmr;
 	struct rk_marks *rm;
 	int i;
 
@@ -169,14 +165,13 @@ list_marked(char *str)
 		rprintf("Du måste logga in först.\n");
 		return;
 	}
-	if ((rmr = rk_getmarks()) == NULL)
+	if ((rm = rk_getmarks()) == NULL)
 		return rprintf("Det sket sej: %s\n", error(komerr));
-	rm = rmr->rmr_marks.rmr_marks_val;
-	if (rmr->rmr_marks.rmr_marks_len == 0) {
+	if (rm[0].rm_text == 0) {
 		rprintf("Du har inga markerade inlägg.\n");
 	} else {
 		rprintf("Inläggsnummer\tPrioritet\n");
-		for (i = 0; i < rmr->rmr_marks.rmr_marks_len; i++)
+		for (i = 0; rm[i].rm_text; i++)
 			rprintf("%d\t\t%d\n", rm[i].rm_text, rm[i].rm_type);
 		rprintf("\n");
 	}

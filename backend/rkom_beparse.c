@@ -73,12 +73,13 @@ rk_matchconf(char *name, u_int8_t flags)
 			rkc[i].rc_conf_no = get_int();
 		}
 		get_accept('}');
-	}
+	} else
+		get_accept('*');
 	get_accept('\n');
 	return rkc;
 }
 
-int32_t
+int
 rk_login(u_int32_t uid, char *pwd)
 {
 	int i;
@@ -93,10 +94,9 @@ rk_login(u_int32_t uid, char *pwd)
 	return i;
 }
 
-struct rk_unreadconfval *
+u_int32_t *
 rk_unreadconf(u_int32_t uid)
 {
-	static struct rk_unreadconfval rku;
 	static u_int32_t *arr;
 	int i, nconfs;
 
@@ -109,19 +109,16 @@ rk_unreadconf(u_int32_t uid)
 		return NULL;
 	}
 	nconfs = get_int();
-	rku.ru_confs.ru_confs_len = nconfs;
-	if (nconfs == 0) {
-		get_eat('\n');
-	} else {
-		arr = calloc(sizeof(u_int32_t), nconfs);
-		rku.ru_confs.ru_confs_val = arr;
+	arr = calloc(sizeof(u_int32_t), nconfs + 1);
+	if (nconfs != 0) {
 		get_accept('{');
 		for (i = 0; i < nconfs; i++)
 			arr[i] = get_int();
 		get_accept('}');
-		get_accept('\n');
-	}
-	return &rku;
+	} else
+		get_accept('*');
+	get_accept('\n');
+	return arr;
 }
 
 struct rk_uconference *
@@ -142,40 +139,35 @@ rk_uconfinfo(u_int32_t mid)
 	return &rku;
 }
 
-struct rk_dynamic_session_info_retval *
+struct rk_dynamic_session_info *
 rk_vilka(u_int32_t secs, u_int32_t flags)
 {
-	static struct rk_dynamic_session_info_retval rkd;
 	static struct rk_dynamic_session_info *ppp;
 	int antal, i;
 
 	if (ppp != NULL)
 		free(ppp);
+	ppp = NULL;
+
 	send_reply("83 %d %d %d\n", (flags & WHO_VISIBLE) != 0, 
 	    (flags & WHO_INVISIBLE) != 0, secs);
 
 	antal = get_int();
-	rkd.rdv_rds.rdv_rds_val =
-	    calloc(sizeof(struct rk_dynamic_session_info), antal);
-	rkd.rdv_rds.rdv_rds_len = antal;
-
-	if (antal == 0) {
-		get_eat('\n');
-		return &rkd;
-	}
-	ppp = rkd.rdv_rds.rdv_rds_val;
-	get_accept('{');
-	for (i = 0; i < antal; i++) {
-		ppp[i].rds_session = get_int();
-		ppp[i].rds_person = get_int();
-		ppp[i].rds_conf = get_int();
-		ppp[i].rds_idletime = get_int();
-		ppp[i].rds_flags = get_int();
-		ppp[i].rds_doing = get_string();
+	ppp = calloc(sizeof(struct rk_dynamic_session_info), antal + 1);
+	if (antal != 0) {
+		get_accept('{');
+		for (i = 0; i < antal; i++) {
+			ppp[i].rds_session = get_int();
+			ppp[i].rds_person = get_int();
+			ppp[i].rds_conf = get_int();
+			ppp[i].rds_idletime = get_int();
+			ppp[i].rds_flags = get_int();
+			ppp[i].rds_doing = get_string();
+		}
 	}
 	get_accept('}');
 	get_accept('\n');
-	return &rkd;
+	return ppp;
 }
 
 char *
@@ -185,7 +177,10 @@ rk_client_name(u_int32_t vers)
 
 	if (ret != NULL)
 		free(ret);
+	ret = NULL;
+
 	if (send_reply("70 %d\n", vers)) {
+		komerr = get_int();
 		get_eat('\n');
 		return NULL;
 	}
@@ -204,6 +199,7 @@ rk_client_version(u_int32_t vers)
 	if (ret != NULL)
 		free(ret);
 	if (send_reply("71 %d\n", vers)) {
+		komerr = get_int();
 		get_eat('\n');
 		return NULL;
 	}
@@ -242,16 +238,14 @@ rk_gettext(u_int32_t nr)
 {
 	struct text_stat_store *tss;
 	char *c;
-	int i;
 
 	if ((tss = findtxt(nr)) && (tss->text))
-		return strdup(tss->text);
+		return tss->text;
 
 	if (send_reply("25 %d 0 2000000\n", nr)) {
-		if ((i = get_int()))
-			printf("Det sket sej: %d\n", i);
+		komerr = get_int();
 		get_eat('\n');
-		return "";
+		return NULL;
 	}
 	c = get_string();
 	get_accept('\n');
@@ -454,12 +448,15 @@ rk_create_text(struct rk_text_info *rti)
 }
 
 /* Get the marked texts. */
-struct rk_mark_retval *
+struct rk_marks *
 rk_getmarks(void)
 {
-	static struct rk_mark_retval rkm;
 	static struct rk_marks *rm;
 	int cnt, i;
+
+	if (rm)
+		free(rm);
+	rm = NULL;
 
 	if (send_reply("23\n")) {
 		komerr = get_int();
@@ -467,12 +464,8 @@ rk_getmarks(void)
 		return NULL;
 	}
 	cnt = get_int();
+	rm = calloc(sizeof(*rm), cnt + 1);
 	if (cnt) {
-		if (rm != NULL)
-			free(rm);
-		rm = calloc(cnt, sizeof(*rm));
-		rkm.rmr_marks.rmr_marks_len = cnt;
-		rkm.rmr_marks.rmr_marks_val = rm;
 		get_accept('{');
 		for (i = 0; i < cnt; i++) {
 			rm[i].rm_text = get_int();
@@ -482,11 +475,11 @@ rk_getmarks(void)
 	} else
 		get_accept('*');
 	get_accept('\n');
-	return &rkm;
+	return rm;
 }
 
 /* Mark a text */
-int32_t
+int
 rk_setmark(u_int32_t text, u_int8_t type)
 {
 	int retval = 0;
@@ -505,7 +498,7 @@ rk_setmark(u_int32_t text, u_int8_t type)
 }
 
 /* Unmark a text */
-int32_t
+int
 rk_unmark(u_int32_t text)
 {
 	int retval = 0;
@@ -523,7 +516,7 @@ rk_unmark(u_int32_t text)
 	return retval;
 }
 
-int32_t
+int
 rk_send_msg(u_int32_t dest, char *string)
 {
 	int i = 0;
@@ -534,7 +527,7 @@ rk_send_msg(u_int32_t dest, char *string)
 	return i;
 }
 
-int32_t 
+int 
 rk_setpass(u_int32_t uid, char *oldpass, char *newpass)
 {
 	int i;
@@ -549,7 +542,7 @@ rk_setpass(u_int32_t uid, char *oldpass, char *newpass)
 	return 0;
 }
 
-int32_t
+int
 rk_change_name(u_int32_t uid, char *newname)
 {
 	int i;
@@ -563,7 +556,7 @@ rk_change_name(u_int32_t uid, char *newname)
 	return 0;
 }
 
-int32_t
+int
 rk_set_presentation(u_int32_t conf, struct rk_text_info *rti)
 {
 	struct rk_misc_info *rkm;

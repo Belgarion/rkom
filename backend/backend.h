@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.23 2003/09/25 18:38:17 ragge Exp $	*/
+/*	$Id: backend.h,v 1.24 2003/10/01 13:31:04 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -49,7 +49,12 @@ void	reread_text_stat_bg(int text);
 void	readin_textstat(struct rk_text_stat *ts);
 struct	rk_time *rk_time(void);
 void	rk_alive(void);
-struct	rk_dynamic_session_info_retval *rk_vilka(u_int32_t, u_int32_t);
+
+/*
+ * Get information about who is logged on.
+ * Return a null-terminated array of rk_dynamic_session_info.
+ */
+struct	rk_dynamic_session_info *rk_vilka(u_int32_t secs, u_int32_t flags);
 
 /*
  * Get the conference struct based on the conference number.
@@ -70,9 +75,23 @@ struct	rk_person *rk_persinfo(u_int32_t);
  * Note: It is legal to write to this struct!
  */
 struct	rk_confinfo *rk_matchconf(char *name, u_int8_t flags);
-int32_t rk_login(u_int32_t userid, char *passwd);
+
+/*
+ * Login an user. Return 0 if no error, an error code otherwise.
+ * XXX - change to komerr?
+ */
+int	rk_login(u_int32_t userid, char *passwd);
 int32_t rk_whatido(char *args);
-struct	rk_unreadconfval *rk_unreadconf(u_int32_t uid);
+
+/*
+ * Returns an null-terminated array of u_int32_t's which contains 
+ * the numbers of conferences with unread texts in.
+ */
+u_int32_t *rk_unreadconf(u_int32_t uid);
+
+/*
+ * Return an uconf struct. XXX - should die in favour for the large one.
+ */
 struct	rk_uconference *rk_uconfinfo(u_int32_t mid);
 
 /*
@@ -81,6 +100,11 @@ struct	rk_uconference *rk_uconfinfo(u_int32_t mid);
 struct	rk_membership *rk_membership(u_int32_t uid, u_int32_t mid);
 char *	rk_client_name(u_int32_t vers);
 char *	rk_client_version(u_int32_t vers);
+
+/*
+ * Get text number nr. Return NULL if failed.
+ * It is NOT legal to alter the text.
+ */
 char *	rk_gettext(u_int32_t nr);
 
 /* 
@@ -94,13 +118,45 @@ struct	rk_text_stat *rk_textstat(u_int32_t nr);
  * otherwise return 0 and set komerr to the error number.
  */
 u_int32_t rk_create_text(struct rk_text_info *rti);
-struct	rk_mark_retval *rk_getmarks(void);
-int32_t rk_setmark(u_int32_t text, u_int8_t type);
-int32_t rk_unmark(u_int32_t text);
-int32_t rk_send_msg(u_int32_t dest, char *string);
-int32_t rk_setpass(u_int32_t uid, char *oldpass, char *newpass);
-int32_t rk_change_name(u_int32_t uid, char *newname);
-int32_t rk_set_presentation(u_int32_t conf, struct rk_text_info *rti);
+
+/*
+ * Return a null-terminated array of marked texts.
+ */
+struct	rk_marks *rk_getmarks(void);
+
+/*
+ * Mark a text. Return a lyskom error code.
+ */
+int	rk_setmark(u_int32_t text, u_int8_t type);
+
+/*
+ * Unmark a text. Return a lyskom error code.
+ */
+int	rk_unmark(u_int32_t text);
+
+/*
+ * Send a message to a conference or a person.
+ * Return an error code.
+ */
+int	rk_send_msg(u_int32_t dest, char *string);
+
+/*
+ * Change password for a person.
+ * Return an error code.
+ */
+int	rk_setpass(u_int32_t uid, char *oldpass, char *newpass);
+
+/*
+ * Change name for a person or a conference.
+ * Return an error code.
+ */
+int	rk_change_name(u_int32_t uid, char *newname);
+
+/*
+ * Change persentation for a person or a conference.
+ * Return an error code.
+ */
+int	rk_set_presentation(u_int32_t conf, struct rk_text_info *rti);
 int32_t rk_add_rcpt(u_int32_t text, u_int32_t conf, u_int32_t type);
 int32_t rk_sub_rcpt(u_int32_t text, u_int32_t conf);
 int32_t rk_delete_text(u_int32_t text);
@@ -315,20 +371,6 @@ struct rk_dynamic_session_info {
 	char *	rds_doing;
 };
 
-struct rk_dynamic_session_info_retval {
-	struct {
-		u_int32_t	rdv_rds_len;
-		struct rk_dynamic_session_info	*rdv_rds_val;
-	} rdv_rds;
-};
-
-struct rk_unreadconfval {
-	struct {
-		u_int32_t	ru_confs_len;
-		u_int32_t	*ru_confs_val;
-	} ru_confs;
-};
-
 struct rk_memberconflist {
 	struct {
 		u_int32_t	rm_confs_len;
@@ -372,13 +414,6 @@ struct rk_async {
 struct rk_marks {
 	u_int32_t	rm_text;
 	u_int8_t	rm_type;
-};
-
-struct rk_mark_retval {
-	struct {
-		u_int32_t	rmr_marks_len;
-		struct rk_marks	*rmr_marks_val;
-	} rmr_marks;
 };
 
 struct rk_val {

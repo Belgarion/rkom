@@ -315,8 +315,11 @@ put_string(char *str)
 static void
 prerr(char c, char ch)
 {
-	if (c != ch)
-		errx(55, "Protocol error: got char %d expected %d", c, ch);
+	if (c == ch)
+		return;
+
+	fprintf(stderr, "Protocol error: got char %d expected %d", c, ch);
+	abort();
 }
 
 void

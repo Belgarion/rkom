@@ -34,9 +34,9 @@ static struct keeptrack *pole;
 void
 next_prompt()
 {
-	struct rk_unreadconfval *conf;
 	struct rk_conference *rkc;
 	struct rk_membership *m;
+	u_int32_t *c;
 	int hln, mr;
 
 	if ((rkc = rk_confinfo(curconf)) == NULL)
@@ -48,8 +48,8 @@ next_prompt()
 		prompt = PROMPT_NEXT_TEXT;
 		return;
 	}
-	conf = rk_unreadconf(myuid);
-	if (conf->ru_confs.ru_confs_len)
+	c = rk_unreadconf(myuid);
+	if (c[0] != 0)
 		prompt = PROMPT_NEXT_CONF;
 	else
 		prompt = PROMPT_SEE_TIME;
@@ -175,26 +175,24 @@ next_resetchain()
 void
 next_conf(char *str)
 {
-	struct rk_unreadconfval *retval;
 	struct rk_conference *conf;
 	struct rk_membership *member;
-	int *unread, i, len;
+	u_int32_t *c;
+	int i;
 
-	retval = rk_unreadconf(myuid);
-	unread = retval->ru_confs.ru_confs_val;
-	len = retval->ru_confs.ru_confs_len;
-	if (len == 0) {
+	c = rk_unreadconf(myuid);
+	if (c[0] == 0) {
 		rprintf("Du har inga olästa inlägg.\n");
 		prompt = PROMPT_SEE_TIME;
 		return;
 	}
-	for (i = 0; i < len; i++)
-		if (unread[i] == curconf)
+	for (i = 0; c[i]; i++)
+		if (c[i] == curconf)
 			break;
-	if (i+1 < len)
-		curconf = unread[i+1];
+	if (c[i] && c[i+1] != 0)
+		curconf = c[i+1];
 	else
-		curconf = unread[0];
+		curconf = c[0];
 
 	if ((conf = rk_confinfo(curconf)) == NULL)
 		return rprintf("Get confinfo sket sej: %s\n", error(komerr));
@@ -294,14 +292,12 @@ void
 next_marked(char *str)
 {
 	static int lastseen;
-	struct rk_mark_retval *rmr;
 	struct rk_marks *rm;
 	int i;
 
-	if ((rmr = rk_getmarks()) == NULL)
+	if ((rm = rk_getmarks()) == NULL)
 		return rprintf("Det sket sej: %s\n", error(komerr));
-	rm = rmr->rmr_marks.rmr_marks_val;
-	if (rmr->rmr_marks.rmr_marks_len == 0)
+	if (rm[0].rm_text == 0)
 		return rprintf("Du har inga markerade inlägg.\n");
 	rprintf("(Återse) nästa markerade inlägg.\n");
 	if (lastseen == 0) {
@@ -310,10 +306,10 @@ next_marked(char *str)
 		prompt = PROMPT_NEXT_MARKED;
 		return;
 	}
-	for (i = 0; i < rmr->rmr_marks.rmr_marks_len; i++) {
+	for (i = 0; rm[i].rm_text; i++) {
 		if (rm[i].rm_text != lastseen)
 			continue;
-		if (i+1 == rmr->rmr_marks.rmr_marks_len) {
+		if (rm[i+1].rm_text == 0) {
 			lastseen = 0;
 			rprintf("Du har slut markerade inlägg.\n");
 			next_prompt();
@@ -416,43 +412,43 @@ next_again(char *str)
 	show_text(lasttext, 1);
 }
 
-void
-next_hoppa(char *str)
+static int hoppade;
+
+static void
+skip(u_int32_t nr)
 {
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mi;
-	int global, len, i, hoppade;
+	int len, i;
 
-	hoppade = global = 0;
-	while (1) {
-		if (pole == 0) {
-			if (hoppade == 0)
-				rprintf("Du hoppade inte över några inlägg.\n");
-			else
-				rprintf("Du hoppade över %d inlägg.\n", hoppade);
-			return;
-		}
-		if ((ts = rk_textstat(pole->textnr)) == NULL) {
-			len = 0;
-			mi = NULL;
-		} else {
-			len = ts->rt_misc_info.rt_misc_info_len;
-			mi = ts->rt_misc_info.rt_misc_info_val;
-		}
-		for (i = pole->listidx; i < len; i++)
-			if (mi[i].rmi_type == footn_in ||
-			    mi[i].rmi_type == comm_in)
-				break;
-		if (i == len) {
-			next_action(global);
-			continue;
-		}
-		global = mi[i].rmi_numeric;
-		mark_read(global);
-		hoppade++;
-		next_action(global);
-		lasttext = global;
+	if (checkifread(nr))
+		return; /* This message is already marked read */
+
+	if ((ts = rk_textstat(nr)) == NULL)
+		return; /* Can't do anything */
+	mi = ts->rt_misc_info.rt_misc_info_val;
+	len = ts->rt_misc_info.rt_misc_info_len;
+
+	for (i = 0; i < len; i++) {
+		if (mi[i].rmi_type == footn_in ||
+		    mi[i].rmi_type == comm_in)
+			skip(mi[i].rmi_numeric);
 	}
+	hoppade++;
+	mark_read(nr);
+}
+
+void
+next_hoppa(char *str)
+{
+	hoppade = 0;
+	skip(lasttext);
+
+	if (hoppade == 0)
+		rprintf("Du hoppade inte över några inlägg.\n");
+	else
+		rprintf("Du hoppade över %d inlägg.\n", hoppade);
+	next_action(lasttext);
 }
 
 void

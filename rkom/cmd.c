@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.70 2003/09/25 18:38:19 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.71 2003/10/01 13:31:06 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -107,7 +107,6 @@ nxtcmd(char **str)
 void
 cmd_vilka(char *str)
 {
-	struct rk_dynamic_session_info_retval *ppp;
 	struct rk_dynamic_session_info *pp;
 	int i, antal, invisible, visible, clients, type, idle;
 	char *s;
@@ -135,14 +134,12 @@ cmd_vilka(char *str)
 		type |= WHO_INVISIBLE;
 	if (type == 0)
 		type = WHO_VISIBLE;
-	ppp = rk_vilka(idle, type);
+	pp = rk_vilka(idle, type);
 
-	antal = ppp->rdv_rds.rdv_rds_len;
-	pp = ppp->rdv_rds.rdv_rds_val;
-	if (antal == 0) {
-		rprintf("Det är inga påloggade alls.\n");
-		return;
-	}
+	for (antal = 0; pp[antal].rds_session; antal++)
+		;
+	if (antal == 0)
+		return rprintf("Det är inga påloggade alls.\n");
 
 	rprintf("Det är %d person%s påloggade.\n",
 	    antal, antal == 1 ? "" : "er");
@@ -195,15 +192,14 @@ void
 cmd_login(char *str)
 {
 	struct rk_confinfo *rv;
-	struct rk_unreadconfval *conf;
 	struct rk_conference *rc;
-	int nconf, userid;
+	int userid;
+	u_int32_t *c;
 	char *passwd;
 
-	if (str == 0) {
-		rprintf("Du måste ange vem du vill logga in som.\n");
-		return;
-	}
+	if (str == 0)
+		return rprintf("Du måste ange vem du vill logga in som.\n");
+
 	if ((rv = match_complain(str, MATCHCONF_PERSON)) == NULL)
 		return;
 
@@ -241,9 +237,8 @@ cmd_login(char *str)
 		show_text(rc->rc_msg_of_day, 1);
 	}
 
-	conf = rk_unreadconf(myuid);
-	nconf = conf->ru_confs.ru_confs_len;
-	if (nconf)
+	c = rk_unreadconf(myuid);
+	if (c[0])
 		prompt = PROMPT_NEXT_CONF;
 }
 
