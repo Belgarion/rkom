@@ -77,7 +77,7 @@ async(int level)
 		break;
 
 	case 5: /* async-new-name */
-		m = malloc(sizeof(struct mesg));
+		m = calloc(sizeof(struct mesg), 1);
 		m->type = type;
 		tmp = m->pers = get_int();
 		m->msg = get_string();
