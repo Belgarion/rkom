@@ -277,10 +277,8 @@ get_membership(int uid, int conf, struct rk_membership **member)
 	return 0;
 }
 
-#if 0
-
-void
-delete_membership_internal()
+static void
+delete_membership_internal(void)
 {
 	struct get_membership_store *walker, *owalker;
 
@@ -295,7 +293,6 @@ delete_membership_internal()
 	}
 	gms = 0;
 }
-#endif
 
 static void
 set_last_read_internal(int conf, int local)
@@ -376,9 +373,10 @@ get_map(int conf, int first, int otexts)
 	get_accept('\n');
 	return texts;
 }
+#endif
 
-int
-change_conference(int conf)
+int32_t
+rk_change_conference_server(u_int32_t conf)
 {
 	int ret;
 	char buf[20];
@@ -392,23 +390,6 @@ change_conference(int conf)
 		get_accept('\n');
 	return ret;
 }
-
-int
-add_member(int conf, int uid, int priority, int where, int type)
-{
-	int ret;
-	char buf[30];
-
-	sprintf(buf, "100 %d %d %d %d %d\n", conf, uid, priority, where, type);
-	ret = send_reply(buf);
-	if (ret) {
-		ret = get_int();
-		get_eat('\n');
-	} else
-		get_accept('\n');
-	return ret;
-}
-#endif
 
 static int
 next_local(int conf, int local)
@@ -516,3 +497,38 @@ rk_mark_read_server(u_int32_t conf, u_int32_t local)
 	get_eat('\n');
 	return i;
 };
+
+int32_t
+rk_set_last_read_server(u_int32_t conf, u_int32_t local)
+{
+	char buf[20];
+
+	sprintf(buf, "77 %d %d\n", conf, local);
+	if (send_reply(buf)) {
+		int ret = get_int();
+		get_eat('\n');
+		return ret;
+	}
+	get_eat('\n');
+	set_last_read_internal(conf, local);
+	return 0;
+}
+
+int32_t 
+rk_add_member_server(u_int32_t conf, u_int32_t uid, u_int8_t prio,
+    u_int16_t where, u_int32_t flags)
+{
+	int ret;
+	char buf[30];
+
+	sprintf(buf, "100 %d %d %d %d %d\n", conf, uid, prio, where, flags);
+	ret = send_reply(buf);
+	if (ret) {
+		ret = get_int();
+		get_eat('\n');
+		return ret;
+	}
+	get_accept('\n');
+	delete_membership_internal();
+	return ret;
+}

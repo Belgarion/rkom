@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.4 2000/10/11 17:36:26 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.5 2000/10/12 18:23:01 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -249,3 +249,21 @@ struct rk_text_stat rk_textstat(u_int32_t);
  * Fetches the text body from server.
  */
 string rk_gettext(u_int32_t);
+
+/*
+ * Set last read read local text in a conference.
+ * Args are (conference, local textnumber) and returns a lyskom error number.
+ */
+int32_t rk_set_last_read(u_int32_t, u_int32_t);
+
+/*
+ * Change to new working conference.
+ * Arg is (conference), returns a lyskom error number.
+ */
+int32_t rk_change_conference(u_int32_t);
+
+/*
+ * Adds/changes a member in a conference.
+ * Args are (conf, uid, prio, where, flags) and returns a lyskom error number.
+ */
+int32_t rk_add_member(u_int32_t, u_int32_t, u_int8_t, u_int16_t, u_int32_t);
