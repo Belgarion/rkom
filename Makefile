@@ -1,9 +1,14 @@
-#	$Id: Makefile,v 1.4 2001/06/24 09:46:47 ragge Exp $
+#	$Id: Makefile,v 1.5 2001/11/18 14:35:11 ragge Exp $
 #
 all:
-	@(cd backend; make)
-	@(cd rkom; make)
+	@if [ `uname` = NetBSD ]; then \
+		echo "Using NetBSD" ; \
+		make -f Makefile.bsd ; \
+	elif [ `uname` = SunOS ]; then \
+		make -f Makefile.sunos ; \
+	fi
 
 clean:
 	@(cd backend; make clean)
+	@(cd libredit; make clean)
 	@(cd rkom; make clean)
