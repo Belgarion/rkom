@@ -12,6 +12,13 @@
 #include "set.h"
 #include "backend.h"
 
+/*
+ * Current syntax for read messages:
+ * - Read texts are marked read in all conferences where it is added.
+ * - A text is only considered read if it is marked read in all 
+ *   conferences where the user is member.
+ */
+
 struct keeptrack {
 	struct keeptrack *back;
 	int textnr;
@@ -48,15 +55,35 @@ next_prompt()
 		prompt = PROMPT_SEE_TIME;
 }
 
-#if 0
 /*
- * Check if the global text number globno is read in some conference.
+ * Check if the global text number globno is unread in any conference.
+ * If so, return 0, if all read return 1.
  */
 static int
-checkread(int globno)
+checkifread(int globno)
 {
+	struct rk_text_stat *ts;
+	struct rk_misc_info *mi;
+	int i, len, cno;
+
+	if ((ts = rk_textstat(globno)) == NULL)
+		return 1; /* Consider read in all conferences */
+
+	len = ts->rt_misc_info.rt_misc_info_len;
+	mi = ts->rt_misc_info.rt_misc_info_val;
+	for (i = 0; i < len; i++) {
+		if (mi[i].rmi_type == recpt ||
+		    mi[i].rmi_type == cc_recpt ||
+		    mi[i].rmi_type == bcc_recpt) {
+			cno = mi[i].rmi_numeric;
+			if (mi[i+1].rmi_type != loc_no)
+				continue;
+			if (rk_local_is_read(cno, mi[i+1].rmi_numeric) == 0)
+				return 0;
+		}
+	}
+	return 1;
 }
-#endif
 
 /*
  * Next action: decide what to do next is. Choose between:
@@ -84,13 +111,8 @@ next_action(int nr)
 	for (i = 0; i < len; i++)
 		if (mi[i].rmi_type == footn_in ||
 		    mi[i].rmi_type == comm_in) {
-			struct rk_text_stat *ts2;
-
-			if ((ts2 = rk_textstat(mi[i].rmi_numeric)) == NULL)
-				continue;
-			if (rk_is_read(mi[i].rmi_numeric, curconf))
-				continue;
-			break;
+			if (checkifread(mi[i].rmi_numeric) == 0)
+				break;
 		}
 
 	if (i == len) { /* No, nothing followed */
@@ -108,13 +130,8 @@ again:
 		for (i = pole->listidx + 1; i < len; i++)
 			if (mi[i].rmi_type == footn_in ||
 			    mi[i].rmi_type == comm_in) {
-				struct rk_text_stat *ts2;
-
-				if ((ts2 = rk_textstat(mi[i].rmi_numeric)) == NULL)
-					continue;
-				if (rk_is_read(mi[i].rmi_numeric, curconf))
-					continue;
-				break;  
+				if (checkifread(mi[i].rmi_numeric) == 0)
+					break;
 			}
 		if (i == len) { /* last text at this leaf, iterate */
 			struct keeptrack *old;
@@ -203,7 +220,8 @@ mark_read(int nr)
 	len = ts->rt_misc_info.rt_misc_info_len;
 	mi = ts->rt_misc_info.rt_misc_info_val;
 	for (i = 0; i < len; i++) {
-		if (mi[i].rmi_type != recpt && mi[i].rmi_type != cc_recpt)
+		if (mi[i].rmi_type != recpt && mi[i].rmi_type != cc_recpt &&
+		    mi[i].rmi_type != bcc_recpt)
 			continue;
 		if (mi[i+1].rmi_type != loc_no)
 			continue;
@@ -260,7 +278,7 @@ try:	for (i = pole->listidx; i < len; i++)
 	if (i == len) {
 		goto back;
 	}
-	if (rk_is_read(mi[i].rmi_numeric, curconf))
+	if (checkifread(mi[i].rmi_numeric))
 		goto try;
 	global = mi[i].rmi_numeric;
 	rv = show_text(global, 1);

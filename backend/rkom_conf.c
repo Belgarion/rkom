@@ -499,28 +499,20 @@ is_read(int conf, int text, int uid)
 /*
  * Check if text nr is marked read in conference conf.
  */
-int32_t
-rk_is_read(u_int32_t nr, u_int32_t conf)
+int
+rk_local_is_read(u_int32_t conf, u_int32_t localno)
 {
-	struct rk_text_stat *ts;
-	struct rk_misc_info *mi;
-	int i, len;
+	struct rk_membership *m;
+	int i, num, *txts;
 
-	if ((ts = rk_textstat(nr)) == NULL)
-		return 1; /* Not allowed to see, consider read */
-	len = ts->rt_misc_info.rt_misc_info_len;
-	mi = ts->rt_misc_info.rt_misc_info_val;
-	for (i = 0; i < len; i++) {
-		if (mi[i].rmi_type == recpt ||
-		    mi[i].rmi_type == cc_recpt ||
-		    mi[i].rmi_type == bcc_recpt) {
-			if (mi[i].rmi_numeric != conf)
-				continue;
-			if (mi[i+1].rmi_type != loc_no)
-				continue;
-			return is_read(conf, loc_no, myuid);
-		}
-	}
+	if (get_membership(myuid, conf, &m))
+		return 1; /* not member */
+
+	num = m->rm_read_texts.rm_read_texts_len;
+	txts = m->rm_read_texts.rm_read_texts_val;
+	for (i = 0; i < num; i++)
+		if (txts[i] == localno)
+			return 1;
 	return 0;
 }
 

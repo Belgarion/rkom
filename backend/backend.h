@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.18 2003/09/25 11:45:03 ragge Exp $	*/
+/*	$Id: backend.h,v 1.19 2003/09/25 14:08:47 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -92,7 +92,12 @@ void	reread_conf_stat_bg(int conf);
 void	newname(int);
 void	invalidate_local(struct rk_text_stat *ts);
 int32_t rk_change_conference(u_int32_t conf);
-int32_t rk_is_read(u_int32_t nr, u_int32_t conf);
+
+/*
+ * Return 1 if the local number given is read in conference conf
+ * or if the user is not member of the conference, 0 otherwise.
+ */
+int	rk_local_is_read(u_int32_t conf, u_int32_t localno);
 u_int32_t rk_next_unread(u_int32_t conf, u_int32_t uid);
 u_int32_t rk_local_to_global(u_int32_t conf, u_int32_t local);
 int32_t rk_mark_read(u_int32_t conf, u_int32_t local);
