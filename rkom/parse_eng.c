@@ -1,4 +1,4 @@
-/* $Id: parse_eng.c,v 1.4 2000/11/28 22:32:21 jens Exp $ */
+/* $Id: parse_eng.c,v 1.5 2000/11/29 11:22:08 jens Exp $ */
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
@@ -143,7 +143,7 @@ argv_concat(int *new_argc, char ***new_argv,
 	*new_argv = n_argv;
 	*new_argc = n_argc;
 
-	p = (char *)&n_argv[n_argc + 1];
+	p = (char *)&n_argv[n_argc];
 	for (i = 0; i < argc1; i++) {
 		n_argv[i] = p;
 		strcpy(p, argv1[i]);
@@ -172,7 +172,7 @@ argv_dup(int argc, char *argv[])
 	if ((nargv = malloc(len + argc * sizeof(char *))) == NULL)
 		return NULL;
 
-	p = (char *)&nargv[argc + 1];
+	p = (char *)&nargv[argc];
 	for (i = 0; i < argc; i++) {
 		nargv[i] = p;
 		strcpy(p, argv[i]);

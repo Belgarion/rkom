@@ -1,4 +1,4 @@
-#	$Id: Makefile,v 1.8 2000/11/22 11:58:25 ragge Exp $
+#	$Id: Makefile,v 1.9 2000/11/29 11:22:07 jens Exp $
 #
 #	makefile for the rkom frontend
 #
@@ -10,5 +10,10 @@ LDADD+= -ledit -ltermcap
 NOMAN=	y
 CFLAGS= -g
 WARNS?=	1
+
+#DEBUG=1
+.if defined(DEBUG)
+LDADD+= -L/usr/pkg/lib -lefence
+.endif
 
 .include <bsd.prog.mk>
