@@ -22,7 +22,7 @@
 static char *get_text(char *);
 static char *input_string(void);
 static void parse_text(char *);
-static void extedit(char *);
+static int extedit(char *);
 static char *show_format(void);
 
 static struct rk_misc_info *mi;
@@ -54,8 +54,11 @@ write_new(char *str)
 	mi[0].rmi_type = recpt;
 	mi[0].rmi_numeric = curconf;
 	nmi = 1;
-	if (use_editor) {
-		extedit(0);
+a:	if (use_editor) {
+		if (extedit(0)) {
+			use_editor = 0;
+			goto a;
+		}
 	} else {
 		txt = get_text(0);
 		parse_text(txt);
@@ -304,7 +307,7 @@ show_format()
 	return ret;
 }
 
-void
+int
 extedit(char *sub)
 {
 	struct stat sb;
@@ -320,7 +323,7 @@ extedit(char *sub)
 	f = mkstemp(fil);
 	if (f == -1) {
 		printf("Det gick inte: %s\n", strerror(errno));
-		return;
+		return 0;
 	}
 	if (sub)
 		ctext = strdup(sub);
@@ -334,8 +337,15 @@ extedit(char *sub)
 	args[3] = 0;
 	if (fork() == 0) {
 		execve(editor, args, environ);
+		exit(errno); /* Only if exec failed */
 	}
 	wait(&f);
+	if (WEXITSTATUS(f)) {
+		unlink(fil);
+		printf("Kunde inte anropa %s: %s\n", editor, 
+		    strerror(WEXITSTATUS(f)));
+		return 1;
+	}
 	stat(fil, &sb);
 	txt = calloc(sb.st_size + 5, 1);
 	f = open(fil, O_RDONLY);
@@ -344,6 +354,7 @@ extedit(char *sub)
 	unlink(fil);
 	parse_text(txt);
 	free(txt);
+	return 0;
 }
 
 static void
@@ -418,8 +429,11 @@ write_internal(char *str, char *typ, int ktyp)
 		t[1] = 0;
 
 	is_writing = 1;
-	if (use_editor) {
-		extedit(s);
+a:	if (use_editor) {
+		if (extedit(s)) {
+			use_editor = 0;
+			goto a;
+		}
 	} else {
 		txt = get_text(s);
 		parse_text(txt);
