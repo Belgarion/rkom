@@ -267,6 +267,49 @@ try:	for (i = pole->listidx; i < len; i++)
 }
 
 void
+next_marked(char *str)
+{
+	static int lastseen;
+	struct rk_mark_retval *rmr;
+	struct rk_marks *rm;
+	int i;
+
+	rmr = rk_getmarks();
+	rm = rmr->rmr_marks.rmr_marks_val;
+	if (rmr->rmr_retval)
+		return rprintf("Det sket sej: %s\n", error(rmr->rmr_retval));
+	if (rmr->rmr_marks.rmr_marks_len == 0)
+		return rprintf("Du har inga markerade inlägg.\n");
+	rprintf("(Återse) nästa markerade inlägg.\n");
+	if (lastseen == 0) {
+		lastseen = rm[0].rm_text;
+		show_text(lastseen, 1);
+		prompt = PROMPT_NEXT_MARKED;
+		free(rmr);
+		return;
+	}
+	for (i = 0; i < rmr->rmr_marks.rmr_marks_len; i++) {
+		if (rm[i].rm_text != lastseen)
+			continue;
+		if (i+1 == rmr->rmr_marks.rmr_marks_len) {
+			lastseen = 0;
+			rprintf("Du har slut markerade inlägg.\n");
+			next_prompt();
+			free(rmr);
+			return;
+		}
+		prompt = PROMPT_NEXT_MARKED;
+		lastseen = rm[i+1].rm_text;
+		show_text(lastseen, 1);
+		free(rmr);
+		return;
+	}
+	lastseen = 0;
+	next_prompt();
+	free(rmr);
+}
+
+void
 next_resee_comment()
 {
 	struct rk_text_stat *ts;

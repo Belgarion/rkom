@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.42 2002/09/01 13:36:42 ragge Exp $ */
+/* $Id: parse.c,v 1.43 2002/09/04 15:39:47 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -43,6 +43,7 @@ static int CC_2(exec_,x) (int argc, char *argv[])
 /* Commands for reading */
 DCMD(read_next_text);
 DCMD(read_next_cmt);
+DCMD(read_next_marked);
 DCMD(read_see_again_cmt);
 DCMD(read_see_again_faq);
 DCMD(read_see_again_cmt_no);
@@ -158,6 +159,7 @@ struct command_list commands[] = {
 /* Commands for reading */
 DROW("nästa inlägg",			0,PE_NO_ARG,read_next_text)
 DROW("nästa kommentar",			0,PE_NO_ARG,read_next_cmt)
+DROW("nästa markerade",			0,PE_NO_ARG,read_next_marked)
 DROW("återse",				0,PE_NUM_ARG,read_see_again_cmt_no)
 DROW("återse kommenterade",		1,PE_NO_ARG,read_see_again_cmt)
 DROW("återse oredigerat",		0,PE_NUM_ARG,read_see_unmodified)
@@ -328,6 +330,8 @@ exec_cmd(const char *str)
 			next_conf(NULL);
 		else if (prompt == PROMPT_NEXT_COMMENT)
 			next_comment(NULL);
+		else if (prompt == PROMPT_NEXT_MARKED)
+			next_marked(NULL);
 		else
 			rprintf("Okänd prompt %s\n", prompt);
 		return 0;
@@ -393,6 +397,14 @@ exec_read_next_text(int argc, char *argv[])
 {
 	LF;
 	next_text(NULL);
+	return 0;
+}
+
+static int
+exec_read_next_marked(int argc, char *argv[])
+{
+	LF;
+	next_marked(NULL);
 	return 0;
 }
 

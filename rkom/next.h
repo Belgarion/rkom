@@ -9,6 +9,7 @@ void	next_text(char *);
 void	next_resee_presentation(char *);
 void	next_resee_root(int);
 void	next_comment(char *);
+void	next_marked(char *);
 void	next_resetchain(void);
 void	next_prompt(void);
 void	next_again(char *);
