@@ -295,8 +295,9 @@ delete_membership_internal()
 	}
 	gms = 0;
 }
+#endif
 
-void
+static void
 set_last_read_internal(int conf, int local)
 {
 	struct get_membership_store *walker;
@@ -304,14 +305,14 @@ set_last_read_internal(int conf, int local)
 	walker = gms;
 	while (walker) {
 		if (walker->number == conf) {
-			walker->member.last_text_read = local;
+			walker->member.rm_last_text_read = local;
 			return;
 		}
 		walker = walker->next;
 	}
 }
 
-
+#if 0
 static int *confs = 0;
 
 int *
@@ -407,28 +408,9 @@ add_member(int conf, int uid, int priority, int where, int type)
 		get_accept('\n');
 	return ret;
 }
+#endif
 
-static int next_local(int, int);
-
-int
-get_next_unread_local(int conf, int uid)
-{
-	int highest, last;
-
-	highest = get_uconf_stat(conf)->highest_local_no;
-	last = get_membership(uid, conf)->last_text_read;
-
-	last = next_local(conf, last + 1);
-	if (last == 0)
-		return 0;
-
-	if (last > highest)
-		return 0;
-	else
-		return last;
-}
-
-int
+static int
 next_local(int conf, int local)
 {
 	int ret;
@@ -446,8 +428,30 @@ next_local(int conf, int local)
 	return ret;
 }
 
-int
-local_to_global(int conf, int local)
+u_int32_t
+rk_next_unread_server(u_int32_t conf, u_int32_t uid)
+{
+	struct rk_conference *c;
+	struct rk_membership *m;
+	int highest, last;
+
+	get_conf_stat(conf, &c);
+	highest = c->rc_first_local_no + c->rc_no_of_texts - 1;
+	get_membership(uid, conf, &m);
+	last = m->rm_last_text_read;
+
+	last = next_local(conf, last + 1);
+	if (last == 0)
+		return 0;
+
+	if (last > highest)
+		return 0;
+	else
+		return last;
+}
+
+u_int32_t
+rk_local_to_global_server(u_int32_t conf, u_int32_t local)
 {
 	int ret, junk;
 	char buf[30];
@@ -456,7 +460,7 @@ local_to_global(int conf, int local)
 	ret = send_reply(buf);
 	if (ret) {
 		ret = get_int();
-		printf("local_to_global sket sej: %s\n", error(ret));
+		printf("local_to_global sket sej: %d\n", (ret));
 		get_eat('\n');
 		return 0;
 	}
@@ -477,6 +481,7 @@ local_to_global(int conf, int local)
 	return ret;
 }
 
+#if 0
 void
 conf_set_high_local(int conf, int local)
 {
@@ -498,19 +503,16 @@ conf_set_high_local(int conf, int local)
 
 #endif
 
+int32_t
+rk_mark_read_server(u_int32_t conf, u_int32_t local)
+{
+	char buf[50];
+	int i = 0;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	set_last_read_internal(conf, local);
+	sprintf(buf, "27 %d 1 { %d }\n", conf, local);
+	if (send_reply(buf))
+		i = get_int();
+	get_eat('\n');
+	return i;
+};

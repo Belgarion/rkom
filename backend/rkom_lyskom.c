@@ -45,10 +45,8 @@ rkom_loop()
 	for (;;) {
 		int rv;
 	
-#ifdef notyet
 		if (level == 0)
 			async_handle();
-#endif
 		/* Wait for something to happen */
 		rv = poll(pfd, 2, INFTIM);
 		if (rv == 0)
@@ -62,7 +60,6 @@ rkom_loop()
 			if (handling++)
 				warn("front-end unwanted talk");
 			spc_process_request();
-//			bgreceive();
 			handling = 0;
 		}
 		if (pfd[1].revents & (POLLIN|POLLPRI)) {
@@ -71,10 +68,8 @@ rkom_loop()
 
 			switch (c) {
 			case ':':
-#ifdef notyet
 				async(level);
 				break;
-#endif
 
 			case '%':
 				c = get_char();

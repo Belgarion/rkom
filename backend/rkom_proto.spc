@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.2 2000/10/08 14:26:29 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.3 2000/10/09 08:33:51 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -15,6 +15,45 @@ struct rk_time {
 	u_int16_t	rt_day_of_year;
 	u_int8_t	rt_is_dst;
 };
+
+/*
+ * Additional text information.
+ *
+ * Type is: recpt, cc_recpt, comm_to, comm_in, footn_to, footn_in, loc_no
+ *	rec_time, sent_by, sentat, bcc_recpt
+ * with increasing numbers. Definitions in external.h.
+ */
+struct rk_misc_info {
+	u_int32_t	rmi_type;	/* Type of misc field */
+	u_int32_t	rmi_numeric;	/* Used if type is numeric */
+	struct rk_time	rmi_time;	/* Used if type is time */
+};
+
+/* Gurka */
+struct rk_aux_item {
+	u_int32_t	rai_aux_no;
+	u_int32_t	rai_tag;
+	u_int32_t	rai_creator;
+	u_int32_t	rai_created_at;
+	u_int32_t	rai_flags;
+	u_int32_t	inherit_limit;
+	string		rai_data;
+};
+
+/*
+ * Information about a text.
+ */
+struct rk_text_stat {
+	int32_t		rt_retval;
+	struct rk_time	rt_time;
+	u_int32_t	rt_author;
+	u_int32_t	rt_no_of_lines;
+	u_int32_t	rt_no_of_chars;
+	u_int32_t	rt_no_of_marks;
+	struct rk_misc_info rt_misc_info<>;
+	struct rk_aux_item rt_aux_item<>;
+};
+
 
 /*
  * Information of an article of imediate interest.
@@ -54,15 +93,11 @@ struct rk_membership {
 	u_int32_t	rm_type;
 };
 
-struct rk_membership_args {
-	u_int32_t	rma_uid;
-	u_int32_t	rma_mid;
-};
-
 /*
  * Get membership information about a user in a conference.
+ * Args are uid, mid.
  */
-struct rk_membership rk_membership(struct rk_membership_args);
+struct rk_membership rk_membership(u_int32_t, u_int32_t);
 
 /*
  * Description of a conference.
@@ -205,16 +240,30 @@ int32_t rk_alive(int32_t);
  */
 struct rk_time rk_time(int32_t);
 
-
-
-/* get article with the specific id */
-struct rk_article rk_get_article(u_int32_t);
+/*
+ * Get next unread message in a conference.
+ * Args are (conference, uid) and returns the conference local text number.
+ */
+u_int32_t rk_next_unread(u_int32_t, u_int32_t);
 
 /*
- * Get a list of id numers of articles that are unread in
- * the conference with the specific id.
+ * Converts a local text number to a global number.
+ * Args are (conference, textnumber) and returns the global text number.
  */
-struct rk_id_list rk_get_unread(u_int32_t);
+u_int32_t rk_local_to_global(u_int32_t, u_int32_t);
 
-/* Get the name of the specific id. */
-string rk_get_name(u_int32_t);
+/*
+ * Marks a text as read in a conference.
+ * Args are (conference, textnumber) and returns a lyskom error number.
+ */
+int32_t rk_mark_read(u_int32_t, u_int32_t);
+
+/*
+ * Get statistics about a text.
+ */
+struct rk_text_stat rk_textstat(u_int32_t);
+
+/*
+ * Fetches the text body from server.
+ */
+string rk_gettext(u_int32_t);

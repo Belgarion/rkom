@@ -21,6 +21,7 @@ read_in_time(struct rk_time *t)
 	t->rt_is_dst = get_int();
 }
 
+#if 0
 void
 read_in_aux_item(struct aux_item *a)
 {
@@ -32,3 +33,4 @@ read_in_aux_item(struct aux_item *a)
 	a->inherit_limit = get_int();
 	a->data = get_string();
 }
+#endif

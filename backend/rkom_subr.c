@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.4 2000/10/08 14:26:29 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.5 2000/10/09 08:33:51 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -21,7 +21,7 @@
 #include "exported.h"
 #include "backend.h"
 
-int sockfd, readfd, writefd, async;
+int sockfd, readfd, writefd, asyncfd;
 static char *version = "noll";
 static int childpid;
 /*
@@ -89,7 +89,7 @@ rkom_connect(char *server, char *frontend, char *os_username)
 		spc_set_read_fd(toback[0]);
 		writefd = fromback[1];
 		readfd = toback[0];
-		async = asyncio[1];
+		asyncfd = asyncio[1];
 		rkom_loop(); /* Backend main loop */
 	}
 
@@ -98,7 +98,7 @@ rkom_connect(char *server, char *frontend, char *os_username)
 
 	writefd = toback[1];
 	readfd = fromback[0];
-	async = asyncio[0];
+	asyncfd = asyncio[0];
 	close(toback[0]);
 	close(fromback[1]);
 	close(asyncio[1]);

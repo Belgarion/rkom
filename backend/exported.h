@@ -1,4 +1,4 @@
-/*	$Id: exported.h,v 1.4 2000/10/08 14:26:29 ragge Exp $	*/
+/*	$Id: exported.h,v 1.5 2000/10/09 08:33:51 ragge Exp $	*/
 /*
  * Exported functions from the rkom frontend/backend communication system.
  *
@@ -7,6 +7,7 @@
  *	that must be understood by the frontend.
  */
 
+#if 0
 /* Some forward declarations */
 struct tm;
 
@@ -28,6 +29,13 @@ struct aux_item {
 	int		inherit_limit;
 	char *		data;
 };
+#endif
+
+enum Misc_Info_types {
+	recpt, cc_recpt, comm_to, comm_in, footn_to, footn_in,
+	loc_no, rec_time, sent_by, sentat, bcc_recpt = 15
+};
+
 
 /*
  * Type of membership in a conference.
@@ -208,7 +216,7 @@ void	rkom_alive(void);
  * Asks the server for the current time.
  * This call never fails.
  */
-void	rkom_time(struct tm *tm);
+//void	rkom_time(struct tm *tm);
 
 /*
  * Set the what-i-am-doing string for the logged-in user.

@@ -1,4 +1,4 @@
-/*	$Id: backend.h,v 1.3 2000/10/08 14:26:29 ragge Exp $	*/
+/*	$Id: backend.h,v 1.4 2000/10/09 08:33:51 ragge Exp $	*/
 /*
  * Prototypes for the rkom backend internal functions.
  */
@@ -41,6 +41,10 @@ int	get_membership(int uid, int conf, struct rk_membership **member);
 /* Helper functions, in rkom_helpers.c */
 void	read_in_time(struct rk_time *t);
 void	read_in_aux_item(struct aux_item *a);
+
+/* Async functions, in rkom_async.c */
+void	async(int);
+void	async_handle(void);
 
 /* variables */
 extern	int readfd;	/* Get messages from frontend */

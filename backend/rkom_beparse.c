@@ -111,7 +111,6 @@ rk_unreadconf_server(u_int32_t uid)
 	char buf[15];
 
 	sprintf(buf, "52 %d\n", uid);
-	i = send_reply(buf);
 	if ((i = send_reply(buf))) {
 		get_eat('\n');
 		ure = calloc(sizeof(struct rk_unreadconfval), 1);
@@ -165,12 +164,12 @@ rk_persinfo_server(u_int32_t uid)
 }               
 
 struct rk_membership *
-rk_membership_server(struct rk_membership_args *args)
+rk_membership_server(u_int32_t uid, u_int32_t mid)
 {
 	struct rk_membership *m, *ret;
 
 	ret = calloc(sizeof(struct rk_membership), 1);
-	ret->rm_retval = get_membership(args->rma_uid, args->rma_mid, &m);
+	ret->rm_retval = get_membership(uid, mid, &m);
 	if (ret->rm_retval)
 		return ret;
 	bcopy(m, ret, sizeof(struct rk_membership));
@@ -215,6 +214,67 @@ rk_vilka_server(struct rk_vilka_args *rva)
 	return pp;
 }
 
-struct rk_article *rk_get_article_server(u_int32_t a){return 0;}
-struct rk_id_list *rk_get_unread_server(u_int32_t a){return 0;}
-char *rk_get_name_server(u_int32_t a){return 0;}
+char *
+rk_gettext_server(u_int32_t nr)
+{
+	char buf[50], *c;
+	int i;
+
+	sprintf(buf, "25 %d 0 2000000\n", nr);
+	if (send_reply(buf)) {
+		if ((i = get_int()))
+			printf("Det sket sej: %d\n", i);
+		get_eat('\n');
+		return "";
+	}
+	c = get_string();
+	get_accept('\n');
+	return c;
+}
+
+static struct rk_misc_info *pmi;
+//static struct rk_aux_item *pai;
+
+struct rk_text_stat *
+rk_textstat_server(u_int32_t nr)
+{
+	struct rk_text_stat *ts;
+	char buf[30];
+	int len, i;
+
+	ts = calloc(sizeof(struct rk_text_stat), 1);
+	sprintf(buf, "90 %d\n", nr);
+	if (send_reply(buf)) {
+		ts->rt_retval = get_int();
+		get_eat('\n');
+		return ts;
+	}
+	read_in_time(&ts->rt_time);
+	ts->rt_author = get_int();
+	ts->rt_no_of_lines = get_int();
+	ts->rt_no_of_chars = get_int();
+	ts->rt_no_of_marks = get_int();
+	len = ts->rt_misc_info.rt_misc_info_len = get_int();
+	if (len) {
+		if (pmi)
+			free(pmi);
+		pmi = calloc(sizeof(struct rk_misc_info), len);
+		ts->rt_misc_info.rt_misc_info_val = pmi;
+		get_accept('{');
+		for (i = 0; i < len; i++) {
+			pmi[i].rmi_type = get_int();
+			if (pmi[i].rmi_type == rec_time ||
+			    pmi[i].rmi_type == sentat)
+				read_in_time(&pmi[i].rmi_time);
+			else
+				pmi[i].rmi_numeric = get_int();
+		}
+		get_accept('}');
+	} else
+		get_accept('*');
+
+	get_eat('\n'); /* XXX */
+	return ts;
+}
+
+
