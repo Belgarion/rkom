@@ -1,4 +1,4 @@
-#	$Id: Makefile,v 1.16 2001/11/18 18:09:21 ragge Exp $
+#	$Id: Makefile,v 1.17 2003/09/17 10:52:03 ragge Exp $
 #
 #	makefile for the rkom frontend
 #
@@ -12,7 +12,7 @@ OBJS=	rkom.o set.o kbd.o nasta.o show.o lista.o error.o write.o \
 
 all:	rkom
 
-rkom: $(OBJS)
+rkom: $(OBJS) ../backend/librkom.a
 	$(CC) -o $@ $(CFLAGS) $(OBJS) $(LIBS) $(XLIBS)
 
 .c.o:

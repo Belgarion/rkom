@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.45 2002/11/06 16:04:28 offe Exp $ */
+/* $Id: parse.c,v 1.46 2003/09/17 10:52:03 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -9,6 +9,7 @@
 #include "rkomsupport.h"
 #include "next.h"
 #include "write.h"
+#include "backend.h"
 
 void cmd_logout(char *);
 void cmd_login(char *);
@@ -25,7 +26,6 @@ void cmd_leave(char *);
 #include "list.h"
 #include "rkom.h"
 #include "set.h"
-#include "rkom_proto.h"
 
 
 #include "parse_eng.h"

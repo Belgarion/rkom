@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.52 2002/11/14 18:36:16 ragge Exp $	*/
+/*	$Id: write.c,v 1.53 2003/09/17 10:52:03 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -18,13 +18,13 @@
 #include <fcntl.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 
 #include "rkom.h"
 #include "write.h"
 #include "set.h"
 #include "next.h"
 #include "rhistedit.h"
+#include "backend.h"
 
 static char *get_text(char *);
 static void parse_text(char *);

@@ -7,8 +7,8 @@
 #include <string.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "rkom.h"
+#include "backend.h"
 
 static int
 directmatch(struct rk_confinfo_retval *r, char *n)

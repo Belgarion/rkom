@@ -6,11 +6,11 @@
 #include <strings.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 
 #include "rkom.h"
 #include "next.h"
 #include "set.h"
+#include "backend.h"
 
 struct keeptrack {
 	struct keeptrack *back;

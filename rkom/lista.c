@@ -9,11 +9,11 @@
 #include <strings.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "rkom.h"
 #include "list.h"
 #include "next.h"
 #include "set.h"
+#include "backend.h"
 
 void
 list_comm(char *args)

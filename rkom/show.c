@@ -10,10 +10,10 @@
 #include <errno.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "rkom.h"
 #include "set.h"
 #include "next.h"
+#include "backend.h"
 
 char *supstr;
 

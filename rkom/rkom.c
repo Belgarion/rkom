@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.50 2003/08/22 07:01:20 ragge Exp $ */
+/* $Id: rkom.c,v 1.51 2003/09/17 10:52:03 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -33,12 +33,12 @@
 #include <ctype.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "rkom.h"
 #include "next.h"
 #include "set.h"
 #include "parse.h"
 #include "rhistedit.h"
+#include "backend.h"
 
 #define MAX_LINE	1024
 
@@ -46,9 +46,7 @@ int	main(int, char **);
 
 
 static int lasttime;
-static void sigio(int);
 static void sigwinch(int);
-static int async_collect(void);
 
 static void setup_tty(int);
 static void restore_tty(void);
@@ -65,6 +63,9 @@ char *p_next_marked = "(Återse) nästa markerade";
 char *prompt, *server;
 char *client_version = "ett.två.alfa";
 int wrows, wcols, swascii;
+int noprompt;
+HistEvent ev;
+History *hist;
 
 #ifndef INFTIM
 #define	INFTIM -1
@@ -86,16 +87,7 @@ char * __progname;
 int
 main(int argc, char *argv[])
 {
-	HistEvent ev;
-	History *hist;
-	const LineInfo  *lf;
-	const char *str;
-	char	buf[MAX_LINE];
-	size_t	len;
-	int	num;
-	struct pollfd	pfd[1];
-	struct timeval	tp;
-	int ch, noprompt;
+	int ch;
 	char *uname, *confile, *termtype;
 	struct rk_server *rs;
 
@@ -126,7 +118,6 @@ main(int argc, char *argv[])
 	argv += optind;
 	argc -= optind;
 
-	signal(SIGIO, sigio);
 	signal(SIGWINCH, sigwinch);
 
 	sigwinch(0);
@@ -142,10 +133,7 @@ main(int argc, char *argv[])
 	/* Attach to the KOM server */
 	if ((uname = getenv("USER")) == NULL)
 		uname = "amnesia";
-	if (rkom_fork())
-		err(1, "kunde inte starta backend");
-
-	rs = rk_connect(server, "", uname, client_version);
+	rs = rkom_connect(server, "", uname, client_version);
 	if (rs->rs_retval)
 		errx(1, "misslyckades koppla upp, error %d", rs->rs_retval);
 
@@ -158,13 +146,8 @@ main(int argc, char *argv[])
 	}
 	free(rs);
 
-	pfd[0].fd = 0;
-	pfd[0].events = POLLIN|POLLPRI;
-	noprompt = 0;
-
 	if ((termtype = getenv("TERM")) == NULL)
 		termtype = "vt100";
-	setup_tty(1);
 	hist = history_init();
 	history(hist, &ev, H_SETSIZE, 200);
 	main_el = el_init("rkom", stdin, stdout, stderr);
@@ -173,75 +156,57 @@ main(int argc, char *argv[])
 	el_set(main_el, EL_HIST, history, hist);
 	el_set(main_el, EL_TERMINAL, termtype);
 
-	for (;;) {
-		int rv;
-
-		if (noprompt)
-			noprompt = 0;
-		else
-			rprintf("\n%s - ", prompt);
-		fflush(stdout);
-
-		setup_tty(0);
-		pfd[0].revents = 0;
-		rv = poll(pfd, 1, INFTIM);
-		if (rv == 0)
-			continue;
-		if (rv < 0) {
-			if (errno != EINTR)
-				warn("poll");
-			noprompt = async_collect();
-			continue;
-		}
-		if (pfd[0].revents & (POLLIN|POLLPRI)) {
-			/*
-			 * Go to the beginning of the line to allow libedit
-			 * to start
-			 * from column 0 and overwrite the current prompt.
-			 */
-			outlines = 0;
-			rprintf("%c", '\r');	
-			if (el_gets(main_el, &num, 1) == NULL) {
-				noprompt++;
-				continue;
-			}
-			lf = el_line(main_el);
-			strncpy(buf, lf->buffer, MAX_LINE);
-			buf[MAX_LINE-1] = 0;
-			len = strlen(buf);
-			while((len > 0 && buf[len - 1] == '\n')
-#if defined(__FreeBSD__) /* isspace() is broken for non-ascii on NetBSD */
-			    || isspace(buf[len-1])
-#else
-				|| buf[len - 1] == ' '
-#endif
-			    ) {
-				buf[len - 1] = '\0';
-				len--;
-			}
-			str = buf;
-			exec_cmd(str);
-			discard = 0;
-#if !defined(__FreeBSD__)
-			if (len > 1)
-				history(hist, &ev, H_ENTER, buf);
-#endif
-
-			gettimeofday(&tp, 0);
-			if (tp.tv_sec - lasttime > 30) {
-				rk_alive();
-				lasttime = tp.tv_sec;
-			}
-		}
-		async_collect();
-	}
+	rprintf("\n%s - ", prompt);
+	async_collect();
+	fflush(stdout);
+	setup_tty(1);
+	rkom_loop();
 	return 0;
 }
 
 void
-sigio(int arg)
+rkom_command()
 {
-	signal(SIGIO, sigio);
+	const char *str;
+	struct timeval	tp;
+	const LineInfo  *lf;
+	char	buf[MAX_LINE];
+	int num;
+	size_t	len;
+
+	/*
+	 * Go to the beginning of the line to allow libedit
+	 * to start
+	 * from column 0 and overwrite the current prompt.
+	 */
+	outlines = 0;
+	rprintf("%c", '\r');	
+	if (el_gets(main_el, &num, 1) == NULL)
+		return;
+
+	lf = el_line(main_el);
+	strncpy(buf, lf->buffer, MAX_LINE);
+	buf[MAX_LINE-1] = 0;
+	len = strlen(buf);
+	while((len > 0 && buf[len - 1] == '\n') || isspace(buf[len-1])) {
+		buf[len - 1] = '\0';
+		len--;
+	}
+	str = buf;
+	exec_cmd(str);
+	discard = 0;
+	if (len > 1)
+		history(hist, &ev, H_ENTER, buf);
+
+	gettimeofday(&tp, 0);
+	if (tp.tv_sec - lasttime > 30) {
+		rk_alive();
+		lasttime = tp.tv_sec;
+	}
+
+	rprintf("\n%s - ", prompt);
+	fflush(stdout);
+	setup_tty(1);
 }
 
 void
@@ -254,7 +219,7 @@ sigwinch(int arg)
 	wcols = ws.ws_col;
 }
 
-int
+void
 async_collect()
 {
 	struct rk_async *ra;
@@ -266,7 +231,10 @@ async_collect()
 		switch (ra->ra_type) {
 		case 0:
 			free(ra);
-			return retval;
+			if (retval == 0)
+				rprintf("\n%s - ", prompt);
+			fflush(stdout);
+			return;
 
 		case 9:
 		case 13: {

@@ -10,10 +10,10 @@
 #include <err.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "rhistedit.h"
 #include "rkom.h"
 #include "rtype.h"
+#include "backend.h"
 
 #include "set.h"
 

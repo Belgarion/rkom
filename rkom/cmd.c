@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.64 2002/11/14 18:36:16 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.65 2003/09/17 10:52:03 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -16,9 +16,8 @@
 #include <signal.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "rkom.h"
-#include "backend.h"	/* XXX */
+#include "backend.h"
 #include "next.h"
 #include "list.h"
 #include "write.h"
