@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.21 2003/09/17 14:14:05 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.22 2003/09/17 15:37:03 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -38,7 +38,7 @@ rkom_connect(char *server, char *frontend, char *os_username, char *fevers)
 	struct rk_server *rs;
 	struct sockaddr_in sin;
 	struct hostent *hp;
-	char *buf, *buf2;
+	char *buf2;
 
 	rs = malloc(sizeof(struct rk_server));
 	rs->rs_retval = -1;
@@ -80,10 +80,8 @@ rkom_connect(char *server, char *frontend, char *os_username, char *fevers)
 		buf2 = alloca(strlen(frontend) + 30);
 		sprintf(buf2, "%s (rkom backend)", frontend);
 	}
-	buf = alloca(strlen(buf2)+strlen(fevers)+30);
-	sprintf(buf, "69 %ldH%s %ldH%s\n", (long)strlen(buf2), buf2,
+	send_reply("69 %ldH%s %ldH%s\n", (long)strlen(buf2), buf2,
 	    (long)strlen(fevers), fevers);
-	send_reply(buf);
 	get_accept('\n');
 
 	/* Check what the server is running */

@@ -124,15 +124,13 @@ static struct uarea *
 get_uarea(int uid)
 {
 	struct rk_person *p;
-	char buf[30];
 
 	if (upole)
 		free(upole);
 	get_pers_stat(myuid, &p);
 	if (p->rp_user_area == 0)
 		return NULL;
-	sprintf(buf, "25 %d 0 2000000\n", p->rp_user_area);
-	if (send_reply(buf)) {
+	if (send_reply("25 %d 0 2000000\n", p->rp_user_area)) {
 		get_int();
 		get_eat('\n');
 		return 0;
@@ -199,7 +197,7 @@ rk_set_uarea(char *str, struct rk_uarea *u)
 	struct rk_person *p;
 	struct uarea *ua;
 	struct rk_val *v;
-	char *udata, *narea, *utstr, *hdr, *tmp;
+	char *udata, *narea, *hdr, *tmp;
 	int i, tot, len, no;
 
 	/* First make an uarea data string */
@@ -255,19 +253,15 @@ rk_set_uarea(char *str, struct rk_uarea *u)
 	}
 
 	/* Make the long string */
-	utstr = alloca(strlen(udata) + strlen(hdr) + 100);
-	sprintf(utstr, "86 %ldH%s %s 0 { } 0 { }\n",
-	    (long)(strlen(udata) + strlen(hdr) + 1), hdr, udata);
-
-	if (send_reply(utstr)) {
+	if (send_reply("86 %ldH%s %s 0 { } 0 { }\n",
+	    (long)(strlen(udata) + strlen(hdr) + 1), hdr, udata)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
 	}
 	no = get_int();
 	get_accept('\n');
-	sprintf(utstr, "57 %d %d\n", myuid, no);
-	if (send_reply(utstr)) {
+	if (send_reply("57 %d %d\n", myuid, no)) {
 		i = get_int();
 		get_eat('\n');
 		return i;

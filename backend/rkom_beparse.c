@@ -54,14 +54,10 @@ rk_matchconf(char *name, u_int8_t flags)
 {
 	struct rk_confinfo_retval *retval;
 	int antal, i, p, k;
-	char *buf;
 
 	k = (flags & MATCHCONF_CONF) == MATCHCONF_CONF;
 	p = (flags & MATCHCONF_PERSON) == MATCHCONF_PERSON;
-	buf = alloca(strlen(name) + 30);
-	sprintf(buf, "76 %ldH%s %d %d\n", (long)strlen(name), name, p, k);
-
-	send_reply(buf);
+	send_reply("76 %ldH%s %d %d\n", (long)strlen(name), name, p, k);
 
 	antal = get_int();
 	retval = calloc(sizeof(struct rk_confinfo_retval) + 
@@ -86,17 +82,14 @@ rk_matchconf(char *name, u_int8_t flags)
 }
 
 int32_t
-rk_login(u_int32_t userid, char *passwd)
+rk_login(u_int32_t uid, char *pwd)
 {
-	char *buf;
 	int i;
 
-	buf = alloca(strlen(passwd) + 30);
-	sprintf(buf, "62 %d %ldH%s 0\n", userid, (long)strlen(passwd), passwd);
-	if (send_reply(buf)) {
+	if (send_reply("62 %d %ldH%s 0\n", uid, (long)strlen(pwd), pwd)) {
 		i = get_int();
 	} else {
-		myuid = userid;
+		myuid = uid;
 		i = 0;
 	}
 	get_eat('\n');
@@ -108,10 +101,8 @@ rk_unreadconf(u_int32_t uid)
 {
 	struct rk_unreadconfval *ure;
 	int i, nconfs;
-	char buf[15];
 
-	sprintf(buf, "52 %d\n", uid);
-	if ((i = send_reply(buf))) {
+	if ((i = send_reply("52 %d\n", uid))) {
 		i = get_int();
 		get_eat('\n');
 		ure = calloc(sizeof(struct rk_unreadconfval), 1);
@@ -140,10 +131,8 @@ struct rk_uconference *
 rk_uconfinfo(u_int32_t mid) 
 {
 	static struct rk_uconference rku;
-	char buf[40];
 
-	sprintf(buf, "78 %d\n", mid);
-	if (send_reply(buf)) {
+	if (send_reply("78 %d\n", mid)) {
 		rku.ru_name = "";
 		rku.ru_retval = get_int();
 		get_eat('\n');
@@ -200,14 +189,12 @@ rk_vilka(u_int32_t secs, u_int32_t flags)
 {
 	static struct rk_dynamic_session_info_retval rkd;
 	static struct rk_dynamic_session_info *ppp;
-	char buf[50];
 	int antal, i;
 
 	if (ppp != NULL)
 		free(ppp);
-	sprintf(buf, "83 %d %d %d\n", (flags & WHO_VISIBLE) != 0, 
+	send_reply("83 %d %d %d\n", (flags & WHO_VISIBLE) != 0, 
 	    (flags & WHO_INVISIBLE) != 0, secs);
-	send_reply(buf);
 
 	antal = get_int();
 	rkd.rdv_rds.rdv_rds_val =
@@ -237,12 +224,10 @@ char *
 rk_client_name(u_int32_t vers)
 {
 	static char *ret;
-	char buf[50];
 
 	if (ret != NULL)
 		free(ret);
-	sprintf(buf, "70 %d\n", vers);
-	if (send_reply(buf)) {
+	if (send_reply("70 %d\n", vers)) {
 		get_eat('\n');
 		return NULL;
 	}
@@ -257,12 +242,10 @@ char *
 rk_client_version(u_int32_t vers)
 {
 	static char *ret;
-	char buf[50];
 
 	if (ret != NULL)
 		free(ret);
-	sprintf(buf, "71 %d\n", vers);
-	if (send_reply(buf)) {
+	if (send_reply("71 %d\n", vers)) {
 		get_eat('\n');
 		return NULL;
 	}
@@ -300,14 +283,13 @@ char *
 rk_gettext(u_int32_t nr)
 {
 	struct text_stat_store *tss;
-	char buf[50], *c;
+	char *c;
 	int i;
 
 	if ((tss = findtxt(nr)) && (tss->text))
 		return strdup(tss->text);
 
-	sprintf(buf, "25 %d 0 2000000\n", nr);
-	if (send_reply(buf)) {
+	if (send_reply("25 %d 0 2000000\n", nr)) {
 		if ((i = get_int()))
 			printf("Det sket sej: %d\n", i);
 		get_eat('\n');
@@ -408,8 +390,7 @@ back:		ts = malloc(sizeof(*ts));
 		return ts;
 	}
 	ts = calloc(sizeof(struct rk_text_stat), 1);
-	sprintf(buf, "90 %d\n", nr);
-	if (send_reply(buf)) {
+	if (send_reply("90 %d\n", nr)) {
 		ts->rt_retval = get_int();
 		get_eat('\n');
 		return ts;
@@ -485,35 +466,25 @@ rk_create_text(struct rk_text_info *rti)
 	struct rk_text_retval *rkr;
 	struct rk_misc_info *mi;
 	struct rk_aux_item_input *raii;
-	char buf[30];
 	int i, nmi, nraii;
 
-	sprintf(buf, "86 %ldH", (long)strlen(rti->rti_text));
-	send_reply(buf);
+	send_reply("86 %ldH", (long)strlen(rti->rti_text));
 	fputs(rti->rti_text, sfd);
 	nmi = rti->rti_misc.rti_misc_len;
 	mi = rti->rti_misc.rti_misc_val;
 
-	sprintf(buf, " %d { ", nmi);
-	send_reply(buf);
+	send_reply(" %d { ", nmi);
 	for (i = 0; i < nmi; i++) {
-		sprintf(buf, "%d %d ", mi[i].rmi_type, mi[i].rmi_numeric);
-		send_reply(buf);
+		send_reply("%d %d ", mi[i].rmi_type, mi[i].rmi_numeric);
 	}
 	nraii = rti->rti_input.rti_input_len;
 	raii = rti->rti_input.rti_input_val;
-	sprintf(buf, "} %d { ", nraii);
-	send_reply(buf);
+	send_reply("} %d { ", nraii);
 	for (i = 0; i < nraii; i++) {
-		char *nbuf;
-
-		sprintf(buf, "%d 00000000 %d ", raii[i].raii_tag,
+		send_reply("%d 00000000 %d ", raii[i].raii_tag,
 		    raii[i].inherit_limit);
-		send_reply(buf);
-		nbuf = alloca(strlen(raii[i].raii_data) + 10);
-		sprintf(nbuf, "%ldH%s ", (long)strlen(raii[i].raii_data),
+		send_reply("%ldH%s ", (long)strlen(raii[i].raii_data),
 		    raii[i].raii_data);
-		send_reply(nbuf);
 	}
 
 	rkr = calloc(sizeof(struct rk_text_retval), 1);
@@ -564,11 +535,9 @@ rk_getmarks(void)
 int32_t
 rk_setmark(u_int32_t text, u_int8_t type)
 {
-	char buf[30];
 	int retval = 0;
 
-	sprintf(buf, "72 %d %d\n", text, type);
-	if (send_reply(buf))
+	if (send_reply("72 %d %d\n", text, type))
 		retval = get_int();
 	get_eat('\n');
 	if (retval == 0) {
@@ -585,11 +554,9 @@ rk_setmark(u_int32_t text, u_int8_t type)
 int32_t
 rk_unmark(u_int32_t text)
 {
-	char buf[30];
 	int retval = 0;
 
-	sprintf(buf, "73 %d\n", text);
-	if (send_reply(buf))
+	if (send_reply("73 %d\n", text))
 		retval = get_int();
 	get_eat('\n');
 	if (retval == 0) {
@@ -605,12 +572,9 @@ rk_unmark(u_int32_t text)
 int32_t
 rk_send_msg(u_int32_t dest, char *string)
 {
-	char *dst;
 	int i = 0;
 
-	dst = alloca(strlen(string) + 30);
-	sprintf(dst, "53 %d %ldH%s\n", dest, (long)strlen(string), string);
-	if (send_reply(dst))
+	if (send_reply("53 %d %ldH%s\n", dest, (long)strlen(string), string))
 		i = get_int();
 	get_eat('\n');
 	return i;
@@ -619,14 +583,10 @@ rk_send_msg(u_int32_t dest, char *string)
 int32_t 
 rk_setpass(u_int32_t uid, char *oldpass, char *newpass)
 {
-	int i, totlen;
-	char *buf;
+	int i;
 
-	totlen = strlen(oldpass) + strlen(newpass) + 50;
-	buf = alloca(totlen);
-	sprintf(buf, "8 %d %ldH%s %ldH%s\n", uid, (long)strlen(oldpass),
-	    oldpass, (long)strlen(newpass), newpass);
-	if (send_reply(buf)) {
+	if (send_reply("8 %d %ldH%s %ldH%s\n", uid, (long)strlen(oldpass),
+	    oldpass, (long)strlen(newpass), newpass)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -639,11 +599,8 @@ int32_t
 rk_change_name(u_int32_t uid, char *newname)
 {
 	int i;
-	char *buf;
 
-	buf = alloca(strlen(newname) + 40);
-	sprintf(buf, "3 %d %ldH%s\n", uid, (long)strlen(newname), newname);
-	if (send_reply(buf)) {
+	if (send_reply("3 %d %ldH%s\n", uid, (long)strlen(newname), newname)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -658,7 +615,6 @@ rk_set_presentation(u_int32_t conf, struct rk_text_info *rti)
 	struct rk_text_retval *rtr;
 	struct rk_misc_info *rkm;
 	struct rk_conference *c;
-	char buf[30];
 	int i, presconf, oldn, nrkm;
 	void *old;
 
@@ -667,8 +623,7 @@ rk_set_presentation(u_int32_t conf, struct rk_text_info *rti)
 		return 9;
 
 	/* Get presentation conference number */
-	sprintf(buf, "94\n");
-	send_reply(buf);
+	send_reply("94\n");
 	get_int();
 	presconf = get_int();
 	if (c->rc_type & RK_CONF_TYPE_LETTERBOX)
@@ -700,8 +655,7 @@ rk_set_presentation(u_int32_t conf, struct rk_text_info *rti)
 	rti->rti_misc.rti_misc_len = oldn;
 	rti->rti_misc.rti_misc_val = old;
 	/* Set text as presentation */
-	sprintf(buf, "16 %d %d\n", conf, rtr->rtr_textnr);
-	if (send_reply(buf)) {
+	if (send_reply("16 %d %d\n", conf, rtr->rtr_textnr)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -713,11 +667,9 @@ rk_set_presentation(u_int32_t conf, struct rk_text_info *rti)
 int32_t
 rk_add_rcpt(u_int32_t text, u_int32_t conf, u_int32_t type)
 {
-	char buf[30];
 	int i;
 
-	sprintf(buf, "30 %d %d %d\n", text, conf, type);
-	if (send_reply(buf)) {
+	if (send_reply("30 %d %d %d\n", text, conf, type)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -729,11 +681,9 @@ rk_add_rcpt(u_int32_t text, u_int32_t conf, u_int32_t type)
 int32_t
 rk_sub_rcpt(u_int32_t text, u_int32_t conf)
 {
-	char buf[30];
 	int i;
 
-	sprintf(buf, "31 %d %d\n", text, conf);
-	if (send_reply(buf)) {
+	if (send_reply("31 %d %d\n", text, conf)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -745,11 +695,9 @@ rk_sub_rcpt(u_int32_t text, u_int32_t conf)
 int32_t
 rk_delete_text(u_int32_t text)
 {
-	char buf[30];
 	int i;
 
-	sprintf(buf, "29 %d\n", text);
-	if (send_reply(buf)) {
+	if (send_reply("29 %d\n", text)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -762,13 +710,11 @@ int32_t
 rk_set_motd(u_int32_t conf, struct rk_text_info *rti)
 {
 	struct rk_text_retval *rtr;
-	char buf[30];
 	int i, motdconf, oldn;
 	void *old;
 
 	if (*rti->rti_text == 0) { /* Remove motd */
-		sprintf(buf, "17 %d 0\n", conf);
-		if (send_reply(buf)) {
+		if (send_reply("17 %d 0\n", conf)) {
 			i = get_int();
 			get_eat('\n');
 			return i;
@@ -777,8 +723,7 @@ rk_set_motd(u_int32_t conf, struct rk_text_info *rti)
 		return 0;
 	}
 	/* Get presentation conference number */
-	sprintf(buf, "94\n");
-	send_reply(buf);
+	send_reply("94\n");
 	get_int();
 	get_int();get_int();
 	motdconf = get_int();
@@ -801,8 +746,7 @@ rk_set_motd(u_int32_t conf, struct rk_text_info *rti)
 	rti->rti_misc.rti_misc_len = oldn;
 	rti->rti_misc.rti_misc_val = old;
 	/* Set text as presentation */
-	sprintf(buf, "17 %d %d\n", conf, rtr->rtr_textnr);
-	if (send_reply(buf)) {
+	if (send_reply("17 %d %d\n", conf, rtr->rtr_textnr)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -814,18 +758,13 @@ rk_set_motd(u_int32_t conf, struct rk_text_info *rti)
 int32_t
 rk_add_text_info(u_int32_t textno, struct rk_aux_item_input *raii)
 {
-	char buf[30];
 	int ret;
 
-	sprintf(buf, "92 %ld 0 { }", (long)textno);
-	send_reply(buf);
-
-	sprintf(buf, " 1 { %d 00000000 %d %ldH", raii->raii_tag,
+	send_reply("92 %ld 0 { }", (long)textno);
+	send_reply(" 1 { %d 00000000 %d %ldH", raii->raii_tag,
 		raii->inherit_limit, (long)strlen(raii->raii_data));
-	send_reply(buf);
 	fputs(raii->raii_data, sfd);
-	sprintf(buf, " }\n");
-	send_reply(buf);
+	send_reply(" }\n");
 
 	ret = get_int();
 	get_eat('\n');

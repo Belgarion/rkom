@@ -205,11 +205,8 @@ void
 send_callback(char *msg, int arg, void (*func)(int, int))
 {
 	struct callback *c;
-	char buf[12];
 
-	sprintf(buf, "%d ", reqnr);
-	fputs(buf, sfd);
-	fputs(msg, sfd);
+	fprintf(sfd, "%d %s", reqnr, msg);
 	c = malloc(sizeof(struct callback));
 	c->func = func;
 	c->arg = arg;
@@ -311,17 +308,8 @@ put_char(char c)
 void
 put_string(char *str)
 {
-	char *buf;
-	int len = strlen(str), totlen;
 
-	buf = malloc(len+20);
-#ifdef SUNOS4
-	sprintf(buf, " %dH%s ", len, str);
-	totlen = strlen(buf);
-#else
-	totlen = sprintf(buf, " %dH%s ", len, str);
-#endif
-	fputs(buf, sfd);
+	fprintf(sfd, " %ldH%s ", (long)strlen(str), str);
 }
 
 static void

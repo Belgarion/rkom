@@ -46,15 +46,13 @@ get_pers_stat(int uid, struct rk_person **person)
 	struct person_store *pp;
 	struct rk_person *p;
 	int i;
-	char buf[20];
 
 	if ((pp = findperson(uid))) {
 		*person = &pp->person;
 		return 0;
 	}
 
-	sprintf(buf, "49 %d\n", uid);
-	if (send_reply(buf)) {
+	if (send_reply("49 %d\n", uid)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -136,7 +134,6 @@ newname(int uid)
 static void
 read_lgtable(struct get_conf_stat_store *g)
 {
-	char buf[50];
 	int top, i, base, cont, cnt, num;
 
 	if (g->mapsz)
@@ -153,8 +150,7 @@ read_lgtable(struct get_conf_stat_store *g)
 	/*
 	 * First get the highest local text number.
 	 */
-	sprintf(buf, "78 %d\n", g->number);
-	if (send_reply(buf)) {
+	if (send_reply("78 %d\n", g->number)) {
 		get_eat('\n'); /* Do what??? */
 		return;
 	}
@@ -168,8 +164,7 @@ read_lgtable(struct get_conf_stat_store *g)
 	g->map = calloc(g->mapsz, sizeof(int));
 	base = 1;
 	for (;;) {
-		sprintf(buf, "103 %d %d 200\n", g->number, base);
-		if (send_reply(buf)) {
+		if (send_reply("103 %d %d 200\n", g->number, base)) {
 			get_eat('\n');
 			return;	/* XXX ??? */
 		}
@@ -280,7 +275,6 @@ get_conf_stat(int conf, struct rk_conference **confer)
 	struct get_conf_stat_store *walker;
 	struct rk_conference *c;
 	int i;
-	char buf[20];
 
 	/* First, see if we have this conference in the cache */
 	if ((walker = findconf(conf))) {
@@ -289,8 +283,7 @@ get_conf_stat(int conf, struct rk_conference **confer)
 	}
 
 	/* Nope, alloc a new struct and put it into the cache */
-	sprintf(buf, "91 %d\n", conf);
-	if (send_reply(buf)) {
+	if (send_reply("91 %d\n", conf)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -325,7 +318,6 @@ get_membership(int uid, int conf, struct rk_membership **member)
 	struct rk_membership *m;
 	struct person_store *pp;
 	struct rk_person *p;
-	char buf[50];
 	int i, len;
 
 	/* First, force the user into the cache */
@@ -342,8 +334,7 @@ get_membership(int uid, int conf, struct rk_membership **member)
 	}
 
 	/* No, we failed cache search. Fetch from server. */
-	sprintf(buf, "98 %d %d\n", uid, conf);
-	if (send_reply(buf)) {
+	if (send_reply("98 %d %d\n", uid, conf)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -438,10 +429,8 @@ int32_t
 rk_change_conference(u_int32_t conf)
 {
 	int ret;
-	char buf[20];
 
-	sprintf(buf, "2 %d\n", conf);
-	ret = send_reply(buf);
+	ret = send_reply("2 %d\n", conf);
 	if (ret) {
 		ret = get_int();
 		get_eat('\n');
@@ -695,10 +684,8 @@ rk_mark_read(u_int32_t conf, u_int32_t local)
 int32_t
 rk_set_last_read(u_int32_t conf, u_int32_t local)
 {
-	char buf[20];
 
-	sprintf(buf, "77 %d %d\n", conf, local);
-	if (send_reply(buf)) {
+	if (send_reply("77 %d %d\n", conf, local)) {
 		int ret = get_int();
 		get_eat('\n');
 		return ret;
@@ -713,10 +700,8 @@ rk_add_member(u_int32_t conf, u_int32_t uid, u_int8_t prio,
     u_int16_t where, u_int32_t flags)
 {
 	int ret;
-	char buf[30];
 
-	sprintf(buf, "100 %d %d %d %d %d\n", conf, uid, prio, where, flags);
-	ret = send_reply(buf);
+	ret = send_reply("100 %d %d %d %d %d\n", conf, uid, prio, where, flags);
 	if (ret) {
 		ret = get_int();
 		get_eat('\n');
@@ -731,9 +716,8 @@ int32_t
 rk_sub_member(u_int32_t conf, u_int32_t uid)
 {
 	int ret;
-	char buf[30];
-	sprintf(buf, "15 %d %d\n", conf, uid);
-	ret = send_reply(buf);
+
+	ret = send_reply("15 %d %d\n", conf, uid);
 	if (ret) {
 		ret = get_int();
 		get_eat('\n');
@@ -754,7 +738,6 @@ rk_memberconf(u_int32_t uid)
 	struct person_store *ps;
 	struct rk_person *person;
 	int i;
-	char buf[50];
 
 	mcl = calloc(sizeof(*mcl), 1);
 	ps = findperson(uid);
@@ -768,8 +751,7 @@ rk_memberconf(u_int32_t uid)
 			printf("EEEK! Person %d finns inte!\n", uid);
 	}
 	if (ps->nconfs == 0) {
-		sprintf(buf, "46 %d 0 65535 0\n", uid);
-		if (send_reply(buf)) {
+		if (send_reply("46 %d 0 65535 0\n", uid)) {
 			mcl->rm_retval = get_int();
 			get_eat('\n');
 			return mcl;
@@ -824,14 +806,12 @@ rk_sync(void)
 int32_t
 rk_create_conf(char *name, u_int32_t btype)
 {
-	char *buf, *type;
+	char *type;
 	int i;
 
-	buf = alloca(strlen(name) + 100);
 	type = bitfield2str(btype);
-	sprintf(buf, "88 %ldH%s %s 0 { }\n",
-	    (long)strlen(name), name, &type[28]);
-	if (send_reply(buf)) {
+	if (send_reply("88 %ldH%s %s 0 { }\n",
+	    (long)strlen(name), name, &type[28])) {
 		i = get_int();
 		get_eat('\n');
 		return -i;
@@ -844,13 +824,10 @@ rk_create_conf(char *name, u_int32_t btype)
 int32_t
 rk_create_person(char *name, char *passwd, u_int32_t btype)
 {
-	char *buf;
 	int i;
 
-	buf = alloca(strlen(name) + strlen(passwd) + 100);
-	sprintf(buf, "89 %ldH%s %ldH%s 00000000 0 { }\n",
-	    (long)strlen(name), name, (long)strlen(passwd), passwd);
-	if (send_reply(buf)) {
+	if (send_reply("89 %ldH%s %ldH%s 00000000 0 { }\n",
+	    (long)strlen(name), name, (long)strlen(passwd), passwd)) {
 		i = get_int();
 		get_eat('\n');
 		return -i;
@@ -863,11 +840,9 @@ rk_create_person(char *name, char *passwd, u_int32_t btype)
 int32_t 
 rk_delete_conf(u_int32_t conf)
 {
-	char buf[40];
 	int i;
 
-	sprintf(buf, "11 %d\n", conf);
-	if (send_reply(buf)) {
+	if (send_reply("11 %d\n", conf)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
@@ -880,37 +855,27 @@ int32_t
 rk_modify_conf_info(struct rk_modifyconfinfo *rkm)
 {
 	struct rk_aux_item_input *raii;
-	char buf[100];
 	int i, nr;
 
 	/* Send request */
-	sprintf(buf, "93 %d ", rkm->rkm_conf);
-	send_reply(buf);
+	send_reply("93 %d ", rkm->rkm_conf);
 
 	/* Send delete items */
 	nr = rkm->rkm_delete.rkm_delete_len;
-	sprintf(buf, " %d { ", nr);
-	send_reply(buf);
+	send_reply(" %d { ", nr);
 	for (i = 0; i < nr; i++) {
-		sprintf(buf, "%d ", rkm->rkm_delete.rkm_delete_val[i]);
-		send_reply(buf);
+		send_reply("%d ", rkm->rkm_delete.rkm_delete_val[i]);
 	}
 
 	/* Send add items */
 	nr = rkm->rkm_add.rkm_add_len;
 	raii = rkm->rkm_add.rkm_add_val;
-	sprintf(buf, "} %d { ", nr);
-	send_reply(buf);
+	send_reply("} %d { ", nr);
 	for (i = 0; i < nr; i++) {
-		char *nbuf;
-
-		sprintf(buf, "%d 00000000 %d ", raii[i].raii_tag,
+		send_reply("%d 00000000 %d ", raii[i].raii_tag,
 		    raii[i].inherit_limit);
-		send_reply(buf);
-		nbuf = alloca(strlen(raii[i].raii_data) + 10);
-		sprintf(nbuf, "%ldH%s ", (long)strlen(raii[i].raii_data),
+		send_reply("%ldH%s ", (long)strlen(raii[i].raii_data),
 		    raii[i].raii_data);
-		send_reply(nbuf);
 	}
 	i = 0;
 	if (send_reply("}\n")) {
