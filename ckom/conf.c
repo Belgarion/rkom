@@ -1,8 +1,9 @@
-/* $Id: conf.c,v 1.5 2000/10/15 21:39:15 jens Exp $ */
+/* $Id: conf.c,v 1.6 2000/10/15 21:43:42 jens Exp $ */
 
 #include <sys/cdefs.h>
 #include <sys/param.h>
 #include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
