@@ -1,4 +1,4 @@
-#	$Id: Makefile,v 1.10 2001/11/18 14:28:05 ragge Exp $
+#	$Id: Makefile,v 1.11 2001/11/18 15:01:54 ragge Exp $
 #
 # Rkom backend library Makefile
 #
@@ -15,6 +15,9 @@ librkom.a: rkom_proto.h $(OBJS)
 
 rkom_proto.c rkom_proto.h rkom_proto_stubs.c: rkom_proto.spc
 	spcgen -ch -i rkom_proto.spc
+	echo '#include "rkomsupport.h"' > rkom_proto.c.tmp
+	cat rkom_proto.c >> rkom_proto.c.tmp
+	mv rkom_proto.c.tmp rkom_proto.c
 
 clean:
 	rm -f $(OBJS) librkom.a
