@@ -8,7 +8,7 @@
 
 #include "rkom.h"
 
-int outlines;
+int outlines, discard;
 
 static char *cvtstr[] = {
 	"}å", "]Å", "{ä", "[Ä", "|ö", "\\Ö", 
@@ -33,6 +33,10 @@ rprintf(char const *fmt, ...)
 {
 	va_list ap;
 	char *utstr, *c, *d;
+	int ch;
+
+	if (discard)
+		return;
 
 	va_start(ap, fmt);
 
@@ -43,10 +47,18 @@ rprintf(char const *fmt, ...)
 		if (swascii)
 			chrconvert(c);
 		printf("%s\n", c);
-		if (outlines++ >= wrows) {
+		outlines += (strlen(c)/wcols);
+		if (outlines++ >= (wrows - 1)) {
 			printf("(Tryck retur)");
-			getchar();
-			outlines = 0;
+			outlines = 1;
+			ch = getchar();
+			if (ch == 'q') {
+				while (getchar() != '\n')
+					;
+				discard = 1;
+				printf("\r");
+				return;
+			}
 		}
 		c = d;
 	}

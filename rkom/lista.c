@@ -50,6 +50,8 @@ list_conf(char *str)
 		free(C);
 		if (myuid)
 			free(M);
+		if (discard)
+			break;
 	}
 	rprintf("\n");
 	free(rv);

@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.20 2001/01/06 16:05:56 ragge Exp $ */
+/* $Id: rkom.c,v 1.21 2001/01/07 14:54:50 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -46,7 +46,7 @@ char *p_next_text = "(Läsa) nästa inlägg";
 char *p_see_time  = "(Se) tiden";
 char *p_next_comment = "(Läsa) nästa kommentar";
 char *prompt;
-int wrows, swascii;
+int wrows, wcols, swascii;
 
 static char *
 prompt_fun(EditLine *el)
@@ -149,7 +149,8 @@ main(int argc, char *argv[])
 		}
 		if (pfd[0].revents & (POLLIN|POLLPRI)) {
 			/*
-			 * Go to the beginning of the line to allow libedit to start
+			 * Go to the beginning of the line to allow libedit
+			 * to start
 			 * from column 0 and overwrite the current prompt.
 			 */
 			outlines = 0;
@@ -171,6 +172,7 @@ main(int argc, char *argv[])
 			}
 			str = buf;
 			exec_cmd(str);
+			discard = 0;
 			if (len > 1)
 				history(hist, &ev, H_ENTER, buf);
 
@@ -197,6 +199,7 @@ sigwinch(int arg)
 
 	ioctl(1, TIOCGWINSZ, &ws);
 	wrows = ws.ws_row;
+	wcols = ws.ws_col;
 }
 
 int
