@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.19 2001/01/04 11:05:13 ragge Exp $ */
+/* $Id: rkom.c,v 1.20 2001/01/06 16:05:56 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -260,6 +260,11 @@ rprintf("----------------------------------------------------------------\n");
 		break;
 
 		case 15: /* New text created */
+			if (ra->ra_pers == myuid &&
+			    iseql("created-texts-are-read", "1")) {
+				mark_read(ra->ra_text);
+				break;
+			}
 			hej = prompt;
 			if (prompt != PROMPT_NEXT_COMMENT)
 				next_prompt();
@@ -267,7 +272,9 @@ rprintf("----------------------------------------------------------------\n");
 				retval = 0;
 			break;
 
+		case 8:
 		case 14:
+		case 18:
 			break;
 
 		default:

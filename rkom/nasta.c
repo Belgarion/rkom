@@ -186,7 +186,7 @@ next_conf(char *str)
 	free(member);
 }
 
-static void
+void
 mark_read(int nr)
 {
 	struct rk_text_stat *ts;

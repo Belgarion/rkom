@@ -10,5 +10,6 @@ void	next_resetchain(void);
 void	next_prompt(void);
 void	next_again(char *);
 void	next_hoppa(char *);
+void	mark_read(int nr);
 
 extern int lasttext, lastlasttext;
