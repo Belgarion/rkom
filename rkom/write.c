@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.54 2003/09/17 12:15:44 ragge Exp $	*/
+/*	$Id: write.c,v 1.55 2003/09/17 18:33:03 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -87,7 +87,6 @@ write_private(int textno)
 	if (ts->rt_retval) {
 		rprintf("Kunde inte svara personligt på texten: %s\n",
 		    error(ts->rt_retval));
-		free(ts);
 		return;
 	}
 	mi = calloc(sizeof(struct rk_misc_info), 3);
@@ -98,7 +97,6 @@ write_private(int textno)
 	mi[2].rmi_type = comm_to;
 	mi[2].rmi_numeric = textno;
 	nmi = 3;
-	free(ts);
 
 	/* Get the subject line from commented text */
 	s = rk_gettext(textno);
@@ -107,7 +105,6 @@ write_private(int textno)
 		t[1] = 0;
 
 	doedit(s);
-	free(s);
 }
 
 void
@@ -311,7 +308,6 @@ write_put(char *str)
 			rprintf("Text %d har skapats.\n", rtr->rtr_textnr);
 		lastlasttext = lasttext;
 		lasttext = rtr->rtr_textnr;
-		free(rtr);
 	}
 	free(ctext);
 	free(mi);
@@ -405,7 +401,6 @@ write_rcpt(char *str, int type)
 	if (cr == NULL)
 		return;
 	conf = cr->rcr_ci.rcr_ci_val[0].rc_conf_no;
-	free(cr);
 	for (i = 0; i < nmi; i++)
 		if (mi[i].rmi_numeric == conf && mi[i].rmi_type == type)
 			return;
@@ -572,13 +567,11 @@ write_internal(int text, int ktyp)
 	ts = rk_textstat(text);
 	if (ts->rt_retval) {
 		rprintf("Text %d är inte läsbar, tyvärr...\n", text);
-		free(ts);
 		return;
 	}
 
 	if (ktyp == footn_to && ts->rt_author != myuid) {
 		rprintf("Du kan bara skriva fotnötter till dina egna inlägg.\n");
-		free(ts);
 		return;
 	}
 	mf = ts->rt_misc_info.rt_misc_info_val;
@@ -603,7 +596,6 @@ write_internal(int text, int ktyp)
 
 	is_writing = 1;
 	doedit(s);
-	free(s);
 }
 
 void
@@ -717,8 +709,6 @@ write_change_faq(char *str)
 	if (c == NULL)
 		c = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);
 	doedit(c);
-	free(c);
-	free(retval);
 }
 
 void
@@ -754,8 +744,6 @@ write_change_presentation(char *str)
 	if (c == NULL)
 		c = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);
 	doedit(c);
-	free(c);
-	free(retval);
 }
 
 void
@@ -769,7 +757,6 @@ write_set_motd(char *str)
 	islapp = rv->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	rprintf("(Sätt) lapp (på dörren för) %s\n",
 	    rv->rcr_ci.rcr_ci_val[0].rc_name);
-	free(rv);
 	is_writing = 1;
 	mi = calloc(sizeof(struct rk_misc_info), 2);
 	nmi = 0;

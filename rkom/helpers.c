@@ -48,7 +48,6 @@ match_complain(char *str, int type)
 
 	if (num == 0) {
 		rprintf("Det finns ingenting som matchar \"%s\".\n", str);
-		free(retval);
 		return 0;
 	} else if (num > 1) {
 		if (directmatch(retval, str))
@@ -57,7 +56,6 @@ match_complain(char *str, int type)
 		for (i = 0; i < num; i++)
 			rprintf("%s\n", retval->rcr_ci.rcr_ci_val[i].rc_name);
 		rprintf("\n");
-		free(retval);
 		return 0;
 	}
 	return retval;
@@ -76,6 +74,5 @@ ismember(int conf)
 				rv = 1;
 				break;
 			}
-	free(mcl);
 	return rv;
 }

@@ -29,8 +29,7 @@ show_superhoppa(char *arg)
 	supstr = rk_gettext(lasttext);
 	if ((c = index(supstr, '\n')))
 		*c = 0;
-	rprintf("Superhoppar över alla inlägg med ärenderad '%s'\n",
-	    supstr);
+	rprintf("Superhoppar över alla inlägg med ärenderad '%s'\n", supstr);
 }
 
 char *
@@ -68,7 +67,6 @@ printcmnt(struct rk_misc_info *mi, int len, int p)
 			tt = rk_textstat(mi[i].rmi_numeric);
 			if (tt->rt_retval == 0)
 				rprintf(" av %s", vem(tt->rt_author));
-			free(tt);
 			rprintf("%s\n", p ? ")" : "");
 		}
 	}
@@ -138,15 +136,12 @@ show_text(int nr, int format)
 	ts = rk_textstat(nr);
 	if (ts->rt_retval) {
 		rprintf("För din del så finns inte text %d\n", nr);
-		free(ts);
 		return 0;
 	}
 	c = rk_gettext(nr);
 	if (supstr) {
 		int l = strlen(supstr);
 		if (strncmp(c, supstr, l) == 0 && (c[l] == 0 || c[l] == '\n')) {
-			free(ts);
-			free(c);
 			return 1;
 		}
 	}
@@ -202,7 +197,6 @@ show_text(int nr, int format)
 			tt = rk_textstat(mi[i].rmi_numeric);
 			if (tt->rt_retval == 0)
 				rprintf(" av %s", vem(tt->rt_author));
-			free(tt);
 			break;
 
 		case footn_to:
@@ -211,7 +205,6 @@ show_text(int nr, int format)
 			tt = rk_textstat(mi[i].rmi_numeric);
 			if (tt->rt_retval == 0)
 				rprintf(" av %s", vem(tt->rt_author));
-			free(tt);
 			break;
 		default:
 			break;
@@ -250,7 +243,6 @@ show_text(int nr, int format)
 		rprintf("%s%s", buf, &"------------------------------------------------------------\n"[strlen(buf)]);
 	else
 		rprintf("%s\n", buf);
-	free(c);
 	free(namn);
 	/* Check for "Anmärkningar" */
 	for (i = 0; i < ts->rt_aux_item.rt_aux_item_len; i++) {
@@ -265,7 +257,6 @@ show_text(int nr, int format)
 	if (p)
 		printcmnt(mi, len, p);
 
-	free(ts);
 	return 0;
 }
 

@@ -45,7 +45,6 @@ next_prompt()
 		prompt = PROMPT_NEXT_CONF;
 	else
 		prompt = PROMPT_SEE_TIME;
-	free(conf);
 }
 /*
  * Next action: decide what to do next is. Choose between:
@@ -75,7 +74,6 @@ next_action(int nr)
 
 			ts2 = rk_textstat(mi[i].rmi_numeric);
 			r = ts2->rt_retval;
-			free(ts2);
 			if (r)
 				continue;
 			if (rk_is_read(mi[i].rmi_numeric))
@@ -84,7 +82,7 @@ next_action(int nr)
 		}
 
 	if (i == len) { /* No, nothing followed */
-again:		free(ts); /* Forget last text */
+again:
 		if (pole == 0) { /* Nothing to do at all */
 			next_prompt();
 			return;
@@ -101,7 +99,6 @@ again:		free(ts); /* Forget last text */
 
 				ts2 = rk_textstat(mi[i].rmi_numeric);
 				r = ts2->rt_retval;
-				free(ts2);
 				if (r)
 					continue;
 				if (rk_is_read(mi[i].rmi_numeric))
@@ -129,7 +126,6 @@ again:		free(ts); /* Forget last text */
 		prompt = PROMPT_NEXT_COMMENT;
 	else
 		prompt = PROMPT_NEXT_TEXT;
-	free(ts);
 }
 
 /*
@@ -201,7 +197,6 @@ mark_read(int nr)
 		if (ismember(mi[i].rmi_numeric))
 			rk_mark_read(mi[i].rmi_numeric, mi[i+1].rmi_numeric);
 	}
-	free(ts);
 }
 
 void
@@ -246,13 +241,11 @@ try:	for (i = pole->listidx; i < len; i++)
 		    mi[i].rmi_type == comm_in)
 			break;
 	if (i == len) {
-		free(ts);
 		goto back;
 	}
 	if (rk_is_read(mi[i].rmi_numeric))
 		goto try;
 	global = mi[i].rmi_numeric;
-	free(ts);
 	rv = show_text(global, 1);
 	mark_read(global);
 	next_action(global);
@@ -281,7 +274,6 @@ next_marked(char *str)
 		lastseen = rm[0].rm_text;
 		show_text(lastseen, 1);
 		prompt = PROMPT_NEXT_MARKED;
-		free(rmr);
 		return;
 	}
 	for (i = 0; i < rmr->rmr_marks.rmr_marks_len; i++) {
@@ -291,18 +283,15 @@ next_marked(char *str)
 			lastseen = 0;
 			rprintf("Du har slut markerade inlägg.\n");
 			next_prompt();
-			free(rmr);
 			return;
 		}
 		prompt = PROMPT_NEXT_MARKED;
 		lastseen = rm[i+1].rm_text;
 		show_text(lastseen, 1);
-		free(rmr);
 		return;
 	}
 	lastseen = 0;
 	next_prompt();
-	free(rmr);
 }
 
 void
@@ -321,13 +310,11 @@ next_resee_comment()
 			break;
 	if (i == len) {
 		rprintf("Inlägget är varken kommentar eller fotnot.\n");
-		free(ts);
 		return;
 	}
 	show_text(mi[i].rmi_numeric, 1);
 	lastlasttext = lasttext;
 	lasttext = mi[i].rmi_numeric;
-	free(ts);
 }
 
 void
@@ -349,7 +336,6 @@ restart:
 			switch(count) {
 			case 0:
 				text = mi[i].rmi_numeric;
-				free(ts);
 				goto restart;
 			case 1:
 				next_resee_root(text);
@@ -364,8 +350,6 @@ restart:
 		lastlasttext = lasttext;
 		lasttext = text;
 	}
-
-	free(ts);
 }
 
 void
@@ -414,12 +398,10 @@ next_hoppa(char *str)
 			    mi[i].rmi_type == comm_in)
 				break;
 		if (i == len) {
-			free(ts);
 			next_action(global);
 			continue;
 		}
 		global = mi[i].rmi_numeric;
-		free(ts);
 		mark_read(global);
 		hoppade++;
 		next_action(global);
@@ -450,7 +432,6 @@ next_resee_presentation(char *name)
 		show_text(rc->rc_presentation, 1);
 	lastlasttext = lasttext;
 	lasttext = rc->rc_presentation;
-	free(rv);
 }
 
 void
@@ -485,5 +466,4 @@ next_resee_faq(char *name)
 		show_text(atoi(rai[i].rai_data), 1);
 	lastlasttext = lasttext;
 	lasttext = rc->rc_presentation;
-	free(rv);
 }

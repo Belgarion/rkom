@@ -52,33 +52,35 @@ rk_whatido(char *args)
 struct rk_confinfo_retval *
 rk_matchconf(char *name, u_int8_t flags)
 {
-	struct rk_confinfo_retval *retval;
+	static struct rk_confinfo *rkc;
+	static struct rk_confinfo_retval retval;
 	int antal, i, p, k;
+
+	if (rkc != NULL)
+		free(rkc);
 
 	k = (flags & MATCHCONF_CONF) == MATCHCONF_CONF;
 	p = (flags & MATCHCONF_PERSON) == MATCHCONF_PERSON;
 	send_reply("76 %ldH%s %d %d\n", (long)strlen(name), name, p, k);
 
 	antal = get_int();
-	retval = calloc(sizeof(struct rk_confinfo_retval) + 
-	    antal * sizeof(struct rk_confinfo), 1);
+	rkc = calloc(sizeof(struct rk_confinfo), antal);
 	if (antal == 0) {
 		get_eat('\n');
 	} else {
-		retval->rcr_ci.rcr_ci_val = (struct rk_confinfo *)&retval[1];
-		retval->rcr_ci.rcr_ci_len = antal;
+		retval.rcr_ci.rcr_ci_val = rkc;
+		retval.rcr_ci.rcr_ci_len = antal;
 		get_accept('{');
 		for (i = 0; i < antal; i++) {
-			struct rk_confinfo *rc = &retval->rcr_ci.rcr_ci_val[i];
-			rc->rc_name = get_string();
-			rc->rc_type = get_bitfield();
-			rc->rc_type <<= 4; /* Careful: Extended-Conf-Type */
-			rc->rc_conf_no = get_int();
+			rkc[i].rc_name = get_string();
+			rkc[i].rc_type = get_bitfield();
+			rkc[i].rc_type <<= 4; /* Careful: Extended-Conf-Type */
+			rkc[i].rc_conf_no = get_int();
 		}
 		get_accept('}');
 		get_accept('\n');
 	}
-	return retval;
+	return &retval;
 }
 
 int32_t
@@ -99,32 +101,31 @@ rk_login(u_int32_t uid, char *pwd)
 struct rk_unreadconfval *
 rk_unreadconf(u_int32_t uid)
 {
-	struct rk_unreadconfval *ure;
+	static struct rk_unreadconfval rku;
+	static u_int32_t *arr;
 	int i, nconfs;
 
+	if (arr != NULL)
+		free(arr);
 	if ((i = send_reply("52 %d\n", uid))) {
-		i = get_int();
+		rku.ru_retval = get_int();
 		get_eat('\n');
-		ure = calloc(sizeof(struct rk_unreadconfval), 1);
-		return ure;
+		return &rku;
 	}
 	nconfs = get_int();
-	ure = calloc(sizeof(struct rk_unreadconfval) +
-	    nconfs * sizeof(u_int32_t), 1);
-	ure->ru_confs.ru_confs_val = (u_int32_t *)&ure[1];
-	ure->ru_confs.ru_confs_len = nconfs;
+	arr = calloc(sizeof(u_int32_t), nconfs);
+	rku.ru_confs.ru_confs_val = arr;
+	rku.ru_confs.ru_confs_len = nconfs;
 	if (nconfs == 0) {
 		get_eat('\n');
 	} else {
-		u_int32_t *val = ure->ru_confs.ru_confs_val;
-
 		get_accept('{');
 		for (i = 0; i < nconfs; i++)
-			val[i] = get_int();
+			arr[i] = get_int();
 		get_accept('}');
 		get_accept('\n');
 	}
-	return ure;
+	return &rku;
 }
 
 struct rk_uconference *
@@ -303,7 +304,7 @@ rk_gettext(u_int32_t nr)
 		tss->next = pole;
 		pole = tss;
 	}
-	tss->text = strdup(c);
+	tss->text = c;
 	return c;
 }
 
@@ -384,11 +385,8 @@ rk_textstat(u_int32_t nr)
 	struct rk_text_stat *ts;
 	char buf[30];
 
-	if ((tss = findtxt(nr)) && (tss->rts)) {
-back:		ts = malloc(sizeof(*ts));
-		bcopy(tss->rts, ts, sizeof(*ts));
-		return ts;
-	}
+	if ((tss = findtxt(nr)) && (tss->rts))
+		return tss->rts;
 	ts = calloc(sizeof(struct rk_text_stat), 1);
 	if (send_reply("90 %d\n", nr)) {
 		ts->rt_retval = get_int();
@@ -407,7 +405,7 @@ back:		ts = malloc(sizeof(*ts));
 		send_callback(buf, nr, gettext_callback);
         }
 	tss->rts = ts;
-	goto back;
+	return ts;
 
 }
 
@@ -426,7 +424,6 @@ reread_text_stat_bg_callback(int err, int arg)
 	}
 	tss->rts = calloc(sizeof(struct rk_text_stat), 1);
 	readin_textstat(tss->rts);
-	return;
 }
 
 void
@@ -463,7 +460,7 @@ reread_text_stat_bg(int text)
 struct rk_text_retval *
 rk_create_text(struct rk_text_info *rti)
 {
-	struct rk_text_retval *rkr;
+	static struct rk_text_retval rkt;
 	struct rk_misc_info *mi;
 	struct rk_aux_item_input *raii;
 	int i, nmi, nraii;
@@ -487,38 +484,37 @@ rk_create_text(struct rk_text_info *rti)
 		    raii[i].raii_data);
 	}
 
-	rkr = calloc(sizeof(struct rk_text_retval), 1);
 	if (send_reply("}\n")) {
-		rkr->rtr_status = get_int();
+		rkt.rtr_status = get_int();
 		get_eat('\n');
-		return rkr;
+		return &rkt;
 	}
-	rkr->rtr_textnr = get_int();
+	rkt.rtr_textnr = get_int();
 	get_accept('\n');
 
-	return rkr;
+	return &rkt;
 }
 
 /* Get the marked texts. */
 struct rk_mark_retval *
 rk_getmarks(void)
 {
-	struct rk_mark_retval *rmr;
-	struct rk_marks *rm;
+	static struct rk_mark_retval rkm;
+	static struct rk_marks *rm;
 	int cnt, i;
 
-	rmr = calloc(sizeof(*rmr), 1);
 	if (send_reply("23\n")) {
-		rmr->rmr_retval = get_int();
+		rkm.rmr_retval = get_int();
 		get_eat('\n');
-		return rmr;
+		return &rkm;
 	}
 	cnt = get_int();
 	if (cnt) {
-		rmr = realloc(rmr, sizeof(*rmr) + cnt * sizeof(*rm));
-		rmr->rmr_marks.rmr_marks_len = cnt;
-		rmr->rmr_marks.rmr_marks_val = (void *)&rmr[1];
-		rm = rmr->rmr_marks.rmr_marks_val;
+		if (rm != NULL)
+			free(rm);
+		rm = calloc(cnt, sizeof(*rm));
+		rkm.rmr_marks.rmr_marks_len = cnt;
+		rkm.rmr_marks.rmr_marks_val = rm;
 		get_accept('{');
 		for (i = 0; i < cnt; i++) {
 			rm[i].rm_text = get_int();
@@ -528,7 +524,7 @@ rk_getmarks(void)
 	} else
 		get_accept('*');
 	get_accept('\n');
-	return rmr;
+	return &rkm;
 }
 
 /* Mark a text */

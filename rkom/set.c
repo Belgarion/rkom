@@ -147,12 +147,10 @@ readvars()
 	ru = rk_get_uarea("common");
 	if (ru->ru_retval == 0)
 		put_in_vars(ru, commonvars, ncommonvars);
-	free(ru);
 
 	ru = rk_get_uarea("rkom");
 	if (ru->ru_retval == 0)
 		put_in_vars(ru, rkomvars, nrkomvars);
-	free(ru);
 }
 
 int

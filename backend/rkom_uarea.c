@@ -144,25 +144,27 @@ get_uarea(int uid)
 struct rk_uarea *
 rk_get_uarea(char *str)
 {
-	struct rk_uarea *ru;
-	struct rk_val *rv;
+	static struct rk_uarea rku;
+	static struct rk_val *rv;
 	struct uarea *vec;
 	int i, j;
 
 	if (uarea)
 		free(uarea);
+	if (rv)
+		free(rv);
+	rv = NULL;
 	upole = NULL;
 	uarea = NULL;
 
-	ru = calloc(sizeof(*ru), 1);
 	if (myuid == 0) {
-		ru->ru_retval = 6;
-		return ru;
+		rku.ru_retval = 6;
+		return &rku;
 	}
 	uarea = get_uarea(myuid);
 	if (uarea == NULL) {
-		ru->ru_retval = 11;
-		return ru;
+		rku.ru_retval = 11;
+		return &rku;
 	}
 
 	/* Check if there is any entry in the uarea matching our string */
@@ -170,24 +172,23 @@ rk_get_uarea(char *str)
 		if (strcmp(uarea[i].key, str) == 0)
 			break;
 	if (uarea[i].key == NULL)
-		return ru;
+		return &rku;
 
 	vec = splitup(uarea[i].elem, &i, 1);
 	if (vec == NULL) {
-		ru->ru_retval = 12;
-		return ru;
+		rku.ru_retval = 12;
+		return &rku;
 	}
-	free(ru);
-	ru = calloc(sizeof(*ru) + sizeof(struct rk_val), i + 1);
-	ru->ru_val.ru_val_len = i;
-	rv = (void *)&ru[1];
-	ru->ru_val.ru_val_val = rv;
+
+	rv = calloc(sizeof(struct rk_val), i + 1);
+	rku.ru_val.ru_val_len = i;
+	rku.ru_val.ru_val_val = rv;
 	for (j = 0; j < i; j++) {
 		rv[j].rv_var = vec[j].key;
 		rv[j].rv_val = vec[j].elem;
 	}
 	free(vec);
-	return ru;
+	return &rku;
 }
 
 

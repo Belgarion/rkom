@@ -47,7 +47,6 @@ list_conf_q(char *str)
 		rprintf("%08d  %s\n", UC->ru_type, UC->ru_name);
 	}
 	rprintf("\n");
-	free(rv);
 }
 
 void
@@ -83,7 +82,6 @@ list_conf(char *str)
 			break;
 	}
 	rprintf("\n");
-	free(rv);
 }
 
 void
@@ -147,7 +145,6 @@ list_news(char *args)
 		        unr_confs, unr_confs>1?"n":"");
 	} else
 		rprintf("Du har inga olästa inlägg.\n");
-	free(conf);
 }
 
 static int
@@ -193,7 +190,6 @@ list_marked(char *str)
 			rprintf("%d\t\t%d\n", rm[i].rm_text, rm[i].rm_type);
 		rprintf("\n");
 	}
-	free(rmr);
 }
 
 void    
@@ -262,8 +258,6 @@ list_subject()
 		if (strlen(text) > 40)
 			text[40] = 0;
 		rprintf("%-21s%s\n", gubbe, text);
-		free(ts);
-		free(text);
 	}
 }
 
@@ -310,7 +304,5 @@ list_unread()
 		if (strlen(text) > 40)
 			text[40] = 0;
 		rprintf("%-21s%s\n", gubbe, text);
-		free(ts);
-		free(text);
 	}
 }

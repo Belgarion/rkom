@@ -132,7 +132,7 @@ static struct mesg *freepole = 0;
 struct rk_async *
 rk_async(void)
 {
-	struct rk_async *ra;
+	static struct rk_async rka;
 
 	if (freepole) {
 		if (*freepole->ra.ra_message)
@@ -142,14 +142,13 @@ rk_async(void)
 		free(freepole);
 		freepole = 0;
 	}
-	ra = calloc(sizeof(struct rk_async), 1);
 	if (pole) {
-		bcopy(pole, ra, sizeof(struct rk_async));
+		bcopy(pole, &rka, sizeof(struct rk_async));
 		freepole = pole;
 		pole = pole->next;
 	} else
-		ra->ra_message = ra->ra_message2 = "";
-	return ra;
+		rka.ra_message = rka.ra_message2 = "";
+	return &rka;
 }
 
 void

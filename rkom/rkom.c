@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.52 2003/09/17 12:15:44 ragge Exp $ */
+/* $Id: rkom.c,v 1.53 2003/09/17 18:33:03 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -144,7 +144,6 @@ main(int argc, char *argv[])
 		rprintf("\nVARNING: Protokollversionen bör vara minst 10.\n");
 		rprintf("VARNING: Vissa saker kan ofungera.\n");
 	}
-	free(rs);
 
 	if ((termtype = getenv("TERM")) == NULL)
 		termtype = "vt100";
@@ -230,7 +229,6 @@ async_collect()
 		ra = rk_async();
 		switch (ra->ra_type) {
 		case 0:
-			free(ra);
 			if (retval == 0)
 				rprintf("\n%s - ", prompt);
 			fflush(stdout);
@@ -308,7 +306,6 @@ rprintf("----------------------------------------------------------------\n");
 			rprintf("Ohanterat async %d\n", ra->ra_type);
 			break;
 		}
-		free(ra);
 	}
 }
 

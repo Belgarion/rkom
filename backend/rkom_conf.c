@@ -734,17 +734,16 @@ rk_sub_member(u_int32_t conf, u_int32_t uid)
 struct rk_memberconflist *
 rk_memberconf(u_int32_t uid)
 {
-	struct rk_memberconflist *mcl;
+	static struct rk_memberconflist rkm;
 	struct person_store *ps;
 	struct rk_person *person;
 	int i;
 
-	mcl = calloc(sizeof(*mcl), 1);
 	ps = findperson(uid);
 	if (ps == 0) {
 		if (get_pers_stat(uid, &person)) {
-			mcl->rm_retval = -1;
-			return mcl;
+			rkm.rm_retval = -1;
+			return &rkm;
 		}
 		ps = findperson(uid); /* Cannot fail here */
 		if (ps == 0)
@@ -752,9 +751,9 @@ rk_memberconf(u_int32_t uid)
 	}
 	if (ps->nconfs == 0) {
 		if (send_reply("46 %d 0 65535 0\n", uid)) {
-			mcl->rm_retval = get_int();
+			rkm.rm_retval = get_int();
 			get_eat('\n');
-			return mcl;
+			return &rkm;
 		}
 		ps->nconfs = get_int();
 		if (ps->nconfs) {
@@ -772,9 +771,9 @@ rk_memberconf(u_int32_t uid)
 			get_accept('*');
 		get_accept('\n');
 	}
-	mcl->rm_confs.rm_confs_len = ps->nconfs;
-	mcl->rm_confs.rm_confs_val = ps->confs;
-	return mcl;
+	rkm.rm_confs.rm_confs_len = ps->nconfs;
+	rkm.rm_confs.rm_confs_val = ps->confs;
+	return &rkm;
 }
 
 /*

@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.66 2003/09/17 12:15:44 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.67 2003/09/17 18:33:03 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -209,11 +209,9 @@ cmd_login(char *str)
 	passwd = getpass(swascii ? "L|senord: " : "Lösenord: ");
 	if (rk_login(userid, passwd)) {
 		rprintf("Felaktigt lösenord.\n\n");
-		free(retval);
 		return;
 	}
 	myuid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
-	free(retval);
 
 	readvars();
 	/*
@@ -244,7 +242,6 @@ cmd_login(char *str)
 	nconf = conf->ru_confs.ru_confs_len;
 	if (nconf)
 		prompt = PROMPT_NEXT_CONF;
-	free(conf);
 }
 
 void
@@ -309,7 +306,6 @@ cmd_say(char *str)
 	} else
 		rprintf("Nähej.");
 	free(buf);
-	free(retval);
 }
 
 void
@@ -351,7 +347,6 @@ cmd_goto(char *str)
 	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	name = alloca(strlen(retval->rcr_ci.rcr_ci_val[0].rc_name) + 2);
 	strcpy(name, retval->rcr_ci.rcr_ci_val[0].rc_name);
-	free(retval);
 	ret = rk_change_conference(conf);
 	if (ret == 0) {
 		curconf = conf;
@@ -424,7 +419,6 @@ cmd_leave(char *str)
 	ret = rk_sub_member(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, myuid);
 	if (ret)
 		rprintf("Det sket sej: %s\n", error(ret));
-	free(retval);
 }
 
 void
@@ -521,7 +515,6 @@ cmd_status(char *name)
 		persstat(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
 	else
 		confstat(retval->rcr_ci.rcr_ci_val[0].rc_conf_no);
-	free(retval);
 }
 
 void
@@ -537,7 +530,6 @@ cmd_info_extra(int text)
 	if (rts->rt_retval) {
 		rprintf("Kunde inte läsa status för inlägg %d: %s.\n",
 		    text, error(rts->rt_retval));
-		free(rts);
 		return;
 	}
 	nrai = rts->rt_aux_item.rt_aux_item_len;
@@ -555,7 +547,6 @@ cmd_info_extra(int text)
 		}
 	} else
 		rprintf("Det finns ingen tilläggsinformation för denna text.\n");
-	free(rts);
 }
 
 void
@@ -582,7 +573,6 @@ cmd_change_name()
 	rv = rk_change_name(retval->rcr_ci.rcr_ci_val[0].rc_conf_no, name);
 	if (rv)
 		rprintf("Det gick inte: %s\n", error(rv));
-	free(retval);
 	free(name);
 }
 
@@ -608,7 +598,6 @@ cmd_add_member()
 	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
 	user = strdup(retval->rcr_ci.rcr_ci_val[0].rc_name);
 	uid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
-	free(retval);
 	name = getstr("Till vilket möte? ");
 	if (strlen(name) == 0) {
 		rprintf("Nähej.\n");
@@ -629,7 +618,6 @@ cmd_add_member()
 	else
 		rprintf("Person %s adderad till möte %s.\n",
 		    user, retval->rcr_ci.rcr_ci_val[0].rc_name);
-	free(retval);
 	free(user);
 }
 
@@ -654,7 +642,6 @@ cmd_sub_member()
 		return;
 	rprintf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
 	uid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
-	free(retval);
 	name = getstr("Från vilket möte? ");
 	if (strlen(name) == 0) {
 		rprintf("Nähej.\n");
@@ -666,7 +653,6 @@ cmd_sub_member()
 	if (retval == NULL)
 		return;
 	mid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
-	free(retval);
 	rv = rk_sub_member(mid, uid);
 	if (rv)
 		rprintf("Det gick inte: %s\n", error(rv));
@@ -703,14 +689,12 @@ cmd_add_rcpt()
 	} else if (strlen(name) == 0) {
 		rprintf("Nähej.\n");
 		free(name);
-		free(retval);
 		return;
 	} else 
 		text = atoi(name);
 	free(name);
 	if (text == 0) {
 		rprintf("Det var ett dåligt textnummer.\n");
-		free(retval);
 		return;
 	}
 	rv = rk_add_rcpt(text, conf, recpt);
@@ -719,7 +703,6 @@ cmd_add_rcpt()
 	else
 		rprintf("Text %d adderad till möte %s.\n", text,
 		    retval->rcr_ci.rcr_ci_val[0].rc_name);
-	free(retval);
 }
 
 void
@@ -747,7 +730,6 @@ cmd_move_text()
 	ts = rk_textstat(nr);
 	if (ts->rt_retval) {
 		rprintf("Text %d är inte en giltig text.\n", nr);
-		free(ts);
 		return;
 	}
 	mi = ts->rt_misc_info.rt_misc_info_val;
@@ -757,7 +739,6 @@ cmd_move_text()
 		cm = mi[i].rmi_numeric;
 		nm++;
 	}
-	free(ts);
 	if (nm > 1) {
 		rprintf("Texten tillhör mer än ett möte.\n"
 		    "Subtrahera och addera texten manuellt.\n");
@@ -778,7 +759,6 @@ cmd_move_text()
 	rv = rk_add_rcpt(nr, conf, recpt);
 	if (rv) {
 		rprintf("Kunde ej flytta texten: %s\n", error(rv));
-		free(retval);
 		return;
 	}
 	rv = rk_sub_rcpt(nr, cm);
@@ -788,7 +768,6 @@ cmd_move_text()
 	else
 		rprintf("Texten nu flyttad till %s.\n",
 		    retval->rcr_ci.rcr_ci_val[0].rc_name);
-	free(retval);
 }
 
 void 
@@ -822,14 +801,12 @@ cmd_sub_rcpt()
 	} else if (strlen(name) == 0) {
 		rprintf("Nähej.\n");
 		free(name);
-		free(retval);
 		return;
 	} else
 		text = atoi(name);
 	free(name);
 	if (text == 0) {
 		rprintf("Det var ett dåligt textnummer.\n");
-		free(retval);
 		return;
 	}
 	rv = rk_sub_rcpt(text, conf);
@@ -838,7 +815,6 @@ cmd_sub_rcpt()
 	else
 		rprintf("Text %d subtraherad från möte %s.\n", text,
 		    retval->rcr_ci.rcr_ci_val[0].rc_name);
-	free(retval);
 }
 
 void
@@ -905,7 +881,6 @@ cmd_create_person(void)
 		if (strcasecmp(r->rcr_ci.rcr_ci_val[i].rc_name, name) == 0) {
 			rprintf("Personen finns redan: %s\n",
 			    r->rcr_ci.rcr_ci_val[i].rc_name);
-			free(r);
 			free(name);
 			return;
 		}
@@ -930,7 +905,6 @@ cmd_create_person(void)
 	free(npass1);
 	free(npass2);
 	free(name);
-	free(r);
 }
 
 void
@@ -947,7 +921,6 @@ cmd_erase(char *name)
 		rprintf("Det sket sej: %s\n", error(rv));
 	else
 		rprintf("Raderat och klart!\n");
-	free(retval);
 }
 
 void
@@ -981,14 +954,12 @@ cmd_copy()
 	} else if (strlen(name) == 0) {
 		rprintf("Nähej.\n");
 		free(name);
-		free(retval);
 		return;
 	} else 
 		text = atoi(name);
 	free(name);
 	if (text == 0) {
 		rprintf("Det var ett dåligt textnummer.\n");
-		free(retval);
 		return;
 	}
 	rv = rk_add_rcpt(text, conf, cc_recpt);
@@ -997,6 +968,5 @@ cmd_copy()
 	else
 		rprintf("Text %d adderad till %s.\n", text,
 		    retval->rcr_ci.rcr_ci_val[0].rc_name);
-	free(retval);
 }
 
