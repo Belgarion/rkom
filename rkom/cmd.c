@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <pwd.h>
+#include <histedit.h>
 
 #include "rkom_proto.h"
 #include "rkom.h"
@@ -239,15 +240,36 @@ cmd_sluta(char *str)
 	exit(0);
 }
 
+static char *
+prompt_fun(EditLine *el)
+{
+	return "Meddelande: ";
+}
+
+static char *
+getstr(void)
+{
+	EditLine *el;
+	char *ret;
+	int len;
+
+	el = el_init("rkom", stdin, stdout, stderr);
+	el_set(el, EL_EDITOR, "emacs");
+	el_set(el, EL_PROMPT, prompt_fun);
+	ret = strdup(el_gets(el, &len));
+	ret[len - 1] = 0; /* Forget \n */
+	el_end(el);
+	return ret;
+}
+
 void 
 cmd_send(char *str)
 {
 	char *buf;
 
-	rprintf("Sänd (alarmmeddelande till alla)\nMeddelande: ");
-	fflush(stdout);
+	rprintf("Sänd (alarmmeddelande till alla)\n");
 
-	buf = get_input_string(0, 0); /* XXX */
+	buf = getstr();
 
 	if (strlen(buf) == 0)
 		rprintf("Nähej.");
@@ -270,10 +292,10 @@ cmd_say(char *str)
 	if (retval == 0)
 		return;
 
-	rprintf("Sänd meddelande till %s\nMeddelande: ",
+	rprintf("Sänd meddelande till %s\n",
 	    retval->rcr_ci.rcr_ci_val[0].rc_name);
-	fflush(stdout);
-	buf = get_input_string(0, 0); /* XXX */
+
+	buf = getstr();
 	if (strlen(buf) == 0)
 		rprintf("Nähej.");
 	else {
