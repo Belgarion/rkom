@@ -197,8 +197,10 @@ get_membership(int uid, int conf, struct rk_membership **member)
 	pp = findperson(uid);
 	if (pp->next) {
 		mb = findmember(conf, pp->next);
-		if (mb == 0)
-			return -1;
+		if (mb) {
+			*member = &mb->member;
+			return 0;
+		}
 	}
 
 	/* No, we failed cache search. Fetch from server. */
@@ -231,9 +233,9 @@ get_membership(int uid, int conf, struct rk_membership **member)
 	read_in_time(&m->rm_added_at);
 	m->rm_type = get_int();
 
-	mb[0].mid = m->rm_conference;
-	mb[0].next = pp->next;
-	pp->next = &mb[0];
+	mb->mid = m->rm_conference;
+	mb->next = pp->next;
+	pp->next = mb;
 	get_accept('\n');
 	*member = m;
 	return 0;
@@ -266,6 +268,9 @@ set_last_read_internal(int conf, int local)
 		if (mb == 0)
 			return;
 		mb->member.rm_last_text_read = local;
+		if (mb->member.rm_read_texts.rm_read_texts_len)
+			free(mb->member.rm_read_texts.rm_read_texts_val);
+		mb->member.rm_read_texts.rm_read_texts_len = 0;
 	}
 }
 
@@ -418,6 +423,32 @@ conf_set_high_local(int conf, int local)
 	}
 }
 
+static void
+cleanup_read(struct rk_membership *m)
+{
+	int local, len, nlen, *txts, *ntxts, i;
+
+	local = m->rm_last_text_read;
+	len = m->rm_read_texts.rm_read_texts_len;
+	txts = m->rm_read_texts.rm_read_texts_val;
+	if (len == 0)
+		return;
+	for (i = 0; i < len; i++)
+		if (txts[i] == local + 1) {
+			local++;
+			i = 0;
+		}
+	ntxts = malloc(sizeof(int) * len);
+	nlen = 0;
+	for (i = 0; i < len; i++)
+		if (txts[i] > local)
+			ntxts[nlen++] = txts[i];
+	free(txts);
+	m->rm_read_texts.rm_read_texts_val = ntxts;
+	m->rm_read_texts.rm_read_texts_len = nlen;
+	m->rm_last_text_read = local;
+}
+
 int32_t
 rk_mark_read_server(u_int32_t conf, u_int32_t local)
 {
@@ -428,18 +459,20 @@ rk_mark_read_server(u_int32_t conf, u_int32_t local)
 	if (is_read(conf, local, myuid))
 		return 0;
 	if (get_membership(myuid, conf, &m) == 0) {
-		if (m->rm_last_text_read + 1 == local)
+		if (m->rm_last_text_read + 1 == local) {
 			m->rm_last_text_read = local;
-		else {
+			cleanup_read(m);
+		} else {
 			txts = m->rm_read_texts.rm_read_texts_val;
 			num = m->rm_read_texts.rm_read_texts_len;
 			for (i = 0; i < num; i++)
 				if (txts[i] == local)
 					break;
 			if (i == num) {
-				txts = realloc(txts, sizeof(int) * (i+1));
-				txts[i] = local;
-				 m->rm_read_texts.rm_read_texts_val = txts;
+				num++;
+				txts = realloc(txts, sizeof(int) * num);
+				txts[num-1] = local;
+				m->rm_read_texts.rm_read_texts_val = txts;
 				m->rm_read_texts.rm_read_texts_len = num;
 			}
 		}
