@@ -92,6 +92,8 @@ struct get_conf_stat_store {
 	struct get_conf_stat_store *next;
 	int number;
 	struct rk_conference confer;
+	int mapsz;	/* Number of element in mapping */
+	int *map;	/* Array of mapped ints */
 };
 
 static struct get_conf_stat_store *gcs;
@@ -126,6 +128,75 @@ newname(int uid)
 		return;
 	free(pp->person.rp_username);
 	pp->person.rp_username = strdup(walker->confer.rc_name);
+}
+
+/*
+ * Get the local->global table. Store it as an array from 0 and up,
+ * this is waste of memory but we do not care right now.
+ */
+static void
+read_lgtable(struct get_conf_stat_store *g)
+{
+	char buf[50];
+	int top, i, base, cont, cnt, num;
+
+	if (g->mapsz)
+		return; /* Done already */
+
+	if (g->number != myuid && 
+	    g->confer.rc_type & (RK_CONF_TYPE_LETTERBOX << 4)) 
+		return; /* Do not try to read someones letterbox. */
+	/*
+	 * First get the highest local text number.
+	 */
+	sprintf(buf, "78 %d\n", g->number);
+	if (send_reply(buf)) {
+		get_eat('\n'); /* Do what??? */
+		return;
+	}
+	get_string();
+	get_int();
+	top = get_int();
+	g->mapsz = top + 50;
+	get_int();
+	get_accept('\n');
+
+	g->map = calloc(g->mapsz, sizeof(int));
+	base = 1;
+	for (;;) {
+		sprintf(buf, "103 %d %d 200\n", g->number, base);
+		if (send_reply(buf)) {
+			get_eat('\n');
+			return;	/* XXX ??? */
+		}
+		get_int();
+		base = get_int();
+		cont = get_int();
+		if (get_int() == 0) {
+			/* Sparse block */
+			cnt = get_int();
+			if (cnt != 0) {
+				get_accept('{');
+				for (i = 0; i < cnt; i++) {
+					num = get_int();
+					g->map[num] = get_int();
+				}
+				get_accept('}');
+			} else
+				get_accept('*');
+		} else {
+			/* Dense block */
+			num = get_int();
+			cnt = get_int();
+			get_accept('{');
+			for (i = 0; i < cnt; i++)
+				g->map[num++] = get_int();
+			get_accept('}');
+		}
+		get_accept('\n');
+		if (cont == 0)
+			break;
+	}
 }
 
 static void
@@ -224,6 +295,8 @@ get_conf_stat(int conf, struct rk_conference **confer)
 	walker->number = conf;
 	c = &walker->confer;
 	readin_conf_stat(c);
+
+	read_lgtable(walker);
 
 	walker->next = gcs;
 	gcs = walker;
@@ -378,19 +451,21 @@ rk_change_conference_server(u_int32_t conf)
 static int
 next_local(int conf, int local)
 {
-	int ret;
-	char buf[30];
+	struct rk_conference *c;
+	struct get_conf_stat_store *g;
+	int i;
 
-	sprintf(buf, "103 %d %d 1\n", conf, local);
-	ret = send_reply(buf);
-	if (ret) {
-		get_eat('\n');
-		return 0;
+	if ((g = findconf(conf)) == NULL) {
+		get_conf_stat(conf, &c);
+		if ((g = findconf(conf)) == NULL)
+			return 0;
 	}
-	get_int();get_int();get_int();get_int();
-	ret = get_int();
-	get_eat('\n');
-	return ret;
+	if (local >= g->mapsz)
+		return 0;
+	for (i = local; i < g->mapsz; i++)
+		if (g->map[i])
+			return i;
+	return 0;
 }
 
 static int
@@ -469,52 +544,46 @@ back:	last = m->rm_last_text_read;
 u_int32_t
 rk_local_to_global_server(u_int32_t conf, u_int32_t local)
 {
-	int ret, junk;
-	char buf[30];
+	struct rk_conference *c;
+	struct get_conf_stat_store *g;
 
-	sprintf(buf, "103 %d %d 1\n", conf, local);
-	ret = send_reply(buf);
-	if (ret) {
-		ret = get_int();
-		printf("local_to_global sket sej: %d\n", (ret));
-		get_eat('\n');
-		return 0;
+	if ((g = findconf(conf)) == NULL) {
+		get_conf_stat(conf, &c);
+		if ((g = findconf(conf)) == NULL)
+			return 0;
 	}
-	junk = get_int(); /* first */
-	junk = get_int(); /* last */
-	junk = get_int(); /* later texts */
-	junk = get_int(); /* sparse/dense, must be dense */
-	junk = get_int(); /* must be == local */
-	if (junk != local) {
-		get_eat('\n');
+	if (local >= g->mapsz)
 		return 0;
-	}
-	junk = get_int(); /* Numbers of texts in array, must be 1 */
-	get_accept('{');
-	ret = get_int(); /* Our global number */
-	get_accept('}');
-	get_accept('\n');
-	return ret;
+	return g->map[local];
 }
 
 void
-conf_set_high_local(int conf, int local)
+conf_set_high_local(int conf, int local, int global)
 {
 	struct get_conf_stat_store *walker;
 	int tt;
 
 	/* First, see if we have this conference in the cache */
-	if (gcs != 0) {
-		walker = gcs;
-		while (walker) {
-			if (walker->number == conf) {
-				tt = local - walker->confer.rc_first_local_no+1;
-				if (walker->confer.rc_no_of_texts < tt)
-					walker->confer.rc_no_of_texts = tt;
-				return;
+	if (gcs == 0)
+		return;
+	walker = gcs;
+	while (walker) {
+		if (walker->number == conf) {
+			tt = local - walker->confer.rc_first_local_no+1;
+			if (walker->confer.rc_no_of_texts < tt)
+				walker->confer.rc_no_of_texts = tt;
+			if (walker->mapsz <= local) {
+				int *tpt = calloc(local+50, sizeof(int));
+				memcpy(tpt, walker->map, walker->mapsz *
+				    sizeof(int));
+				free(walker->map);
+				walker->map = tpt;
+				walker->mapsz = local+50;
 			}
-			walker = walker->next;
+			walker->map[local] = global;
+			return;
 		}
+		walker = walker->next;
 	}
 }
 

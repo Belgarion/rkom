@@ -27,11 +27,16 @@ rk_time_server(void)
 	return ret;
 }
 
+static void
+rk_alive_server_callback(int err, int arg)
+{
+	get_accept('\n');
+}
+
 void
 rk_alive_server(void)
 {
-	send_reply("82\n");
-	get_accept('\n');
+	send_callback("82\n", 0, rk_alive_server_callback);
 }
 
 int32_t

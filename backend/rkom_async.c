@@ -190,7 +190,7 @@ async_new_text(struct mesg *m)
 				printf("async_new_text: bad protocol\n");
 			local = get_int();
 			i++;
-			conf_set_high_local(conf, local);
+			conf_set_high_local(conf, local, m->ra.ra_text);
 			break;
 
 		case comm_to:
