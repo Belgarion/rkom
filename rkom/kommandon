@@ -20,6 +20,8 @@ Ord inom parantes ska inte skrivas.
     Personligt (svar)
 
   Kommandon för möten:
+    Addera medlem (till möte)
+    Subtrahera medlem (från möte)
     Var (är jag)
     Gå (till möte)
     (Gå till) nästa möte
@@ -27,6 +29,8 @@ Ord inom parantes ska inte skrivas.
     Utträda (ur möte)
 
   Kommandon för texter:
+    Addera mottagare (till inlägg)
+    Subtrahera mottagare (till inlägg)
     Lägga (in texten)
     Mottagare:
     Ärende:

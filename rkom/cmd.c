@@ -510,3 +510,81 @@ cmd_change_name()
 	free(retval);
 	free(name);
 }
+
+void
+cmd_add_member()
+{
+	struct rk_confinfo_retval *retval;
+	int rv, uid, mid;
+	char *name;
+
+	printf("Addera medlem\n\n");
+
+	name = getstr("Vem skall adderas? ");
+	if (strlen(name) == 0) {
+		printf("Nähej.\n"); 
+		free(name);
+		return;
+	}
+	retval = match_complain(name, MATCHCONF_PERSON);
+	free(name);
+	if (retval == NULL)
+		return;
+	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	uid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	free(retval);
+	name = getstr("Till vilket möte? ");
+	if (strlen(name) == 0) {
+		printf("Nähej.\n");
+		free(name);
+		return;
+	}
+	retval = match_complain(name, MATCHCONF_CONF);
+	free(name);
+	if (retval == NULL)
+		return;
+	mid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	free(retval);
+	rv = rk_add_member(mid, uid, 100, 3, 0);
+	if (rv)
+		printf("Det gick inte: %s\n", error(rv));
+}
+
+void
+cmd_sub_member()
+{
+	struct rk_confinfo_retval *retval;
+	int rv, uid, mid;
+	char *name;
+
+	printf("Subtrahera medlem\n\n");
+
+	name = getstr("Vem skall subtraheras? ");
+	if (strlen(name) == 0) {
+		printf("Nähej.\n"); 
+		free(name);
+		return;
+	}
+	retval = match_complain(name, MATCHCONF_PERSON);
+	free(name);
+	if (retval == NULL)
+		return;
+	printf("%s\n", retval->rcr_ci.rcr_ci_val[0].rc_name);
+	uid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	free(retval);
+	name = getstr("Från vilket möte? ");
+	if (strlen(name) == 0) {
+		printf("Nähej.\n");
+		free(name);
+		return;
+	}
+	retval = match_complain(name, MATCHCONF_CONF);
+	free(name);
+	if (retval == NULL)
+		return;
+	mid = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
+	free(retval);
+	rv = rk_sub_member(mid, uid);
+	if (rv)
+		printf("Det gick inte: %s\n", error(rv));
+}
