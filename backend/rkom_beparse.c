@@ -343,7 +343,28 @@ back:		ts = malloc(sizeof(*ts));
 	} else
 		get_accept('*');
 
-	get_eat('\n'); /* XXX */
+	/* aux-info. Just throw it away for now */
+	len = get_int();
+	if (len) { 
+		struct rk_time t;
+		char *c;
+		get_accept('{');
+		for (i = 0; i < len; i++) {
+			get_int(); /* aux-no */
+			get_int(); /* tag */ 
+			get_int(); /* creator */
+			read_in_time(&t); /* created-at */
+			get_int(); /* flags */
+			get_int(); /* inherit-limit */
+			c = get_string(); /* data */
+			if (*c)
+				free(c);
+		}
+		get_accept('}');
+	} else
+		get_accept('*');
+	get_accept('\n');
+
 	if (tss == 0) {
 		tss = calloc(sizeof(*tss), 1);
 		tss->nummer = nr;
