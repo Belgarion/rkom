@@ -1,4 +1,4 @@
-/*	$Id: rkom_subr.c,v 1.19 2001/12/07 21:10:36 ragge Exp $	*/
+/*	$Id: rkom_subr.c,v 1.20 2003/09/17 10:51:34 ragge Exp $	*/
 /*
  * This file contains the front-end subroutine interface.
  */
@@ -22,17 +22,16 @@
 #include <err.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "backend.h"
 
-int sockfd, readfd=-1, writefd, fepid;
+int sockfd, readfd=-1, writefd = -1, fepid = -1;
 static int childpid;
 /*
  * First connect to the server, then fork away the backend after informing
  * about our existance.
  */
 struct rk_server *
-rk_connect_server(char *server, char *frontend, char *os_username, char *fevers)
+rkom_connect(char *server, char *frontend, char *os_username, char *fevers)
 {
 	struct rk_server *rs;
 	struct sockaddr_in sin;
@@ -91,9 +90,11 @@ rk_connect_server(char *server, char *frontend, char *os_username, char *fevers)
 	/* Set what async messages we want */
 	send_reply("80 10 { 5 8 9 12 13 14 15 16 17 18 }\n");
 	get_accept('\n');
+
 	return rs;
 }
 
+#if 0
 int
 rkom_fork()
 {
@@ -125,6 +126,7 @@ rkom_fork()
 	close(fromback[1]);
 	return 0;
 }
+#endif
 
 void
 rkom_logout()

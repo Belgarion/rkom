@@ -6,7 +6,6 @@
 #include <string.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "backend.h"
 
 struct membership_store {
@@ -436,7 +435,7 @@ set_last_read_internal(int conf, int local)
 }
 
 int32_t
-rk_change_conference_server(u_int32_t conf)
+rk_change_conference(u_int32_t conf)
 {
 	int ret;
 	char buf[20];
@@ -515,13 +514,13 @@ is_read(int conf, int text, int uid)
 }
 
 int32_t
-rk_is_read_server(u_int32_t nr)
+rk_is_read(u_int32_t nr)
 {
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mi;
 	int i, len, conf = 0;
 
-	ts = rk_textstat_server(nr);
+	ts = rk_textstat(nr);
 	if (ts->rt_retval)
 		return 0;
 	len = ts->rt_misc_info.rt_misc_info_len;
@@ -542,7 +541,7 @@ rk_is_read_server(u_int32_t nr)
 }
 
 u_int32_t
-rk_next_unread_server(u_int32_t conf, u_int32_t uid)
+rk_next_unread(u_int32_t conf, u_int32_t uid)
 {
 	struct rk_conference *c;
 	struct rk_membership *m;
@@ -558,7 +557,7 @@ back:	last = m->rm_last_text_read;
 		return 0;
 	last = next_local(conf, last + 1);
 	if (last == 0) {
-		rk_mark_read_server(conf, m->rm_last_text_read + 1);
+		rk_mark_read(conf, m->rm_last_text_read + 1);
 		goto back;
 	}
 	if (is_read(conf, last, uid)) {
@@ -573,7 +572,7 @@ back:	last = m->rm_last_text_read;
 }
 
 u_int32_t
-rk_local_to_global_server(u_int32_t conf, u_int32_t local)
+rk_local_to_global(u_int32_t conf, u_int32_t local)
 {
 	struct rk_conference *c;
 	struct get_conf_stat_store *g;
@@ -660,7 +659,7 @@ rk_mark_read_server_callback(int err, int arg)
 }
 
 int32_t
-rk_mark_read_server(u_int32_t conf, u_int32_t local)
+rk_mark_read(u_int32_t conf, u_int32_t local)
 {
 	struct rk_membership *m;
 	char buf[50];
@@ -694,7 +693,7 @@ rk_mark_read_server(u_int32_t conf, u_int32_t local)
 };
 
 int32_t
-rk_set_last_read_server(u_int32_t conf, u_int32_t local)
+rk_set_last_read(u_int32_t conf, u_int32_t local)
 {
 	char buf[20];
 
@@ -710,7 +709,7 @@ rk_set_last_read_server(u_int32_t conf, u_int32_t local)
 }
 
 int32_t 
-rk_add_member_server(u_int32_t conf, u_int32_t uid, u_int8_t prio,
+rk_add_member(u_int32_t conf, u_int32_t uid, u_int8_t prio,
     u_int16_t where, u_int32_t flags)
 {
 	int ret;
@@ -729,7 +728,7 @@ rk_add_member_server(u_int32_t conf, u_int32_t uid, u_int8_t prio,
 }
 
 int32_t
-rk_sub_member_server(u_int32_t conf, u_int32_t uid)
+rk_sub_member(u_int32_t conf, u_int32_t uid)
 {
 	int ret;
 	char buf[30];
@@ -749,7 +748,7 @@ rk_sub_member_server(u_int32_t conf, u_int32_t uid)
  * XXX - should remember the membership structs also.
  */
 struct rk_memberconflist *
-rk_memberconf_server(u_int32_t uid)
+rk_memberconf(u_int32_t uid)
 {
 	struct rk_memberconflist *mcl;
 	struct person_store *ps;
@@ -800,7 +799,7 @@ rk_memberconf_server(u_int32_t uid)
  * Delete all cached membership records.
  */
 void
-rk_sync_server(void)
+rk_sync(void)
 {
 	struct membership_store *m, *nm;
 	struct person_store *walker;
@@ -823,7 +822,7 @@ rk_sync_server(void)
 }
 
 int32_t
-rk_create_conf_server(char *name, u_int32_t btype)
+rk_create_conf(char *name, u_int32_t btype)
 {
 	char *buf, *type;
 	int i;
@@ -843,7 +842,7 @@ rk_create_conf_server(char *name, u_int32_t btype)
 }
 
 int32_t
-rk_create_person_server(char *name, char *passwd, u_int32_t btype)
+rk_create_person(char *name, char *passwd, u_int32_t btype)
 {
 	char *buf;
 	int i;
@@ -862,7 +861,7 @@ rk_create_person_server(char *name, char *passwd, u_int32_t btype)
 }
 
 int32_t 
-rk_delete_conf_server(u_int32_t conf)
+rk_delete_conf(u_int32_t conf)
 {
 	char buf[40];
 	int i;
@@ -878,7 +877,7 @@ rk_delete_conf_server(u_int32_t conf)
 }
 
 int32_t
-rk_modify_conf_info_server(struct rk_modifyconfinfo *rkm)
+rk_modify_conf_info(struct rk_modifyconfinfo *rkm)
 {
 	struct rk_aux_item_input *raii;
 	char buf[100];

@@ -15,7 +15,6 @@
 #include <err.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "backend.h"
 #include "rtype.h"
 
@@ -52,7 +51,7 @@ rkom_loop()
 	 * Set up the poll descriptors.
 	 */
 	level++;
-	pfd[0].fd = readfd;
+	pfd[0].fd = 0;	/* stdin */
 	pfd[0].events = (level < 2 ? POLLIN|POLLPRI : 0);
 	pfd[1].fd = sockfd;
 	pfd[1].events = POLLIN|POLLPRI;
@@ -65,7 +64,7 @@ rkom_loop()
 		int rv;
 	
 		if (level == 1)
-			async_handle();
+			async_collect();
 		/* Wait for something to happen */
 		pfd[0].revents = pfd[1].revents = 0;
 		rv = poll(pfd, 2, INFTIM);
@@ -77,7 +76,7 @@ rkom_loop()
 			continue;
 		}
 		if (pfd[0].revents & (POLLIN|POLLPRI))
-			spc_process_request();
+			rkom_command();
 		if (pfd[1].revents & (POLLIN|POLLPRI)) {
 			int i, rv;
 			char c;

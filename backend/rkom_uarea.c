@@ -9,7 +9,6 @@
 #include <unistd.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "backend.h"
 #include "rtype.h"
 
@@ -145,7 +144,7 @@ get_uarea(int uid)
 
 
 struct rk_uarea *
-rk_get_uarea_server(char *str)
+rk_get_uarea(char *str)
 {
 	struct rk_uarea *ru;
 	struct rk_val *rv;
@@ -195,7 +194,7 @@ rk_get_uarea_server(char *str)
 
 
 int32_t
-rk_set_uarea_server(char *str, struct rk_uarea *u)
+rk_set_uarea(char *str, struct rk_uarea *u)
 {
 	struct rk_person *p;
 	struct uarea *ua;

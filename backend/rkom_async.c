@@ -11,7 +11,6 @@
 #include <strings.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "backend.h"
 
 
@@ -125,22 +124,13 @@ async(int level)
 		return;
 	}
 	if (level == 1)
-		async_handle();
-}
-
-void
-async_handle()
-{
-	extern int fepid;
-
-	if (pole)
-		kill(fepid, SIGIO);
+		async_collect();
 }
 
 static struct mesg *freepole = 0;
 
 struct rk_async *
-rk_async_server(void)
+rk_async(void)
 {
 	struct rk_async *ra;
 

@@ -10,13 +10,12 @@
 #include <unistd.h>
 
 #include "rkomsupport.h"
-#include "rkom_proto.h"
 #include "backend.h"
 
 extern int myuid;
 
 struct rk_time *
-rk_time_server(void)
+rk_time(void)
 {
 	struct rk_time *ret;
 
@@ -34,13 +33,13 @@ rk_alive_server_callback(int err, int arg)
 }
 
 void
-rk_alive_server(void)
+rk_alive(void)
 {
 	send_callback("82\n", 0, rk_alive_server_callback);
 }
 
 int32_t
-rk_whatido_server(char *args)
+rk_whatido(char *args)
 {
 	int i;
 	char *buf;
@@ -54,7 +53,7 @@ rk_whatido_server(char *args)
 
 
 struct rk_confinfo_retval *
-rk_matchconf_server(char *name, u_int8_t flags)
+rk_matchconf(char *name, u_int8_t flags)
 {
 	struct rk_confinfo_retval *retval;
 	int antal, i, p, k;
@@ -90,7 +89,7 @@ rk_matchconf_server(char *name, u_int8_t flags)
 }
 
 int32_t
-rk_login_server(u_int32_t userid, char *passwd)
+rk_login(u_int32_t userid, char *passwd)
 {
 	char *buf;
 	int i;
@@ -108,7 +107,7 @@ rk_login_server(u_int32_t userid, char *passwd)
 }
 
 struct rk_unreadconfval *
-rk_unreadconf_server(u_int32_t uid)
+rk_unreadconf(u_int32_t uid)
 {
 	struct rk_unreadconfval *ure;
 	int i, nconfs;
@@ -141,7 +140,7 @@ rk_unreadconf_server(u_int32_t uid)
 }
 
 struct rk_uconference *
-rk_uconfinfo_server(u_int32_t mid) 
+rk_uconfinfo(u_int32_t mid) 
 {
 	struct rk_uconference *ru;
 	char buf[40];
@@ -163,7 +162,7 @@ rk_uconfinfo_server(u_int32_t mid)
 }
 
 struct rk_conference *
-rk_confinfo_server(u_int32_t mid)
+rk_confinfo(u_int32_t mid)
 {
 	struct rk_conference *ret, *conf;
 
@@ -177,7 +176,7 @@ rk_confinfo_server(u_int32_t mid)
 }
 
 struct rk_person *
-rk_persinfo_server(u_int32_t uid)
+rk_persinfo(u_int32_t uid)
 {
 	struct rk_person *ret, *r2; 
 
@@ -191,7 +190,7 @@ rk_persinfo_server(u_int32_t uid)
 }               
 
 struct rk_membership *
-rk_membership_server(u_int32_t uid, u_int32_t mid)
+rk_membership(u_int32_t uid, u_int32_t mid)
 {
 	struct rk_membership *m, *ret;
 
@@ -205,7 +204,7 @@ rk_membership_server(u_int32_t uid, u_int32_t mid)
 }
 
 struct rk_dynamic_session_info_retval *
-rk_vilka_server(u_int32_t secs, u_int32_t flags)
+rk_vilka(u_int32_t secs, u_int32_t flags)
 {
 	struct rk_dynamic_session_info_retval *pp;
 	struct rk_dynamic_session_info *ppp;
@@ -242,7 +241,7 @@ rk_vilka_server(u_int32_t secs, u_int32_t flags)
 }
 
 char *
-rk_client_name_server(u_int32_t vers)
+rk_client_name(u_int32_t vers)
 {
 	char *ret;
 	char buf[50];
@@ -260,7 +259,7 @@ rk_client_name_server(u_int32_t vers)
 }
 
 char *
-rk_client_version_server(u_int32_t vers)
+rk_client_version(u_int32_t vers)
 {
 	char *ret;
 	char buf[50];
@@ -301,7 +300,7 @@ findtxt(int nr)
 }
 
 char *
-rk_gettext_server(u_int32_t nr)
+rk_gettext(u_int32_t nr)
 {
 	struct text_stat_store *tss;
 	char buf[50], *c;
@@ -400,7 +399,7 @@ readin_textstat(struct rk_text_stat *ts)
 }
 
 struct rk_text_stat *
-rk_textstat_server(u_int32_t nr)
+rk_textstat(u_int32_t nr)
 {
 	struct text_stat_store *tss;
 	struct rk_text_stat *ts;
@@ -484,7 +483,7 @@ reread_text_stat_bg(int text)
  * Put a text into a conference.
  */
 struct rk_text_retval *
-rk_create_text_server(struct rk_text_info *rti)
+rk_create_text(struct rk_text_info *rti)
 {
 	struct rk_text_retval *rkr;
 	struct rk_misc_info *mi;
@@ -535,7 +534,7 @@ rk_create_text_server(struct rk_text_info *rti)
 
 /* Get the marked texts. */
 struct rk_mark_retval *
-rk_getmarks_server(void)
+rk_getmarks(void)
 {
 	struct rk_mark_retval *rmr;
 	struct rk_marks *rm;
@@ -567,7 +566,7 @@ rk_getmarks_server(void)
 
 /* Mark a text */
 int32_t
-rk_setmark_server(u_int32_t text, u_int8_t type)
+rk_setmark(u_int32_t text, u_int8_t type)
 {
 	char buf[30];
 	int retval = 0;
@@ -588,7 +587,7 @@ rk_setmark_server(u_int32_t text, u_int8_t type)
 
 /* Unmark a text */
 int32_t
-rk_unmark_server(u_int32_t text)
+rk_unmark(u_int32_t text)
 {
 	char buf[30];
 	int retval = 0;
@@ -608,7 +607,7 @@ rk_unmark_server(u_int32_t text)
 }
 
 int32_t
-rk_send_msg_server(u_int32_t dest, char *string)
+rk_send_msg(u_int32_t dest, char *string)
 {
 	char *dst;
 	int i = 0;
@@ -622,7 +621,7 @@ rk_send_msg_server(u_int32_t dest, char *string)
 }
 
 int32_t 
-rk_setpass_server(u_int32_t uid, char *oldpass, char *newpass)
+rk_setpass(u_int32_t uid, char *oldpass, char *newpass)
 {
 	int i, totlen;
 	char *buf;
@@ -641,7 +640,7 @@ rk_setpass_server(u_int32_t uid, char *oldpass, char *newpass)
 }
 
 int32_t
-rk_change_name_server(u_int32_t uid, char *newname)
+rk_change_name(u_int32_t uid, char *newname)
 {
 	int i;
 	char *buf;
@@ -658,7 +657,7 @@ rk_change_name_server(u_int32_t uid, char *newname)
 }
 
 int32_t
-rk_set_presentation_server(u_int32_t conf, struct rk_text_info *rti)
+rk_set_presentation(u_int32_t conf, struct rk_text_info *rti)
 {
 	struct rk_text_retval *rtr;
 	struct rk_misc_info *rkm;
@@ -698,7 +697,7 @@ rk_set_presentation_server(u_int32_t conf, struct rk_text_info *rti)
 	rti->rti_misc.rti_misc_len = nrkm;
 
 	/* create text */
-	rtr = rk_create_text_server(rti);
+	rtr = rk_create_text(rti);
 	if (rtr->rtr_status)
 		return rtr->rtr_status;
 
@@ -716,7 +715,7 @@ rk_set_presentation_server(u_int32_t conf, struct rk_text_info *rti)
 }
 
 int32_t
-rk_add_rcpt_server(u_int32_t text, u_int32_t conf, u_int32_t type)
+rk_add_rcpt(u_int32_t text, u_int32_t conf, u_int32_t type)
 {
 	char buf[30];
 	int i;
@@ -732,7 +731,7 @@ rk_add_rcpt_server(u_int32_t text, u_int32_t conf, u_int32_t type)
 }
 
 int32_t
-rk_sub_rcpt_server(u_int32_t text, u_int32_t conf)
+rk_sub_rcpt(u_int32_t text, u_int32_t conf)
 {
 	char buf[30];
 	int i;
@@ -748,7 +747,7 @@ rk_sub_rcpt_server(u_int32_t text, u_int32_t conf)
 }
 
 int32_t
-rk_delete_text_server(u_int32_t text)
+rk_delete_text(u_int32_t text)
 {
 	char buf[30];
 	int i;
@@ -764,7 +763,7 @@ rk_delete_text_server(u_int32_t text)
 }
 
 int32_t
-rk_set_motd_server(u_int32_t conf, struct rk_text_info *rti)
+rk_set_motd(u_int32_t conf, struct rk_text_info *rti)
 {
 	struct rk_text_retval *rtr;
 	char buf[30];
@@ -799,7 +798,7 @@ rk_set_motd_server(u_int32_t conf, struct rk_text_info *rti)
 	rti->rti_misc.rti_misc_len = 1;
 
 	/* create text */
-	rtr = rk_create_text_server(rti);
+	rtr = rk_create_text(rti);
 	if (rtr->rtr_status)
 		return rtr->rtr_status;
 
@@ -817,7 +816,7 @@ rk_set_motd_server(u_int32_t conf, struct rk_text_info *rti)
 }
 
 int32_t
-rk_add_text_info_server(u_int32_t textno, struct rk_aux_item_input *raii)
+rk_add_text_info(u_int32_t textno, struct rk_aux_item_input *raii)
 {
 	extern int sockfd;
 	char buf[30];
