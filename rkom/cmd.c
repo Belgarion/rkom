@@ -358,7 +358,7 @@ cmd_goto(char *str)
 	ret = rkc->rc_first_local_no + rkc->rc_no_of_texts - 1 -
 	    m->rm_last_text_read;
 	if (ret) {
-		rprintf("\nDu har %d olästa inlägg.\n", ret);
+		rprintf("\nDu har %d oläst%s inlägg.\n", ret, ret>1?"a":"");
 	} else {
 		rprintf("\nDu har inga olästa inlägg.\n");
 	}
@@ -423,6 +423,7 @@ persstat(int uid)
 	struct rk_person *p;
 
 	p = rk_persinfo(uid);
+	rprintf("Namn:                 %s\n", vem(uid));
 	rprintf("Person nummer:        %-5d\n", uid);
 	rprintf("Inloggad från:        %s\n", p->rp_username);
 	rprintf("Senast inloggad:      %s\n",
@@ -443,6 +444,21 @@ persstat(int uid)
 static void
 confstat(int mid)
 {
+	struct rk_conference *rcp;
+
+	rcp = rk_confinfo(mid);
+	rprintf("Namn:                  %s\n", vem(mid));
+	rprintf("Antal texter:          %d\n", rcp->rc_no_of_texts);
+	rprintf("Skapat:                %s\n",
+		get_date_string(&rcp->rc_creation_time));
+	rprintf("Skapare:               %s\n",
+		vem(rcp->rc_creator));
+	rprintf("Senaste text:          %s\n",
+		get_date_string(&rcp->rc_last_written));
+	rprintf("Antal medlemmar:       %d\n",
+		rcp->rc_no_of_members);
+	rprintf("Livslängd:             %d dagar\n",
+		rcp->rc_expire);
 }
 
 void

@@ -18,7 +18,7 @@ char *
 vem(int num)
 {
 	struct rk_conference *conf;
-	static char *ret, buf[30];
+	static char *ret, buf[60];
 
 	if (ret && ret != buf)
 		free(ret);
@@ -63,7 +63,8 @@ show_text(int nr)
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mi;
 	int i, len, p;
-	char *c, *cc, *namn, buf[20];
+	char *c, *cc, *namn, buf[100];
+	char namnbuf[100];
 
 	ts = rk_textstat(nr);
 	if (ts->rt_retval) {
@@ -74,13 +75,13 @@ show_text(int nr)
 
 	conf = rk_confinfo(ts->rt_author);
 	if (conf->rc_retval) {
-		namn = alloca(100);
+		namn = namnbuf;
 		sprintf(namn, "Person %d (hemlig)", ts->rt_author);
 	} else
 		namn = conf->rc_name;
 	rprintf("\n(%d) %s /%d rad%s/ %s\n", nr,
 	    get_date_string(&ts->rt_time), ts->rt_no_of_lines,
-	    ts->rt_no_of_lines == 2 ? "er" : "", namn);
+	    ts->rt_no_of_lines > 1 ? "er" : "", namn);
 	free(conf);
 
 	mi = ts->rt_misc_info.rt_misc_info_val;
@@ -133,11 +134,11 @@ show_text(int nr)
 			rprintf("\n");
 	} else
 		rprintf("\n");
-	sprintf(buf, "(%d)", nr);
-	if (isneq("dashed-lines", "0"))
+	sprintf(buf, "(%d) %s", nr, namn);
+	if (isneq("dashed-lines", "0") && strlen(buf) < 60)
 		rprintf("%s%s", buf, &"------------------------------------------------------------\n"[strlen(buf)]);
 	else
-		rprintf("\n");
+		rprintf("%s\n", buf);
 	free(c);
 	if (p)
 		printcmnt(mi, len, p);
