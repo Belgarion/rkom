@@ -70,18 +70,10 @@ get_input_string(int fd, int brk)
 	int i = 0, len;
 	char *buf = 0;
 
-	errno = 0;
 	do {
 		i++;
 		buf = realloc(buf, 80 * i);
 		len = read(fd, &buf[80 * (i - 1)], 80);
-		if (len == 0 || errno) {
-			errno = 0;
-			if (brk) {
-				free(buf);
-				return 0;
-			}
-		}
 	} while (len == 80);
 	buf[80 * (i - 1) + len - 1] = 0;
 

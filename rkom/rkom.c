@@ -33,14 +33,13 @@ char *p_next_text = "(Läsa) nästa inlägg";
 char *p_see_time  = "(Se) tiden";
 char *p_next_comment = "(Läsa) nästa kommentar";
 char *prompt;
-int fetchstat;
 
 int
 main(int argc, char *argv[])
 {
-	struct sigaction sa;
+	struct pollfd pfd[1];
 	struct timeval tp;
-	int ch;
+	int ch, noprompt;
 	char *server, *uname, *confile;
 
 	confile = 0;
@@ -59,9 +58,7 @@ main(int argc, char *argv[])
 	argv += optind;
 	argc -= optind;
 
-	bzero(&sa, sizeof(sa));
-	sa.sa_handler = sigio;
-	sigaction(SIGIO, &sa, NULL);
+	signal(SIGIO, sigio);
 
 	if (argc != 1) {
 		if ((server = getenv("KOMSERVER")) == 0)
@@ -77,20 +74,37 @@ main(int argc, char *argv[])
 	if (rkom_connect(server, NULL, uname))
 		err(1, "misslyckades koppla upp...");
 
+	pfd[0].fd = 0;
+	pfd[0].events = POLLIN|POLLPRI;
+	noprompt = 0;
+
 	for (;;) {
-		printf("\n%s - ", prompt);
+		int rv;
+
+		if (noprompt)
+			noprompt = 0;
+		else
+			printf("\n%s - ", prompt);
 		fflush(stdout);
-back:		if (kbd_input(0)) {
-			fetchstat = 0;
-			if (async_collect())
-				goto back;
+
+		rv = poll(pfd, 1, INFTIM);
+		if (rv == 0)
+			continue;
+		if (rv < 0) {
+			if (errno != EINTR)
+				warn("poll");
+			noprompt = async_collect();
 			continue;
 		}
-		gettimeofday(&tp, 0);
-		if (tp.tv_sec - lasttime > 30) {
-			rk_alive(0);
-			lasttime = tp.tv_sec;
+		if (pfd[0].revents & (POLLIN|POLLPRI)) {
+			kbd_input(pfd[0].fd);
+			gettimeofday(&tp, 0);
+			if (tp.tv_sec - lasttime > 30) {
+				rk_alive(0);
+				lasttime = tp.tv_sec;
+			}
 		}
+		async_collect();
 	}
 	return 0;
 }
@@ -98,7 +112,6 @@ back:		if (kbd_input(0)) {
 void
 sigio(int arg)
 {
-	fetchstat = 1;
 }
 
 int
