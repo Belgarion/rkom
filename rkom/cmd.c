@@ -318,7 +318,7 @@ cmd_goto(char *str)
 		rprintf("Du måste ge ett möte som argument.\n");
 		return;
 	}
-	retval = match_complain(str, MATCHCONF_CONF);
+	retval = match_complain(str, MATCHCONF_CONF|MATCHCONF_PERSON);
 	if (retval == NULL)
 		return;
 	conf = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
@@ -348,7 +348,11 @@ cmd_goto(char *str)
 		return;
 	}
 	if ((ret = rk_add_member(conf, myuid, 100, 3, 0))) {
-		rprintf("%s\n", error(ret));
+		if (ret == 11)
+			rprintf("Mötet är slutet, kontakta administratören "
+			    "för medlemsskap.\n");
+		else
+			rprintf("%s\n", error(ret));
 		return;
 	}
 	curconf = conf;
