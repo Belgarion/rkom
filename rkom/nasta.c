@@ -404,6 +404,8 @@ next_resee_presentation(char *name)
 		printf("Det finns ingen presentation.\n");
 	else
 		show_text(rc->rc_presentation, 1);
+	lastlasttext = lasttext;
+	lasttext = rc->rc_presentation;
 	free(rv);
 	free(rc);
 }
