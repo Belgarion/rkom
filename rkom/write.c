@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.49 2002/09/01 10:22:56 ragge Exp $	*/
+/*	$Id: write.c,v 1.50 2002/09/01 11:16:03 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -210,6 +210,38 @@ change_faq(int confno, struct rk_text_info *rti)
 	return rk_modify_conf_info(rkm);
 }
 
+static void
+check_receiver(void)
+{
+	struct rk_conference *rc;
+	int i;
+
+	/*
+	 * If this is not a comment to something, skip.
+	 */
+	for (i = 0; i < nmi; i++)
+		if (mi[i].rmi_type == comm_to)
+			break;
+	if (i == nmi)
+		return;
+
+	/*
+	 * If this text is sent to a conference that has a superconf,
+	 * and is an original conference, set recpt to superconf instead.
+	 */
+	for (i = 0; i < nmi; i++) {
+		if (mi[i].rmi_type != recpt)
+			continue;
+		rc = rk_confinfo(mi[i].rmi_numeric);
+		if (rc->rc_retval)
+			continue; /* Handle later */
+		if (((rc->rc_type / 1000000) & 1) == 0)
+			continue; /* Not original conference */
+		if (rc->rc_super_conf)
+			mi[i].rmi_numeric = rc->rc_super_conf;
+	}
+}
+
 void
 write_put(char *str)
 {
@@ -223,6 +255,10 @@ write_put(char *str)
 	/* Remove extra '\n' after txt */
 	while (strlen(ctext) && ctext[strlen(ctext) - 1] == '\n')
 		ctext[strlen(ctext) - 1] = 0;
+
+	/* Do not send comments to conferences that are not allowed */
+	if (!isfaq && !ispres && !islapp)
+		check_receiver();
 
 	rti = alloca(sizeof(struct rk_text_info));
 	rti->rti_misc.rti_misc_len = nmi;
