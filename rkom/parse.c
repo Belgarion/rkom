@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.39 2002/07/12 01:40:39 offe Exp $ */
+/* $Id: parse.c,v 1.40 2002/08/31 08:33:21 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -52,6 +52,7 @@ DCMD(read_list_news);
 DCMD(read_only);
 DCMD(read_again);
 DCMD(read_jump);
+DCMD(read_superjump);
 
 /* Commands for writing */
 DCMD(write_new);
@@ -162,6 +163,7 @@ DROW("lista nyheter",			0,PE_NO_ARG,read_list_news)
 DROW("endast",					1,PE_NUM_ARG,read_only)
 DROW("igen",					0,PE_NO_ARG,read_again)
 DROW("hoppa",					0,PE_NO_ARG,read_jump)
+DROW("superhoppa",				0,PE_NO_ARG,read_superjump)
 
 /* Commands for writing */
 DROW("inlägg",					0,PE_NO_ARG,write_new)
@@ -462,6 +464,14 @@ exec_read_again(int argc, char *argv[])
 	next_again(NULL);
 	return 0;
 }
+
+static int
+exec_read_superjump(int argc, char *argv[])
+{
+	show_superhoppa(NULL);
+	return 0;
+}
+
 
 static int
 exec_read_jump(int argc, char *argv[])

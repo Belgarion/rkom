@@ -211,20 +211,22 @@ mark_read(int nr)
 void
 next_text(char *str)
 {
-	int local, global;
+	int local, global, rv;
 
-	local = rk_next_unread(curconf, myuid);
+igen:	local = rk_next_unread(curconf, myuid);
 	if (local == 0) {
 		rprintf("Du har inga mer olästa inlägg.\n");
 		next_prompt();
 		return;
 	}
 	global = rk_local_to_global(curconf, local);
-	show_text(global, 1);
+	rv = show_text(global, 1);
 	mark_read(global);
 	next_action(global);
 	lastlasttext = lasttext;
 	lasttext = global;
+	if (rv)
+		goto igen;
 }
 
 void
@@ -232,10 +234,11 @@ next_comment(char *str)
 {
 	struct rk_text_stat *ts;
 	struct rk_misc_info *mi;
-	int global, len, i;
+	int global, len, i, rv = 0;
 
-	if (pole == 0) {
-back:		rprintf("Det finns ingen nästa kommentar.\n");
+igen:	if (pole == 0) {
+		if (rv == 0)
+back:			rprintf("Det finns ingen nästa kommentar.\n");
 		prompt = PROMPT_NEXT_TEXT;
 		return;
 	}
@@ -254,11 +257,13 @@ try:	for (i = pole->listidx; i < len; i++)
 		goto try;
 	global = mi[i].rmi_numeric;
 	free(ts);
-	show_text(global, 1);
+	rv = show_text(global, 1);
 	mark_read(global);
 	next_action(global);
 	lastlasttext = lasttext;
 	lasttext = global;
+	if (rv)
+		goto igen;
 }
 
 void

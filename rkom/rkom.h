@@ -38,10 +38,11 @@ void	cmd_move_text(void);
 char *	error(int);
 
 /* show.c */
-void	show_text(int, int);
+int	show_text(int, int);
 void show_savetext(char *);
 char * get_date_string(struct rk_time *t);
 char *vem(int);
+void show_superhoppa(char *);
 
 /* In file helpers.c */
 struct rk_confinfo_retval *match_complain(char *str, int type);

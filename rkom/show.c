@@ -15,6 +15,20 @@
 #include "set.h"
 #include "next.h"
 
+static char *supstr;
+
+void
+show_superhoppa(char *arg)
+{
+	char *c;
+
+	supstr = rk_gettext(lasttext);
+	if ((c = index(supstr, '\n')))
+		*c = 0;
+	printf("Superhoppar över alla inlägg med ärenderad '%s'\n",
+	    supstr);
+}
+
 char *
 vem(int num)
 {
@@ -111,7 +125,7 @@ show_formatted(char *cc)
 	}
 }
 
-void
+int
 show_text(int nr, int format)
 {
 	struct rk_conference *conf;
@@ -124,7 +138,16 @@ show_text(int nr, int format)
 	if (ts->rt_retval) {
 		rprintf("För din del så finns inte text %d\n", nr);
 		free(ts);
-		return;
+		return 0;
+	}
+	c = rk_gettext(nr);
+	if (supstr) {
+		int l = strlen(supstr);
+		if (strncmp(c, supstr, l) == 0 && (c[l] == 0 || c[l] == '\n')) {
+			free(ts);
+			free(c);
+			return 1;
+		}
 	}
 
 	conf = rk_confinfo(ts->rt_author);
@@ -202,7 +225,6 @@ show_text(int nr, int format)
 	if (ts->rt_no_of_marks)
 		rprintf("Texten markerad av %d person%s.\n", ts->rt_no_of_marks,
 		    ts->rt_no_of_marks == 1 ? "" : "er");
-	c = rk_gettext(nr);
 	rprintf("Ärende: ");
 	cc = c;
 	while (*cc && (*cc != '\n'))
@@ -244,6 +266,7 @@ show_text(int nr, int format)
 		printcmnt(mi, len, p);
 
 	free(ts);
+	return 0;
 }
 
 char *
