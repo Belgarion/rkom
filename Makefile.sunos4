@@ -1,0 +1,15 @@
+#	$Id: Makefile.sunos4,v 1.1 2001/11/19 20:28:23 ragge Exp $
+#
+
+FLAGS=XFLAGS="-DSUNOS4" CC=gcc
+LIBS="XLIBS=-ltermcap"
+
+all:
+	(cd backend; make $(FLAGS))
+	(cd libredit; make $(FLAGS))
+	(cd rkom; make $(FLAGS) $(LIBS))
+
+clean:
+	(cd backend; make clean)
+	(cd libredit; make clean)
+	(cd rkom; make clean)
