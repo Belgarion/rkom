@@ -519,3 +519,20 @@ rk_add_member_server(u_int32_t conf, u_int32_t uid, u_int8_t prio,
 	delete_membership_internal(uid);
 	return ret;
 }
+
+int32_t
+rk_sub_member_server(u_int32_t conf, u_int32_t uid)
+{
+	int ret;
+	char buf[30];
+	sprintf(buf, "15 %d %d\n", conf, uid);
+	ret = send_reply(buf);
+	if (ret) {
+		ret = get_int();
+		get_eat('\n');
+		return ret;
+	}
+	get_accept('\n');
+	delete_membership_internal(uid);
+	return ret;
+}

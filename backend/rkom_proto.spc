@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.12 2000/10/21 11:28:59 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.13 2000/10/21 12:14:21 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -298,6 +298,12 @@ int32_t rk_change_conference(u_int32_t);
  * Args are (conf, uid, prio, where, flags) and returns a lyskom error number.
  */
 int32_t rk_add_member(u_int32_t, u_int32_t, u_int8_t, u_int16_t, u_int32_t);
+
+/*
+ * Remove a member from a conference. Corresponds to call #15.
+ * Args are (conf, pers) and returns a lyskom error number.
+ */
+int32_t rk_sub_member(u_int32_t, u_int32_t);
 
 /*
  * Puts a text in the conferences described in the misc_info struct.
