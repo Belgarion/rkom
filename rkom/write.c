@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.38 2001/11/24 12:33:28 ragge Exp $	*/
+/*	$Id: write.c,v 1.39 2001/11/25 15:19:56 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -76,7 +76,7 @@ write_brev(char *str)
 	mi[0].rmi_numeric = retval->rcr_ci.rcr_ci_val[0].rc_conf_no;
 	mi[1].rmi_type = recpt;
 	mi[1].rmi_numeric = myuid;
-	nmi = 2;
+	nmi = (retval->rcr_ci.rcr_ci_val[0].rc_conf_no == myuid ? 1 : 2);
 	doedit(0);
 }
 
