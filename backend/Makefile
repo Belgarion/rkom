@@ -1,8 +1,8 @@
-#	$Id: Makefile,v 1.15 2001/11/25 21:09:41 ragge Exp $
+#	$Id: Makefile,v 1.16 2002/07/14 17:08:58 offe Exp $
 #
 # Rkom backend library Makefile
 #
-CFLAGS=	-O2 -g -Wall -Werror -Wstrict-prototypes -Wmissing-prototypes \
+CFLAGS=	-O2 -g -Wall -Wstrict-prototypes -Wmissing-prototypes \
 	$(XFLAGS) -I../support -I../libredit
 
 OBJS=	rkom_subr.o rkom_lyskom.o rkom_beparse.o rkom_conf.o \
