@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.24 2001/01/15 16:25:11 ragge Exp $ */
+/* $Id: rkom.c,v 1.25 2001/01/15 17:34:07 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -170,8 +170,11 @@ main(int argc, char *argv[])
 			strncpy(buf, lf->buffer, MAX_LINE);
 			buf[MAX_LINE-1] = 0;
 			len = strlen(buf);
-			while((len > 0 && buf[len - 1] == '\n') ||
-			    isspace(buf[len-1])) {
+			while((len > 0 && buf[len - 1] == '\n')
+#if defined(__FreeBSD__) /* isspace() is broken for non-ascii on NetBSD */
+			    || isspace(buf[len-1])
+#endif
+			    ) {
 				buf[len - 1] = '\0';
 				len--;
 			}
