@@ -143,6 +143,11 @@ async_new_text()
 			conf_set_high_local(conf, local);
 			break;
 
+		case comm_to:
+		case footn_to:
+			invalidate_text_stat(get_int());
+			break;
+
 		default:
 			get_int();
 			break;

@@ -87,38 +87,6 @@ get_pers_stat(int uid, struct rk_person **person)
 	return 0;
 }
 
-#if 0
-void
-conf_delete(char *name)
-{
-	struct conf *ow, *w;
-
-	if (person == 0)
-		return;
-
-	if (strcmp(person->p_name, name) == 0) {
-		w = person;
-		person = person->p_next;
-		free(w->p_name);
-		free(w);
-		return;
-	}
-	w = person->p_next;
-	ow = person;
-	while (w) {
-		if (strcmp(w->p_name, name) == 0) {
-			ow->p_next = w->p_next;
-			free(w->p_name);
-			free(w);
-			return;
-		}
-		ow = w;
-		w = w->p_next;
-	}
-}
-
-#endif
-
 struct get_conf_stat_store {
 	struct get_conf_stat_store *next;
 	int number;
@@ -220,7 +188,7 @@ get_membership(int uid, int conf, struct rk_membership **member)
 	struct person_store *pp;
 	struct rk_person *p;
 	char buf[50];
-	int i, cnt;
+	int i, len;
 
 	/* First, force the user into the cache */
 	if (get_pers_stat(uid, &p))
@@ -234,37 +202,40 @@ get_membership(int uid, int conf, struct rk_membership **member)
 	}
 
 	/* No, we failed cache search. Fetch from server. */
-	sprintf(buf, "99 %d 0 65535 0\n", uid);
+	sprintf(buf, "98 %d %d\n", uid, conf);
 	if (send_reply(buf)) {
 		i = get_int();
 		get_eat('\n');
 		return i;
 	}
-	cnt = get_int();
-	mb = calloc(sizeof(struct membership_store), cnt);
-	get_accept('{');
-	for (i = 0; i < cnt; i++) {
-		m = &mb[i].member;
-		m->rm_position = get_int();
-		read_in_time(&m->rm_last_time_read);
-		m->rm_conference = get_int();
-		m->rm_priority = get_int();
-		m->rm_last_text_read = get_int();
-		m->rm_read_texts.rm_read_texts_len = 0;get_int();
-		get_accept('*');
-		m->rm_added_by = get_int();
-		read_in_time(&m->rm_added_at);
-		m->rm_type = get_int();
+	mb = calloc(sizeof(struct membership_store), 1);
+	m = &mb->member;
+	m->rm_position = get_int();
+	read_in_time(&m->rm_last_time_read);
+	m->rm_conference = get_int();
+	m->rm_priority = get_int();
+	m->rm_last_text_read = get_int();
+	len = m->rm_read_texts.rm_read_texts_len = get_int();
+	if (len) {
+		int *txts, j;
 
-		mb[i].mid = m->rm_conference;
-		mb[i].next = pp->next;
-		pp->next = &mb[i];
-	}
-	get_accept('}');
-	get_eat('\n');
-	if ((mb = findmember(conf, pp->next)) == 0)
-		return -1;
-	*member = &mb->member;
+		txts = malloc(sizeof(int) * len);
+		get_accept('{');
+		for (j = 0; j < len; j++)
+			txts[j] = get_int();
+		get_accept('}');
+		m->rm_read_texts.rm_read_texts_val = txts;
+	} else
+		get_accept('*');
+	m->rm_added_by = get_int();
+	read_in_time(&m->rm_added_at);
+	m->rm_type = get_int();
+
+	mb[0].mid = m->rm_conference;
+	mb[0].next = pp->next;
+	pp->next = &mb[0];
+	get_accept('\n');
+	*member = m;
 	return 0;
 }
 
@@ -297,72 +268,6 @@ set_last_read_internal(int conf, int local)
 		mb->member.rm_last_text_read = local;
 	}
 }
-
-#if 0
-static int *confs = 0;
-
-int *
-get_unread_confs(int uid)
-{
-	int i, nconfs;
-	char buf[20];
-
-	sprintf(buf, "52 %d\n", uid);
-	if (send_reply(buf)) {
-		if ((i = get_int()))
-			printf("Get_unread_confs sket sej: %s\n", error(i));
-		get_eat('\n');
-		return 0;
-	}
-	nconfs = get_int();
-	if (nconfs == 0) {
-		get_eat('\n');
-		return 0;
-	}
-	if (confs)
-		free(confs);
-	confs = calloc(sizeof(int), nconfs + 1);
-	get_accept('{');
-	for (i = 0; i < nconfs; i++)
-		confs[i] = get_int();
-	get_accept('}');
-	get_accept('\n');
-	return confs;
-}
-
-static int *texts;
-
-int *
-get_map(int conf, int first, int otexts)
-{
-	char buf[30];
-	int gotten, off = 0, ntexts, i;
-
-	if (texts)
-		free(texts);
-
-	texts = calloc(sizeof(int), otexts);
-	sprintf(buf, "34 %d %d %d\n", conf, first, otexts);
-
-	if (send_reply(buf)) {
-		if ((i = get_int()))
-			printf("Det sket sej: %s\n", error(i));
-		get_eat('\n');
-		return 0;
-	}
-	gotten = get_int();
-	if (gotten != first)
-		off = gotten - first;
-
-	ntexts = get_int();
-	get_accept('{');
-	for (i = off; i < (off + ntexts); i++)
-		texts[i] = get_int();
-	get_accept('}');
-	get_accept('\n');
-	return texts;
-}
-#endif
 
 int32_t
 rk_change_conference_server(u_int32_t conf)
@@ -398,6 +303,46 @@ next_local(int conf, int local)
 	return ret;
 }
 
+static int
+is_read(int conf, int text, int uid)
+{
+	struct rk_membership *m;
+	int i, num, *txts;
+
+	if (get_membership(uid, conf, &m))
+		return 0; /* ??? */
+	num = m->rm_read_texts.rm_read_texts_len;
+	txts = m->rm_read_texts.rm_read_texts_val;
+	for (i = 0; i < num; i++)
+		if (txts[i] == text)
+			return 1;
+	return 0;
+}
+
+int32_t
+rk_is_read_server(u_int32_t nr)
+{
+	struct rk_text_stat *ts;
+	struct rk_misc_info *mi;
+	int i, len, conf;
+
+	ts = rk_textstat_server(nr);
+	if (ts->rt_retval)
+		return 0;
+	len = ts->rt_misc_info.rt_misc_info_len;
+	mi = ts->rt_misc_info.rt_misc_info_val;
+	for (i = 0; i < len; i++) {
+		if (mi[i].rmi_type == recpt ||
+		    mi[i].rmi_type == cc_recpt ||
+		    mi[i].rmi_type == bcc_recpt)
+			conf = mi[i].rmi_numeric;
+		if (mi[i].rmi_type == loc_no)
+			break;
+	}
+	free(ts);
+	return is_read(conf, mi[i].rmi_numeric, myuid);
+}
+
 u_int32_t
 rk_next_unread_server(u_int32_t conf, u_int32_t uid)
 {
@@ -410,9 +355,13 @@ rk_next_unread_server(u_int32_t conf, u_int32_t uid)
 	get_membership(uid, conf, &m);
 	last = m->rm_last_text_read;
 
-	last = next_local(conf, last + 1);
+back:	last = next_local(conf, last + 1);
 	if (last == 0)
 		return 0;
+	if (is_read(conf, last, uid)) {
+		m->rm_last_text_read = last;
+		goto back;
+	}
 
 	if (last > highest)
 		return 0;
@@ -472,10 +421,30 @@ conf_set_high_local(int conf, int local)
 int32_t
 rk_mark_read_server(u_int32_t conf, u_int32_t local)
 {
+	struct rk_membership *m;
 	char buf[50];
-	int i = 0;
+	int i, num, *txts;
 
-	set_last_read_internal(conf, local);
+	if (is_read(conf, local, myuid))
+		return 0;
+	if (get_membership(myuid, conf, &m) == 0) {
+		if (m->rm_last_text_read + 1 == local)
+			m->rm_last_text_read = local;
+		else {
+			txts = m->rm_read_texts.rm_read_texts_val;
+			num = m->rm_read_texts.rm_read_texts_len;
+			for (i = 0; i < num; i++)
+				if (txts[i] == local)
+					break;
+			if (i == num) {
+				txts = realloc(txts, sizeof(int) * (i+1));
+				txts[i] = local;
+				 m->rm_read_texts.rm_read_texts_val = txts;
+				m->rm_read_texts.rm_read_texts_len = num;
+			}
+		}
+	}
+	i = 0;
 	sprintf(buf, "27 %d 1 { %d }\n", conf, local);
 	if (send_reply(buf))
 		i = get_int();

@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.9 2000/10/17 18:51:42 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.10 2000/10/18 20:49:10 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -251,6 +251,11 @@ u_int32_t rk_local_to_global(u_int32_t, u_int32_t);
  * Args are (conference, textnumber) and returns a lyskom error number.
  */
 int32_t rk_mark_read(u_int32_t, u_int32_t);
+
+/*
+ * Returns 1 if the given global number is read, otherwise 0.
+ */
+int32_t rk_is_read(u_int32_t);
 
 /*
  * Get statistics about a text.

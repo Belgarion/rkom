@@ -317,6 +317,23 @@ back:		ts = malloc(sizeof(*ts));
 
 }
 
+void
+invalidate_text_stat(int text)
+{
+	struct text_stat_store *tss;
+	struct rk_text_stat *ts;
+	int nr;
+
+	tss = findtxt(nr);
+	if (tss == 0 || tss->rts == 0)
+		return;
+	ts = tss->rts;
+	tss->rts = 0;
+	if (ts->rt_misc_info.rt_misc_info_len)
+		free(ts->rt_misc_info.rt_misc_info_val);
+	free(ts);
+}
+	
 /*
  * Put a text into a conference.
  */
