@@ -1,4 +1,4 @@
-/* $Id: ckom.c,v 1.1 2000/10/15 11:59:39 jens Exp $ */
+/* $Id: ckom.c,v 1.2 2000/10/15 14:18:34 jens Exp $ */
 
 #include <sys/types.h>
 #include <errno.h>
@@ -27,7 +27,6 @@ main(int argc, char *argv[])
 {
 	struct rk_confinfo_retval *rcr;
 	struct rk_unreadconfval *ruc;
-	conft_t		*ct;
 	char		*kom_server;
 	char		*user_name, *pass_word;
 	u_int32_t	myuid;
@@ -68,8 +67,8 @@ main(int argc, char *argv[])
 	ruc = rk_unreadconf(myuid);
 	if (ruc->ru_confs.ru_confs_len == 0)
 		errx(0, "Inga olästa inlägg");
-	ct = art_get_arts(myuid, ruc->ru_confs.ru_confs_val[0]);
-	conference_menu(ct);
+	art_open_conf(myuid, ruc->ru_confs.ru_confs_val[0]);
+	conference_menu();
 
 	/* shut down the screen */
 	scr_cleanup();

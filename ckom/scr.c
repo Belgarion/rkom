@@ -1,4 +1,4 @@
-/* $Id: scr.c,v 1.1 2000/10/15 11:59:39 jens Exp $ */
+/* $Id: scr.c,v 1.2 2000/10/15 14:18:34 jens Exp $ */
 
 #include <stdarg.h>
 #include <curses.h>
@@ -46,9 +46,12 @@ scr_warnx(WINDOW *win, const char *fmt, ...)
 {
 	va_list ap;
 
+	wmove(win, 0,0);
+	werase(win);
 	va_start(ap, fmt);
 	vwprintw(win, fmt, ap);
 	va_end(ap);
+	wrefresh(win);
 }
 
 int
