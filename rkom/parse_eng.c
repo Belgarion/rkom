@@ -1,4 +1,4 @@
-/* $Id: parse_eng.c,v 1.6 2000/12/03 15:57:28 jens Exp $ */
+/* $Id: parse_eng.c,v 1.7 2001/01/20 15:38:23 jens Exp $ */
 
 #include <sys/cdefs.h>
 #include <sys/types.h>
@@ -362,6 +362,7 @@ parse_exec(cmds_t *c, const char *str)
 
 	/* Check for an alias and substitute if found */
 	for (cl_pos = NULL; cl_ce_walk(c->pc_alias, &cl_pos, &ce) == 0;) {
+		/* Only exactly matching aliases are substiting the command */
 		if (strcmp(ce->ce_argv[0], argv[0]) != 0)
 			continue;
 
@@ -437,11 +438,20 @@ parse_exec(cmds_t *c, const char *str)
 				ce_arg_match = NULL;
 		}
 
+		/*
+		 * If two command has the same prio as max_prio they will
+		 * null out each other. So you should avoid it by choosing
+		 * which command should have the higher prio.
+		 */
 		if (ce->ce_prio > max_prio) {
 			max_prio = ce->ce_prio;
 			ce_max_prio = ce;
-		} else if (ce->ce_prio == max_prio)
+		} else if (ce->ce_prio == max_prio) {
 			ce_max_prio = NULL;
+			warnx("Argh! Two commands has the same prio.");
+			wanrx("Read comments in parse.c and parse_eng.c:parse_exec()");
+			warnx("and ask Jens if you don't understand.");
+		}
 
 	/* An escape label for a nested for-statement */
 skip:

@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.25 2001/01/18 15:37:17 jens Exp $ */
+/* $Id: parse.c,v 1.26 2001/01/20 15:38:23 jens Exp $ */
 
 #include <sys/param.h>
 
@@ -133,6 +133,10 @@ struct command_list {
 #define DROW(name, prio, takes_arg, command) \
 { name, prio, takes_arg, CC_2(exec_,command) },
 
+/*
+ * Note that two commands with the same first letter shouldn't use the
+ * same value of prio. Prio is an int so that shouldn't be a problem.
+ */
 struct command_list commands[] = {
 /* Commands for reading */
 DROW("nästa inlägg",			0,PE_NO_ARG,read_next_text)
@@ -140,7 +144,7 @@ DROW("nästa kommentar",			0,PE_NO_ARG,read_next_cmt)
 DROW("återse",				0,PE_NUM_ARG,read_see_again_cmt_no)
 DROW("återse kommenterade",		1,PE_NO_ARG,read_see_again_cmt)
 DROW("återse presentation",		0,PE_STR_ARG,read_see_presentation)
-DROW("återse urinlägg",			1,PE_NO_ARG,read_see_again_root)
+DROW("återse urinlägg",			0,PE_NO_ARG,read_see_again_root)
 DROW("lista nyheter",			0,PE_NO_ARG,read_list_news)
 DROW("endast",					0,PE_NUM_ARG,read_only)
 DROW("igen",					0,PE_NO_ARG,read_again)
