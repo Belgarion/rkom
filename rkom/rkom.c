@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.27 2001/01/20 17:13:40 ragge Exp $ */
+/* $Id: rkom.c,v 1.28 2001/01/28 16:38:50 ragge Exp $ */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
@@ -47,6 +47,10 @@ char *p_see_time  = "(Se) tiden";
 char *p_next_comment = "(Läsa) nästa kommentar";
 char *prompt;
 int wrows, wcols, swascii;
+
+#ifndef INFTIM
+#define	INFTIM -1
+#endif
 
 static char *
 prompt_fun(EditLine *el)
