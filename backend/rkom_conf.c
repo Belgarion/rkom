@@ -244,7 +244,7 @@ get_membership(int uid, int conf, struct rk_membership **member)
 static void
 delete_membership_internal(int conf, int uid)
 {
-	struct membership_store *mb;
+	struct membership_store *mb, *omb;
 	struct person_store *pp;
 
 	if ((pp = findperson(uid)) == 0)
