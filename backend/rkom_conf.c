@@ -466,7 +466,6 @@ conf_set_high_local(int conf, int local)
 			}
 			walker = walker->next;
 		}
-		printf("Internal strange... conf %d not in cache.\n", conf);
 	}
 }
 
