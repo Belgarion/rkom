@@ -14,6 +14,7 @@
 #include "write.h"
 
 static void cmd_logout(char *);
+static void cmd_login(char *);
 static void cmd_tiden(char *);
 static void cmd_vilka(char *);
 static void cmd_sluta(char *);

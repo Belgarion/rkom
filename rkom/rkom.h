@@ -12,22 +12,18 @@ struct cmnd {
 	void (*func)(char *);
 };
 
+/* kbd.c */
 int	kbd_input(int);
-void	msg_input(int);
-void	cmd_parse(char *);
-int	send_reply(char *);
-int	handle(void);
-char *	error(int);
-void	put_char(char);
-void	put_string(char *);
-int	async(int);
-void	async_handle(int);
-void	cmd_lista(char *);
-void	cmd_nasta(char *);
-void	cmd_login(char *);
-void	show_text(int);
-void	cmd_exec(char *, struct cmnd *);
 char *	get_input_string(int, int);
+
+/* cmd.c */
+void	cmd_parse(char *);
+
+/* error.c */
+char *	error(int);
+
+/* show.c */
+void	show_text(int);
 char * get_date_string(struct rk_time *t);
 
 /* In file helpers.c */
