@@ -87,11 +87,14 @@ show_text(int nr)
 	c = rk_gettext(nr);
 	printf("Ärende: ");
 	cc = c;
-	while (*cc != '\n')
+	while (*cc && (*cc != '\n'))
 		printf("%c", *cc++);
 printf("\n------------------------------------------------------------");
-	printf("%s", cc);
-	if (cc[strlen(cc) - 1] != '\n')
+	if (*cc) {
+		printf("%s", cc);
+		if (cc[strlen(cc) - 1] != '\n')
+			printf("\n");
+	} else
 		printf("\n");
 	sprintf(buf, "(%d)", nr);
 	printf("%s%s", buf,
