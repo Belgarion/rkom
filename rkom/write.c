@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.42 2001/12/21 23:14:36 ragge Exp $	*/
+/*	$Id: write.c,v 1.43 2002/02/17 21:07:12 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -255,7 +255,7 @@ input_string(char *m)
 
 	if (el == NULL) {
 		el = el_init("rkom", stdin, stdout, stderr);
-		el_set(el, EL_EDITOR, "emacs");
+		el_set(el, EL_EDITOR, getval("editor-mode"));
 		el_set(el, EL_PROMPT, prompt_fun);
 	}
 

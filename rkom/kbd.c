@@ -16,6 +16,7 @@
 #include <string.h>
 
 #include "rkom.h"
+#include "set.h"
 #include "rhistedit.h"
 
 static char *msg;
@@ -36,7 +37,7 @@ getstr(char *m)
 
 	if (el == NULL) {
 		el = el_init("rkom", stdin, stdout, stderr);
-		el_set(el, EL_EDITOR, "emacs");
+		el_set(el, EL_EDITOR, getval("editor-mode"));
 		el_set(el, EL_PROMPT, prompt_fun);
 	}
 	

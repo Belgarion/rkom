@@ -11,6 +11,7 @@
 
 #include "rkomsupport.h"
 #include "rkom_proto.h"
+#include "rhistedit.h"
 #include "rkom.h"
 #include "rtype.h"
 
@@ -115,6 +116,7 @@ static struct rk_val rkomvars[] = {
 	{ "unread-long-format", "1" },
 	{ "short-time-format", "0" },
 	{ "ignore-ctrl-c", "0" },
+	{ "editor-mode", "emacs" },
 };
 static int nrkomvars = sizeof(rkomvars)/sizeof(rkomvars[0]);
 
@@ -214,6 +216,7 @@ void
 set_setflag(char *name, char *val)    
 {
 	int inc, match, i, nc;
+	extern EditLine *main_el;
 
 	match = nc = 0;
 	for (i = 0; i < ncommonvars; i++) {
@@ -247,6 +250,9 @@ set_setflag(char *name, char *val)
 	if (bcmp(name, "kom-mercial", strlen(name)) == 0)
 		if (rk_whatido(val))
 			rprintf("Byta kom-mercial sket sej.\n");
+	if (bcmp(name, "editor-mode", strlen(name)) == 0)
+		el_set(main_el, EL_EDITOR, getval("editor-mode"));
+/* END HACK */
 #if defined(SOLARIS) || defined(SUNOS4)
 #undef SIG_DFL
 #undef SIG_IGN

@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.40 2001/11/30 22:49:33 ragge Exp $ */
+/* $Id: rkom.c,v 1.41 2002/02/17 21:07:12 ragge Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -55,6 +55,8 @@ static void restore_tty(void);
 
 static struct termios old_termios;
 
+EditLine *main_el;
+
 char *p_next_conf = "(Gå till) nästa möte";
 char *p_next_text = "(Läsa) nästa inlägg";
 char *p_see_time  = "(Se) tiden";
@@ -85,7 +87,6 @@ main(int argc, char *argv[])
 {
 	HistEvent ev;
 	History *hist;
-	EditLine *el = NULL;
 	const LineInfo  *lf;
 	const char *str;
 	char	buf[MAX_LINE];
@@ -95,7 +96,7 @@ main(int argc, char *argv[])
 	struct pollfd	pfd[1];
 	struct timeval	tp;
 	int ch, noprompt;
-	char *server, *uname, *confile;
+	char *server, *uname, *confile, *termtype;
 	struct rk_server *rs;
 
 #if defined(SOLARIS) || defined(SUNOS4)
@@ -161,14 +162,16 @@ main(int argc, char *argv[])
 	pfd[0].events = POLLIN|POLLPRI;
 	noprompt = 0;
 
+	if ((termtype = getenv("TERM")) == NULL)
+		termtype = "vt100";
 	setup_tty(1);
 	hist = history_init();
 	history(hist, &ev, H_SETSIZE, 200);
-	el = el_init("rkom", stdin, stdout, stderr);
-	el_set(el, EL_EDITOR, "emacs");	/* emacs binding */
-	el_set(el, EL_PROMPT, prompt_fun);
-	el_set(el, EL_HIST, history, hist);
-	el_set(el, EL_TERMINAL, "vt100");
+	main_el = el_init("rkom", stdin, stdout, stderr);
+	el_set(main_el, EL_EDITOR, getval("editor-mode"));
+	el_set(main_el, EL_PROMPT, prompt_fun);
+	el_set(main_el, EL_HIST, history, hist);
+	el_set(main_el, EL_TERMINAL, termtype);
 
 	for (;;) {
 		int rv;
@@ -198,14 +201,14 @@ main(int argc, char *argv[])
 			 */
 			outlines = 0;
 			rprintf("%c", '\r');	
-			if (el_gets(el, &num) == NULL) {
+			if (el_gets(main_el, &num) == NULL) {
 				if (nullar > 20)
 					exit(0);
 				nullar++;
 				continue;
 			}
 			nullar = 0;
-			lf = el_line(el);
+			lf = el_line(main_el);
 			strncpy(buf, lf->buffer, MAX_LINE);
 			buf[MAX_LINE-1] = 0;
 			len = strlen(buf);
