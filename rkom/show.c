@@ -159,7 +159,7 @@ get_date_string(struct rk_time *t)
 void
 show_savetext(char *str)
 {
-	int fd, outfd;
+	int fd, outfd, olines, orows;
 
 	if (str == 0) {
 		rprintf("Du måste ange filnamn att spara till.\n");
@@ -174,7 +174,12 @@ show_savetext(char *str)
 	outfd = dup(1);
 	dup2(fd, 1);
 	close(fd);
+	orows = wrows;
+	olines = outlines;
+	wrows = 2000000;
 	show_text(lasttext);
+	wrows = orows;
+	outlines = olines;
 	close(1);
 	dup2(outfd, 1);
 	close(outfd);
