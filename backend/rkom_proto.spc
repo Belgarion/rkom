@@ -1,4 +1,4 @@
-/* $Id: rkom_proto.spc,v 1.10 2000/10/18 20:49:10 ragge Exp $ */
+/* $Id: rkom_proto.spc,v 1.11 2000/10/20 10:45:28 ragge Exp $ */
 
 /*
  * Time as defined in the lyskom protocol. Variables are kept
@@ -157,6 +157,9 @@ struct rk_text_info {
 /* Async message info struct */
 struct rk_async {
 	u_int32_t	ra_type;
+	u_int32_t	ra_conf;
+	u_int32_t	ra_sender;
+	string		ra_message;
 };
 
 struct rk_marks {
@@ -296,6 +299,12 @@ struct	rk_text_retval rk_create_text(struct rk_text_info);
  * XXX - no argument to this one.
  */
 struct rk_async rk_async(u_int32_t);
+
+/*
+ * Sends a message to a user, a conference or to all logged in.
+ * Args are (user, string). Returns null.
+ */
+int32_t rk_send_msg(u_int32_t, string);
 
 /*
  * Get marked texts for the current user.

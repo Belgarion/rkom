@@ -14,6 +14,9 @@ static void async_new_text(void);
 struct mesg {
 	struct mesg *next;
 	int type;
+	int conf;
+	int pers;
+	char *msg;
 };
 static struct mesg *pole;
 
@@ -37,9 +40,20 @@ async(int level)
 		m = malloc(sizeof(struct mesg));
 		m->type = type;
 		m->next = pole;
+		m->msg = "";
 		pole = m;
 		break;
 
+	case 12: /* async-send-message */
+		m = malloc(sizeof(struct mesg));
+		m->type = type; 
+		m->conf = get_int();
+		m->pers = get_int();
+		m->msg = get_string();
+		get_eat('\n');
+		m->next = pole;
+		pole = m;
+		break;
 #if 0
 	case 9:
 	case 13:
@@ -62,23 +76,6 @@ async(int level)
 		conf_delete(s);
 		free(s);
 		free(t);
-		break;
-
-	case 12: /* Unicast/Broadcast/Multicast message */
-		rcpt = get_int();
-		pers = get_int();
-		s = get_string();
-		get_eat('\n');
-printf("\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
-		t = (level ? conf_num2name_nowait(pers) : conf_num2name(pers));
-		if (rcpt == 0)
-			printf("Allmänt meddelande från %s\n\n", t);
-		else if (rcpt == myuid)
-			printf("Personligt meddelande från %s\n\n", t);
-		else
-			printf("Meddelande till %d från %s\n\n", rcpt, t);
-		printf("%s\n", s);
-printf("----------------------------------------------------------------\n");
 		break;
 #endif
 
@@ -103,13 +100,27 @@ struct rk_async *
 rk_async_server(u_int32_t arg)
 {
 	struct mesg *m;
-	struct rk_async *ra = calloc(sizeof(struct rk_async), 1);
+	struct rk_async *ra;
+	int size;
 
 	if (pole) {
+		size = sizeof(struct rk_async);
+		if (pole->type == 12)
+			size += strlen(pole->msg) + 1;
+		ra = calloc(size, 1);
 		ra->ra_type = pole->type;
+		ra->ra_conf = pole->conf;
+		ra->ra_sender = pole->pers;
+		ra->ra_message = (void *)&ra[1];
+		strcpy(ra->ra_message, pole->msg);
+		if (pole->type == 12)
+			free(pole->msg);
 		m = pole;
 		pole = pole->next;
 		free(m);
+	} else {
+		ra = calloc(sizeof(struct rk_async), 1);
+		ra->ra_message = "";
 	}
 	return ra;
 }

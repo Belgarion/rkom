@@ -541,6 +541,16 @@ rk_set_uarea_server(char *hej, struct rk_uarea *u)
 	return 0;
 }
 
+int32_t
+rk_send_msg_server(u_int32_t dest, char *string)
+{
+	char *dst;
+	int i = 0;
 
-
-
+	dst = alloca(strlen(string) + 30);
+	sprintf(dst, "53 %d %ldH%s\n", dest, (long)strlen(string), string);
+	if (send_reply(dst))
+		i = get_int();
+	get_eat('\n');
+	return i;
+}
