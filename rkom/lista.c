@@ -234,15 +234,6 @@ list_subject()
 		rprintf("%-21s%s\n", gubbe, text);
 		free(ts);
 		free(text);
-		if (rows++ == wrows - 4) {
-			rprintf("(Tryck retur)");
-			fflush(stdout);
-			if (getchar() == 'q') {
-				getchar();
-				return;
-			}
-			rows = 0;
-		}
 	}
 }
 
@@ -296,14 +287,5 @@ list_unread()
 		rprintf("%-21s%s\n", gubbe, text);
 		free(ts);
 		free(text);
-		if (rows++ == wrows - 4) {
-			rprintf("(Tryck retur)");
-			fflush(stdout);
-			if (getchar() == 'q') {
-				getchar();
-				return;
-			}
-			rows = 0;
-		}
 	}
 }
