@@ -1,15 +1,19 @@
 
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #include "rkom_proto.h"
 #include "exported.h"
 #include "rkom.h"
 #include "set.h"
-//#include "read.h"
+#include "next.h"
 
 static char *
 vem(int num)
@@ -151,4 +155,28 @@ get_date_string(struct rk_time *t)
 	sprintf(dstr, "%d-%02d-%02d %02d.%02d", t->rt_year+1900,
 	    t->rt_month + 1, t->rt_day, t->rt_hours, t->rt_minutes);
 	return dstr;
+}
+
+void
+show_savetext(char *str)
+{
+	int fd, outfd;
+
+	if (str == 0) {
+		printf("Du måste ange filnamn att spara till.\n");
+		return;
+	}
+	fd = open(str, O_WRONLY|O_CREAT, S_IRUSR|S_IWUSR);
+	if (fd < 0) {
+		printf("Det sket sej att skapa filen: %s\n", strerror(errno));
+		return;
+	}
+	/* This is a quite strange way to save the message... */
+	outfd = dup(1);
+	dup2(fd, 1);
+	close(fd);
+	show_text(lasttext);
+	close(1);
+	dup2(outfd, 1);
+	close(outfd);
 }

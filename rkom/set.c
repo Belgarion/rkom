@@ -122,8 +122,6 @@ put_in_vars(struct rk_uarea *ru, struct vars *w)
 		for (j = 0; w[j].c_name; j++) {
 			if (strcmp(ru->ru_val.ru_val_val[i].rv_var, 
 			    w[j].c_name) == 0) {
-printf("Matchar %s %s\n", ru->ru_val.ru_val_val[i].rv_var,
-	ru->ru_val.ru_val_val[i].rv_val);
 				w[j].c_val =
 				    strdup(ru->ru_val.ru_val_val[i].rv_val);
 				break;

@@ -54,6 +54,7 @@ struct cmnd cmds[] = {
 	{"nästa", "kommentar", next_comment },
 	{"redigera", "editor", write_editor },
 	{"sluta", 0, cmd_sluta },
+	{"spara", "text", show_savetext },
 	{"säg", 0, cmd_say },
 	{"sända", 0, cmd_send },
 	{"sätt", 0, set_setflag },
