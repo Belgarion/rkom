@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.62 2003/10/02 08:19:49 ragge Exp $	*/
+/*	$Id: write.c,v 1.63 2005/04/08 10:06:26 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -330,6 +330,9 @@ get_text(char *sub)
 		rprintf("Ärende: %s", base);
 	} else
 		base = input_string("Ärende: ");
+
+	if (base == NULL)
+		return base = strdup("");
 
 	for (;;) {
 		str = input_string("");
