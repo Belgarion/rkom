@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.54 2003/10/20 08:48:20 ragge Exp $ */
+/* $Id: parse.c,v 1.55 2005/04/08 09:57:53 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -126,6 +126,7 @@ DCMD(info_status);
 DCMD(info_extra);
 DCMD(info_set_motd);
 DCMD(info_remove_motd);
+DCMD(info_version);
 
 /* Commands for aliases */
 DCMD(alias_add);
@@ -257,6 +258,7 @@ DROW("status",					0,PE_STR_ARG,info_status)
 DROW("tillägsinformation",			0,PE_NUM_ARG,info_extra)
 DROW("lapp", 					0,PE_STR_ARG,info_set_motd)
 DROW("ta",					0,PE_STR_ARG,info_remove_motd)
+DROW("version",					0,PE_NO_ARG,info_version)
 
 /* Commands for aliases */
 DROW("alias",					0,PE_STR_ARG,alias_add)
@@ -1240,5 +1242,12 @@ exec_debug_dump_conference(int argc, char *argv[])
 {
 	LF;
 	debug_dump_conference(re_concat(argc, argv));
+	return 0;
+}
+
+static int
+exec_info_version(int argc, char *argv[])
+{
+	rprintf("Detta är version %s av raggkom.\n", client_version);
 	return 0;
 }
