@@ -92,13 +92,14 @@ Ord inom parentes ska inte skrivas.\n\
     Spara flaggor\n\
     Login\n\
     Logout\n\
+    Lämna (administratörsmod)\n\
+    Radera person\n\
+    Skapa person\n\
     Sluta\n\
+    Synkronisera (lästa texter med servern)\n\
+    Version (av klienten)\n\
     Ändra lösenord\n\
     Ändra namn\n\
-    Synkronisera (lästa texter med servern)\n\
-    Skapa person\n\
-    Radera person\n\
     Övergå (till administratörsmod)\n\
-    Lämna (administratörsmod)\n\
     ! (kommando)\n\
 "
