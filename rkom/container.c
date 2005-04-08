@@ -1,4 +1,4 @@
-/* $Id: container.c,v 1.5 2004/05/21 07:12:47 jens Exp $ */
+/* $Id: container.c,v 1.6 2005/04/08 09:47:43 ragge Exp $ */
 /*
  * Copyright (c) 1999, 2000
  *      Jens A. Nilsson, jnilsson@ludd.luth.se. All rights reserved.
@@ -1126,7 +1126,7 @@ pat_walk_helper(struct pat_tree *pat, int forw,
 		}
 		pat->pat_walk_did_forw = 0;
 	}
-	if (stack_peek(s, (TYPE **)&p) < 0)
+	if (stack_peek(s, (void *)&p) < 0)
 		goto ret_bad;
 
 	/* Seek bottom of leg forw. Put the path on a stack. */
@@ -1149,9 +1149,9 @@ pat_walk_helper(struct pat_tree *pat, int forw,
 	/* Leg back is a leaf */
 	if (PAT_IS_LEAF(p, back)) {
 		*data = p->pat_data[back];
-		if (stack_pop(s, (TYPE **)&op) < 0)
+		if (stack_pop(s, (void *)&op) < 0)
 			return 0;
-		while (stack_pop(s, (TYPE **)&p) == 0) {
+		while (stack_pop(s, (void *)&p) == 0) {
 			if (PAT_IS_LEAF(p, back) || op != p->pat_node[back]) {
 				if (stack_push(s, (TYPE *)p) < 0)
 					return -1;
