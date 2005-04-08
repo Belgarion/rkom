@@ -1,4 +1,4 @@
-/*	$Id: write.c,v 1.63 2005/04/08 10:06:26 ragge Exp $	*/
+/*	$Id: write.c,v 1.64 2005/04/08 10:17:29 ragge Exp $	*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -382,7 +382,7 @@ write_forget(char *str)
 		rprintf("Texten du höll på att skriva är nu bortkastad.\n");
 	else
 		rprintf("Du håller inte på att skriva någon text.\n");
-	ispres = is_writing = 0;
+	islapp = ispres = is_writing = 0;
 	if (ctext)
 		free(ctext);
 	if (nmi)
