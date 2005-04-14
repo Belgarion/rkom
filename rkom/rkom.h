@@ -20,6 +20,7 @@ void	tcapinit(void);
 void	cmd_parse(char *);
 void	cmd_only(char *);
 void	cmd_password(void);
+void	cmd_other_password(char *);
 void	cmd_status(char *);
 void	cmd_info_extra(int);
 void	cmd_change_name(void);

@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.77 2003/11/14 22:45:54 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.78 2005/04/14 15:51:10 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -436,6 +436,36 @@ cmd_password()
 		rv = rk_setpass(myuid, opass, npass1);
 		if (rv)
 			rprintf("Det sket sej: %s\n", error(rv));
+		else
+			rprintf("Lösenordet är nu ändrat.\n");
+	}
+	free(opass);
+	free(npass1);
+	free(npass2);
+}
+
+void
+cmd_other_password(char *str)
+{
+	struct rk_confinfo *rc;
+	char *opass, *npass1, *npass2;
+	int rv;
+
+	if ((rc = match_complain(str, MATCHCONF_PERSON)) == NULL)
+		return;
+	rprintf("Ändra andras (lösenord för) %s\n\n", rc->rc_name);
+	opass = strdup(getpass("Ange ditt eget lösenord: "));
+	npass1 = strdup(getpass("Ange nya lösenordet: "));
+	npass2 = strdup(getpass("Ange nya lösenordet igen: "));
+
+	if (strcmp(npass1, npass2)) {
+		rprintf("Du skrev olika nya lösenord, försök igen.\n");
+	} else {
+		rv = rk_setpass(rc->rc_conf_no, opass, npass1);
+		if (rv)
+			rprintf("Det sket sej: %s\n", error(rv));
+		else
+			rprintf("Lösenordet är nu ändrat.\n");
 	}
 	free(opass);
 	free(npass1);

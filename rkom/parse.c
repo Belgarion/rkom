@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.55 2005/04/08 09:57:53 ragge Exp $ */
+/* $Id: parse.c,v 1.56 2005/04/14 15:51:10 ragge Exp $ */
 
 #include <sys/param.h>
 
@@ -140,6 +140,7 @@ DCMD(other_login);
 DCMD(other_logout);
 DCMD(other_quit);
 DCMD(other_password);
+DCMD(other_other_password);
 DCMD(other_name);
 DCMD(other_sync);
 DCMD(other_exec);
@@ -274,6 +275,7 @@ DROW("skapa person",				0,PE_NO_ARG,other_create_person)
 DROW("sluta",					0,PE_NO_ARG,other_quit)
 DROW("synkronisera",				0,PE_NO_ARG,other_sync)
 DROW("ändra lösenord",				0,PE_NO_ARG,other_password)
+DROW("ändra andras",			0,PE_STR_ARG,other_other_password)
 DROW("ändra namn",				0,PE_NO_ARG,other_name)
 DROW("övergå (till administratörsmod)",		0,PE_NO_ARG,other_enable)
 DROW("lämna (administratörsmod)",		0,PE_NO_ARG,other_disable)
@@ -948,6 +950,15 @@ static int
 exec_other_quit(int argc, char *argv[])
 {
 	cmd_sluta(NULL);
+	return 0;
+}
+
+static int
+exec_other_other_password(int argc, char *argv[])
+{
+	LF;
+	TT(argc == 0, "Du måste ange vem du vill ändra lösenord för.\n");
+	cmd_other_password(re_concat(argc, argv));
 	return 0;
 }
 
