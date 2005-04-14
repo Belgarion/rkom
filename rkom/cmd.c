@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.79 2005/04/14 19:22:36 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.80 2005/04/14 19:26:26 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -498,37 +498,35 @@ persstat(int uid)
 	rprintf("\n");
 	rprintf("%s är medlem i följande möten:\n", vem(uid));
 
+	if ((ci = rk_matchconf("", MATCHCONF_CONF)) == NULL)
+		return;
 
+	rprintf("\nSenaste inlägg   Medl. Tot Inl   Namn (typ)\n");
+	for (i = 0; ci[i].rc_name; i++) {
+		struct rk_conference *C;
+		struct rk_membership *M = NULL; /* GCC braino */
 
-        if ((ci = rk_matchconf("", MATCHCONF_CONF)) == NULL)
-                return;
-
-        rprintf("\nSenaste inlägg   Medl. Tot Inl   Namn (typ)\n");
-        for (i = 0; ci[i].rc_name; i++) {
-                struct rk_conference *C;
-                struct rk_membership *M = NULL; /* GCC braino */
-
-                if ((C = rk_confinfo(ci[i].rc_conf_no)) == NULL) {
-                        rprintf("Kunde inte läsa confinfon för möte %d: %s\n",
-                            ci[i].rc_conf_no, error(komerr));
-                        continue;
-                }
-                if (myuid)
-                        M = rk_membership(myuid, ci[i].rc_conf_no);
+		if ((C = rk_confinfo(ci[i].rc_conf_no)) == NULL) {
+			rprintf("Kunde inte läsa confinfon för möte %d: %s\n",
+			    ci[i].rc_conf_no, error(komerr));
+			continue;
+		}
+		if (uid)
+			M = rk_membership(uid, ci[i].rc_conf_no);
 
 		if (M == NULL)
 			continue;
 
-                rprintf("%s %4d %7d %s  %s\n",
-                    get_date_string(&C->rc_last_written),
-                    C->rc_no_of_members, C->rc_first_local_no +
-                    C->rc_no_of_texts - 1, (myuid == 0 ? " " :
-                    (C->rc_supervisor == myuid ? "O" :
-                    (M ? " " : "*" ))), ci[i].rc_name);
+		rprintf("%s %4d %7d %s	%s\n",
+		    get_date_string(&C->rc_last_written),
+		    C->rc_no_of_members, C->rc_first_local_no +
+		    C->rc_no_of_texts - 1, (uid == 0 ? " " :
+		    (C->rc_supervisor == uid ? "O" :
+		    (M ? " " : "*" ))), ci[i].rc_name);
 		if (discard)
 			break;
-        }
-        rprintf("\n");
+	}
+	rprintf("\n");
 }
 
 static void
