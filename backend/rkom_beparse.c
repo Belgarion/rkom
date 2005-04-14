@@ -339,7 +339,7 @@ rk_textstat(u_int32_t nr)
 
 	if ((tss = findtxt(nr)) && (tss->rts))
 		return tss->rts;
-	if (send_reply("90 %d\n", nr)) {
+	if (send_reply("90 %u\n", nr)) {
 		komerr = get_int();
 		get_eat('\n');
 		return NULL;
