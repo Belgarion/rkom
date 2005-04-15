@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 
 #include "rkomsupport.h"
 #include "backend.h"
@@ -70,6 +71,20 @@ async(int handle)
 			send_reply("35\n");
 			read_in_time(&m->ra.ra_time);
 			get_accept('\n');
+		} else {
+			/* XXX - get local time */
+			struct tm *tm;
+			time_t clock = time(NULL);
+			tm = localtime(&clock);
+			m->ra.ra_time.rt_seconds = tm->tm_sec;
+			m->ra.ra_time.rt_minutes = tm->tm_min;
+			m->ra.ra_time.rt_hours = tm->tm_hour;
+			m->ra.ra_time.rt_day = tm->tm_mday;
+			m->ra.ra_time.rt_month = tm->tm_mon;
+			m->ra.ra_time.rt_year = tm->tm_year;
+			m->ra.ra_time.rt_day_of_week = tm->tm_wday;
+			m->ra.ra_time.rt_day_of_year = tm->tm_yday;
+			m->ra.ra_time.rt_is_dst = tm->tm_isdst;
 		}
 
 		putinq(m);
