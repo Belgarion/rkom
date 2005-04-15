@@ -28,13 +28,19 @@ static char *fel[] = {
 	"Den här texten finns inte.",
 	"Internt fel: Försöker komma åt text nummer noll.",
 	"Det lokala textnumret finns inte.",
+	"Det lokala textnumret 0 får inte användas.",
 	"Det där namnet är inte alls bra.",
 	"Numret du försökt använda är utanför gränserna.",
 	"Namnet du angett finns redan.",
 	"Namnet du angett finns redan (21).",
 	"Du försöker skapa ett möte tvetydigt, men det går inte.",
 	"Nu försökte du ändra brevlådeflaggor.",
-	"Servern har fel: databasen är sönderskriven.",
+	"Servern har fel: databasen är sönderskriven.", /* 24 */
+	NULL, NULL, NULL, NULL, NULL, NULL, /* 30 */
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 40 */
+	NULL, NULL, NULL, NULL, NULL, NULL,
+	"Anonyma texter är inte tillåtna i detta möte.",
+	NULL, NULL, NULL, /* 50 */
 };
 
 static int nfel = sizeof(fel)/sizeof(char *);
@@ -44,7 +50,7 @@ error(int code)
 {
 	static char buf[30];
 
-	if (code > nfel) {
+	if (code > nfel || fel[code] == NULL) {
 		sprintf(buf, "Fel nummer %d", code);
 		return buf;
 	}
