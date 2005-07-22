@@ -1,4 +1,4 @@
-/* $Id: container.c,v 1.6 2005/04/08 09:47:43 ragge Exp $ */
+/* $Id: container.c,v 1.7 2005/07/22 07:50:54 ragge Exp $ */
 /*
  * Copyright (c) 1999, 2000
  *      Jens A. Nilsson, jnilsson@ludd.luth.se. All rights reserved.
@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <strings.h>
-#ifdef LINUX
+#if defined(LINUX) || (__FreeBSD__ == 5)
 #include <string.h>
 #endif
 #include <stdio.h>

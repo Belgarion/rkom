@@ -2,6 +2,8 @@
 #ifdef SOLARIS
 #undef _XPG4_2
 #endif
+#include <sys/types.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>

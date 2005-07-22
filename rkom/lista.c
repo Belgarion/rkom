@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef LINUX
+#if defined(LINUX) || (__FreeBSD__ == 5)
 #include <string.h>
 #endif
 #include <strings.h>

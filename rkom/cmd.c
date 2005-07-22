@@ -1,10 +1,10 @@
-/*	$Id: cmd.c,v 1.80 2005/04/14 19:26:26 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.81 2005/07/22 07:50:54 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
 #endif
 
-#ifdef LINUX
+#if defined(LINUX) || (__FreeBSD__ == 5)
 #include <string.h>
 #endif
 #include <strings.h>
