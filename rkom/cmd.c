@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.81 2005/07/22 07:50:54 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.82 2006/01/08 10:44:43 ragge Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -291,7 +291,7 @@ cmd_say(char *str)
 	rprintf("Sänd meddelande till %s\n", rv[0].rc_name);
 
 	buf = getstr("Meddelande: ");
-	if (*buf != 0) {
+	if (buf && *buf != 0) {
 		if (rk_send_msg(rv[0].rc_conf_no, buf))
 			rprintf("\nMeddelandet kunde inte skickas.\n");
 		else

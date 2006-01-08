@@ -42,6 +42,7 @@ getstr(char *m)
 	
 	msg = m;
 	ret = (char *)el_gets(el, &len, 0);
-	ret[len-1] = 0;
+	if (len)
+		ret[len-1] = 0;
 	return ret;
 }
