@@ -143,6 +143,7 @@ show_text(int nr, int format)
 	if (supstr) {
 		int l = strlen(supstr);
 		if (strncmp(c, supstr, l) == 0 && (c[l] == 0 || c[l] == '\n')) {
+			rprintf("Superhoppar över inlägg %d\n", nr);
 			return 1;
 		}
 	}
