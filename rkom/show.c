@@ -33,7 +33,8 @@ show_superhoppa(char *arg)
 		bcopy(ch, supstr, c - ch);
 	} else
 		supstr = strdup(ch);
-	rprintf("Superhoppar över alla inlägg med ärenderad '%s'\n", supstr);
+	rprintf("Superhoppar över alla inlägg med ärenderad '%s'.\n", supstr);
+	rprintf("Använd \"osuperhoppa\" för att visa dem igen\n", supstr);
 }
 
 char *
@@ -140,19 +141,23 @@ show_text(int nr, int format)
 		return 0;
 	}
 	c = strdup(rk_gettext(nr));
-	if (supstr) {
-		int l = strlen(supstr);
-		if (strncmp(c, supstr, l) == 0 && (c[l] == 0 || c[l] == '\n')) {
-			rprintf("Superhoppar över inlägg %d\n", nr);
-			return 1;
-		}
-	}
 
 	if ((conf = rk_confinfo(ts->rt_author)) == NULL) {
 		namn = malloc(100);
 		sprintf(namn, "Person %d (hemlig)", ts->rt_author);
 	} else
 		namn = strdup(conf->rc_name);
+
+	if (supstr) {
+		int l = strlen(supstr);
+		if (strncmp(c, supstr, l) == 0 && (c[l] == 0 || c[l] == '\n')) {
+			rprintf("Superhoppar över inlägg %d av %s\n",
+				nr, namn);
+			free(namn);
+			return 1;
+		}
+	}
+
 	rprintf("\n(%d) %s /%d rad%s/ %s", nr,
 	    get_date_string(&ts->rt_time), ts->rt_no_of_lines,
 	    ts->rt_no_of_lines > 1 ? "er" : "", namn);
