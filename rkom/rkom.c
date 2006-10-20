@@ -1,4 +1,4 @@
-/* $Id: rkom.c,v 1.61 2003/10/12 14:07:45 ragge Exp $ */
+/* $Id: rkom.c,v 1.62 2006/10/20 16:55:58 offe Exp $ */
 
 #ifdef SOLARIS
 #undef _XPG4_2
@@ -168,7 +168,7 @@ rkom_command()
 	const char *str;
 	struct timeval	tp;
 	const LineInfo  *lf;
-	unsigned char	buf[MAX_LINE];
+	char	buf[MAX_LINE];
 	int num;
 	size_t	len;
 

@@ -1,4 +1,4 @@
-/* $Id: parse_eng.c,v 1.12 2001/11/23 22:24:35 ragge Exp $ */
+/* $Id: parse_eng.c,v 1.13 2006/10/20 16:55:58 offe Exp $ */
 
 #include <sys/param.h>
 
@@ -359,6 +359,8 @@ parse_exec(cmds_t *c, const char *str)
 
 	ret = 0;
 	isalias = 0;
+	nargc = 0;
+	nargv = NULL;
 	al_ce = NULL;
 
 	build_argc_argv(str, &argc, &argv);
