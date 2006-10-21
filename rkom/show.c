@@ -227,7 +227,7 @@ show_text(int nr, int format)
 	}
 
 	if (filtrerad(ts->rt_author)) {
-		rprintf("Hoppar |ver inl{gg %d av %s\n", nr, namn);
+		rprintf("Hoppar över inlägg %d av %s\n", nr, namn);
 		free(namn);
 		return 1;
 	}
