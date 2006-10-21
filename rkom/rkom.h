@@ -48,6 +48,8 @@ void show_savetext(char *);
 char * get_date_string(struct rk_time *t);
 char *vem(int);
 void show_superhoppa(char *);
+void show_filtrera(char *);
+void show_ofiltrera(char *);
 
 /* In file helpers.c */
 struct rk_confinfo *match_complain(char *str, int type);

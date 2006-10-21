@@ -1,4 +1,4 @@
-/* $Id: parse.c,v 1.56 2005/04/14 15:51:10 ragge Exp $ */
+/* $Id: parse.c,v 1.57 2006/10/21 00:20:40 offe Exp $ */
 
 #include <sys/param.h>
 
@@ -57,6 +57,8 @@ DCMD(read_again);
 DCMD(read_jump);
 DCMD(read_superjump);
 DCMD(read_unsuperjump);
+DCMD(read_filter);
+DCMD(read_unfilter);
 
 /* Commands for writing */
 DCMD(write_new);
@@ -188,6 +190,8 @@ DROW("igen",					0,PE_NO_ARG,read_again)
 DROW("hoppa",					0,PE_NO_ARG,read_jump)
 DROW("superhoppa",				0,PE_NO_ARG,read_superjump)
 DROW("osuperhoppa",				0,PE_NO_ARG,read_unsuperjump)
+DROW("filtrera",			0,PE_STR_ARG,read_filter)
+DROW("ofiltrera",			0,PE_STR_ARG,read_unfilter)
 
 /* Commands for writing */
 DROW("inlägg",					0,PE_NO_ARG,write_new)
@@ -541,6 +545,21 @@ static int
 exec_read_superjump(int argc, char *argv[])
 {
 	show_superhoppa(NULL);
+	return 0;
+}
+
+static int
+exec_read_unfilter(int argc, char *argv[])
+{
+	TT(argc < 1, "Du måste ange författare att ofiltrera.\n");
+	show_ofiltrera(re_concat(argc, argv));
+	return 0;
+}
+
+static int
+exec_read_filter(int argc, char *argv[])
+{
+	show_filtrera(argc ? re_concat(argc, argv) : NULL);
 	return 0;
 }
 

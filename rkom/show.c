@@ -16,6 +16,22 @@
 #include "backend.h"
 
 char *supstr;
+int32_t *filterlist;
+int filtercount;
+
+static int filtrerad(int);
+
+static int filtrerad(int vem)
+{
+	int i;
+
+	for (i = 0; i < filtercount; i++)
+		if (filterlist[i] == vem)
+			return 1;
+
+	return 0;
+}
+
 
 void
 show_superhoppa(char *arg)
@@ -34,7 +50,59 @@ show_superhoppa(char *arg)
 	} else
 		supstr = strdup(ch);
 	rprintf("Superhoppar över alla inlägg med ärenderad '%s'.\n", supstr);
-	rprintf("Använd \"osuperhoppa\" för att visa dem igen\n", supstr);
+	rprintf("Använd \"osuperhoppa\" för att visa dem igen.\n", supstr);
+}
+
+void
+show_ofiltrera(char *str)
+{
+	struct rk_confinfo *rv;
+	int i;
+
+	if ((rv = match_complain(str, MATCHCONF_PERSON)) == 0)
+		return;
+
+	for (i = 0; i < filtercount; i++)
+		if (filterlist[i] == rv->rc_conf_no) {
+			filtercount--;
+			for (; i < filtercount; i++)
+				filterlist[i] = filterlist[i+1];
+			rprintf("Filtrerar inte längre författare %s.\n", rv->rc_name);
+			return;
+		}
+
+	rprintf("Du filtrerar inte författare %s.\n", rv->rc_name);
+}
+
+void
+show_filtrera(char *str)
+{
+	struct rk_confinfo *rv;
+	int i;
+
+	if (!str) {
+		if (!filtercount) {
+			rprintf("Du filtrerar just nu inga författare.\n");
+		} else {
+			rprintf("Du filtrerar just nu följande författare:\n");
+			for (i = 0; i < filtercount; i++)
+				if (filterlist[i] != -1)
+					rprintf("%s\n", vem(filterlist[i]));
+		}
+		return;
+	}
+
+	if ((rv = match_complain(str, MATCHCONF_PERSON)) == 0)
+		return;
+
+	if (filtrerad(rv->rc_conf_no)) {
+		rprintf("Du filtrerar redan författare %s.\n", rv->rc_name);
+		return;
+	}
+
+	filterlist = realloc(filterlist, filtercount++);
+	filterlist[filtercount-1] = rv->rc_conf_no;
+	rprintf("Filtrerar författare %s.\n", rv->rc_name);
 }
 
 char *
@@ -156,6 +224,12 @@ show_text(int nr, int format)
 			free(namn);
 			return 1;
 		}
+	}
+
+	if (filtrerad(ts->rt_author)) {
+		rprintf("Hoppar |ver inl{gg %d av %s\n", nr, namn);
+		free(namn);
+		return 1;
 	}
 
 	rprintf("\n(%d) %s /%d rad%s/ %s", nr,
