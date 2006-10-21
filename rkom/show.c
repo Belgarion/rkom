@@ -100,7 +100,7 @@ show_filtrera(char *str)
 		return;
 	}
 
-	filterlist = realloc(filterlist, filtercount++);
+	filterlist = realloc(filterlist, ++filtercount);
 	filterlist[filtercount-1] = rv->rc_conf_no;
 	rprintf("Filtrerar författare %s.\n", rv->rc_name);
 }
