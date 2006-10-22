@@ -243,7 +243,7 @@ igen:	local = rk_next_unread(curconf, myuid);
 		return;
 	}
 	global = rk_local_to_global(curconf, local);
-	rv = show_text(global, 1);
+	rv = show_text(global, 1, 0);
 	mark_read(global);
 	next_action(global);
 	lastlasttext = lasttext;
@@ -282,7 +282,7 @@ try:	for (i = pole->listidx; i < len; i++)
 	if (checkifread(mi[i].rmi_numeric))
 		goto try;
 	global = mi[i].rmi_numeric;
-	rv = show_text(global, 1);
+	rv = show_text(global, 1, 0);
 	mark_read(global);
 	next_action(global);
 	lastlasttext = lasttext;
@@ -305,7 +305,7 @@ next_marked(char *str)
 	rprintf("(Återse) nästa markerade inlägg.\n");
 	if (lastseen == 0) {
 		lastseen = rm[0].rm_text;
-		show_text(lastseen, 1);
+		show_text(lastseen, 1, 1);
 		prompt = PROMPT_NEXT_MARKED;
 		return;
 	}
@@ -320,7 +320,7 @@ next_marked(char *str)
 		}
 		prompt = PROMPT_NEXT_MARKED;
 		lastseen = rm[i+1].rm_text;
-		show_text(lastseen, 1);
+		show_text(lastseen, 1, 1);
 		return;
 	}
 	lastseen = 0;
@@ -349,7 +349,7 @@ next_resee_comment()
 		rprintf("Inlägget är varken kommentar eller fotnot.\n");
 		return;
 	}
-	show_text(mi[i].rmi_numeric, 1);
+	show_text(mi[i].rmi_numeric, 1, 1);
 	lastlasttext = lasttext;
 	lasttext = mi[i].rmi_numeric;
 }
@@ -387,7 +387,7 @@ restart:
 		}
 
 	if(!count) {
-		show_text(text, 1);
+		show_text(text, 1, 1);
 		lastlasttext = lasttext;
 		lasttext = text;
 	}
@@ -396,7 +396,7 @@ restart:
 void
 next_resee_text_unmodified(int num)
 {
-	show_text(num, 0);
+	show_text(num, 0, 1);
 	lastlasttext = lasttext;
 	lasttext = num;
 }
@@ -404,7 +404,7 @@ next_resee_text_unmodified(int num)
 void
 next_resee_text(int num)
 {
-	show_text(num, 1);
+	show_text(num, 1, 1);
 	lastlasttext = lasttext;
 	lasttext = num;
 }
@@ -412,7 +412,7 @@ next_resee_text(int num)
 void
 next_again(char *str)
 {
-	show_text(lasttext, 1);
+	show_text(lasttext, 1, 1);
 }
 
 static int hoppade;
@@ -472,7 +472,7 @@ next_resee_presentation(char *name)
 	if (rc->rc_presentation == 0)
 		rprintf("Det finns ingen presentation.\n");
 	else
-		show_text(rc->rc_presentation, 1);
+		show_text(rc->rc_presentation, 1, 1);
 	lastlasttext = lasttext;
 	lasttext = rc->rc_presentation;
 }
@@ -501,7 +501,7 @@ next_resee_faq(char *name)
 	if (naux == 0 || i == naux)
 		rprintf("Det finns ingen FAQ för %s.\n", rv[0].rc_name);
 	else
-		show_text(atoi(rai[i].rai_data), 1);
+		show_text(atoi(rai[i].rai_data), 1, 1);
 	lastlasttext = lasttext;
 	lasttext = rc->rc_presentation;
 }

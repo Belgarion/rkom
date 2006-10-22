@@ -43,7 +43,7 @@ void	cmd_disable(void);
 char *	error(int);
 
 /* show.c */
-int	show_text(int, int);
+int	show_text(int, int, int);
 void show_savetext(char *);
 char * get_date_string(struct rk_time *t);
 char *vem(int);

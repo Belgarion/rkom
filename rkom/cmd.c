@@ -1,4 +1,4 @@
-/*	$Id: cmd.c,v 1.82 2006/01/08 10:44:43 ragge Exp $	*/
+/*	$Id: cmd.c,v 1.83 2006/10/22 21:22:19 offe Exp $	*/
 
 #if defined(SOLARIS)
 #undef _XPG4_2
@@ -234,7 +234,7 @@ cmd_login(char *str)
 	rc = rk_confinfo(myuid);
 	if (rc->rc_msg_of_day) {
 		rprintf("Du har en lapp på dörren.\n");
-		show_text(rc->rc_msg_of_day, 1);
+		show_text(rc->rc_msg_of_day, 1, 1);
 	}
 
 	c = rk_unreadconf(myuid);

@@ -196,7 +196,7 @@ show_formatted(char *cc)
 }
 
 int
-show_text(int nr, int format)
+show_text(int nr, int format, int ignore_filters)
 {
 	struct rk_conference *conf;
 	struct rk_text_stat *ts;
@@ -216,7 +216,7 @@ show_text(int nr, int format)
 	} else
 		namn = strdup(conf->rc_name);
 
-	if (supstr) {
+	if (supstr && !ignore_filters) {
 		int l = strlen(supstr);
 		if (strncmp(c, supstr, l) == 0 && (c[l] == 0 || c[l] == '\n')) {
 			rprintf("Superhoppar över inlägg %d av %s\n",
@@ -226,7 +226,7 @@ show_text(int nr, int format)
 		}
 	}
 
-	if (filtrerad(ts->rt_author)) {
+	if (filtrerad(ts->rt_author) && !ignore_filters) {
 		rprintf("Hoppar över inlägg %d av %s\n", nr, namn);
 		free(namn);
 		return 1;
@@ -370,7 +370,7 @@ show_savetext(char *str)
 	orows = wrows;
 	olines = outlines;
 	wrows = 2000000;
-	show_text(lasttext, 0);
+	show_text(lasttext, 0, 1);
 	wrows = orows;
 	outlines = olines;
 	close(1);
