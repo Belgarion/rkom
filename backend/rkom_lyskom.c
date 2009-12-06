@@ -43,6 +43,8 @@ struct callback {
 
 static struct callback *cpole;
 
+static void check_replenish(char *);
+
 /*
  * Main loop.
  */
@@ -200,6 +202,25 @@ send_callback(char *msg, int arg, void (*func)(int, int))
 	reqnr++;
 }
 
+void
+check_replenish(char *buffer)
+{
+	int ret;
+
+	if (curc < maxc)
+		/* No need to fill buffer yet */
+		return;
+
+	ret = read(pfd, buffer, BUFSIZ);
+
+	if (ret == 0 && errno != EAGAIN && errno != EWOULDBLOCK)
+		err(1, "Lost connection to server");
+
+	maxc = ret;
+	curc = 0;
+	return;
+}
+
 /*
  * Get just one char from the stream.
  */
@@ -213,10 +234,7 @@ get_char()
 		c = unget;
 		unget = 0;
 	} else {
-		if (curc == maxc) {
-			maxc = read(pfd, buffer, BUFSIZ);
-			curc = 0;
-		}
+		check_replenish(buffer);
 		c = buffer[curc++];
 	}
 	return c;
