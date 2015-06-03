@@ -36,26 +36,47 @@ struct rk_server *
 rkom_connect(char *server, char *frontend, char *os_username, char *fevers)
 {
 	static struct rk_server rs;
-	struct sockaddr_in sin;
-	struct hostent *hp;
+	struct addrinfo hints, *res, *ressave;
+	int n;
 	char *buf2;
 
 	komerr = -1; /* XXX */
 
+	memset(&hints, 0, sizeof(struct addrinfo));
+
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+
 	/* Locate our KOM server */
-	if ((hp = gethostbyname(server)) == NULL)
+	n = getaddrinfo(server, "4894", &hints, &res);
+	if (n < 0) {
 		return NULL;
+	}
 
-	/* Create a socket to play with */
-	if ((pfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-		return NULL;
+	ressave = res;
 
-	/* Connect to the server we want to talk with */
-	sin.sin_family = AF_INET;
-	sin.sin_port = htons(4894); /* XXX should be configureable */
-	bcopy(hp->h_addr, &sin.sin_addr, hp->h_length);
-	if (connect(pfd, (struct sockaddr *)&sin, sizeof(sin)) < 0)
+	// Try all possible IP/IPv6 addresses
+	while (res) {
+		/* Create a socket to play with */
+		if ((pfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0)
+			continue;
+
+		/* Connect to the server we want to talk with */
+		if (connect(pfd, res->ai_addr, res->ai_addrlen) == 0) {
+			// Connection successful
+			break;
+		}
+
+		close(pfd);
+		pfd = -1;
+
+		res = res->ai_next;
+	}
+	freeaddrinfo(ressave);
+	if (pfd < 0) {
+		// Connection failed
 		return NULL;
+	}
 
 	if ((sfd = fdopen(pfd, "w")) == NULL)
 		return NULL;
